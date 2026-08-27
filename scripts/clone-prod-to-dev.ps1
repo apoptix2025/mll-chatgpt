@@ -45,24 +45,27 @@ function Write-Fail([string]$Message) {
   exit 1
 }
 
-function Get-RedactedUrl([string]$Url) {
-  if ([string]::IsNullOrWhiteSpace($Url)) { return "(empty)" }
-  $scheme = $Url.IndexOf("://")
-  if ($scheme -lt 0) { return $Url }
-  $at = $Url.IndexOf("@", $scheme)
-  if ($at -lt 0) { return $Url }
-  $colon = $Url.LastIndexOf(":", $at)
-  if ($colon -le $scheme) { return $Url }
-  return $Url.Substring(0, $colon + 1) + "***" + $Url.Substring($at)
-}
-
 function Test-HasCommand([string]$Name) {
   return [bool](Get-Command $Name -ErrorAction SilentlyContinue)
 }
 
 function Invoke-Checked([string]$File, [string[]]$ArgumentList) {
-  $shownParts = foreach ($arg in $ArgumentList) {
-    if ($arg -match "://") { Get-RedactedUrl $arg } else { $arg }
+  $shownParts = New-Object System.Collections.Generic.List[string]
+  for ($i = 0; $i -lt $ArgumentList.Count; $i++) {
+    $arg = $ArgumentList[$i]
+    if ($arg -eq "--db-url" -and ($i + 1) -lt $ArgumentList.Count) {
+      $shownParts.Add("--db-url")
+      $shownParts.Add("[REDACTED]")
+      $i++
+      continue
+    }
+    if ($arg -eq "--dbname" -and ($i + 1) -lt $ArgumentList.Count) {
+      $shownParts.Add("--dbname")
+      $shownParts.Add("[REDACTED]")
+      $i++
+      continue
+    }
+    $shownParts.Add($arg)
   }
   $shown = $shownParts -join " "
   Write-Host "  > $File $shown" -ForegroundColor DarkGray
@@ -108,9 +111,9 @@ if ($prodUrl -match [regex]::Escape($DevRef)) {
   Write-Fail "PROD_DB_URL contains the mll-dev project ref. Source must be production only."
 }
 
-Write-Host "Connection check (passwords redacted):"
-Write-Host "  PROD_DB_URL = $(Get-RedactedUrl $prodUrl)"
-Write-Host "  DEV_DB_URL  = $(Get-RedactedUrl $devUrl)"
+Write-Host "Connection check:"
+Write-Host "  PROD_DB_URL = SET"
+Write-Host "  DEV_DB_URL  = SET"
 Write-Host ""
 
 if (-not (Test-HasCommand "supabase")) {
