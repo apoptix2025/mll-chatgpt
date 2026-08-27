@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500;1,700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+/* ============================================================
+   MLL 2.0 DESIGN SYSTEM
+   Brand: modern blue · white · light-blue surfaces · navy text
+   Feel: Airbnb + Yelp + friendly SaaS community marketplace
+   ============================================================ */
+
+:root {
+  --mll-blue:        #0866FF;
+  --mll-blue-dark:   #0654D4;
+  --mll-blue-deep:   #0446B3;
+  --mll-blue-mid:    #3B8AFF;
+  --mll-blue-soft:   #E8F1FF;
+  --mll-blue-wash:   #F4F8FF;
+  --mll-navy:        #0F1C2E;
+  --mll-charcoal:    #1C2430;
+  --mll-ink:         #1C2430;
+  --mll-ink-soft:    #4B5568;
+  --mll-ink-muted:   #6B7A90;
+  --mll-white:       #FFFFFF;
+  --mll-shadow:      0 8px 28px rgba(8, 102, 255, 0.08);
+  --mll-shadow-hover:0 14px 40px rgba(8, 102, 255, 0.14);
+  --mll-radius-sm:   12px;
+  --mll-radius-md:   16px;
+  --mll-radius-lg:   20px;
+  --mll-radius-xl:   24px;
+  --mll-radius-pill: 999px;
+  --mll-font:        'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
+  --mll-bottom-nav:  72px;
+
+  /* Map onto the existing token names so current pages pick up MLL 2.0 */
+  --coral:       var(--mll-blue);
+  --coral-dark:  var(--mll-blue-dark);
+  --coral-light: var(--mll-blue-soft);
+  --coral-mid:   var(--mll-blue-mid);
+  --ink:         var(--mll-navy);
+  --ink-mid:     var(--mll-charcoal);
+  --ink-soft:    var(--mll-ink-soft);
+  --ink-muted:   var(--mll-ink-muted);
+  --surface:     var(--mll-white);
+  --surface-2:   var(--mll-blue-wash);
+  --surface-3:   #E7EEF8;
+  --border:      rgba(8, 102, 255, 0.10);
+  --border-mid:  rgba(8, 102, 255, 0.18);
+  --radius-sm:   10px;
+  --radius-md:   16px;
+  --radius-lg:   20px;
+  --radius-xl:   24px;
+  --font-display: var(--mll-font);
+  --font-body:    var(--mll-font);
+  --nav-h:       68px;
+  --max-w:       1160px;
+}
+
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--mll-font);
+  background: var(--mll-white);
+  color: var(--mll-navy);
+}
+
+h1, h2, h3, .hero-h1, .section-title, .dash-greeting, .login-h, .wiz-h {
+  letter-spacing: -0.03em;
+}
+
+.btn-cta, .btn-hero-primary, .search-btn, .login-btn, .dir-search-btn,
+.btn-sm-primary, .btn-call, .rf-submit, .upgrade-btn, .plan-btn.primary {
+  border-radius: var(--mll-radius-pill) !important;
+  font-weight: 600;
+  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+.btn-cta:hover, .btn-hero-primary:hover, .login-btn:hover, .btn-sm-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(8, 102, 255, 0.22);
+}
+
+.biz-card, .dash-card, .kpi, .module-card, .login-card, .wizard-card,
+.res-card, .contact-card, .share-card, .plan-card, .add-product-bar {
+  border-radius: var(--mll-radius-lg);
+  box-shadow: var(--mll-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.biz-card:hover, .module-card:hover, .res-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--mll-shadow-hover);
+}

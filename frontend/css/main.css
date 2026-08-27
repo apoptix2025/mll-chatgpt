@@ -1,17 +1,21 @@
+@import url('./design-system.css');
+@import url('./components.css');
+@import url('./responsive.css');
+
 /* ============================================================
    MYLATINOLIST — DESIGN SYSTEM
-   Aesthetic: Modern editorial · Bold typography · Community-first
-   Brand: Deep blue primary · Teal accent · Clean surfaces
+   MLL 2.0 tokens live in design-system.css and are imported above.
+   Keep supporting accent colors here for existing page markup.
    ============================================================ */
 
 :root {
-  /* PRIMARY — Deep blue (replaces coral/orange) */
-  --coral:       #1A56DB;
-  --coral-dark:  #1040B0;
-  --coral-light: #EBF2FF;
-  --coral-mid:   #4B7FE8;
+  /* PRIMARY — MLL 2.0 blue */
+  --coral:       #0866FF;
+  --coral-dark:  #0654D4;
+  --coral-light: #E8F1FF;
+  --coral-mid:   #3B8AFF;
 
-  /* ACCENT — Teal (unchanged) */
+  /* ACCENT — Teal */
   --teal:        #1D9E75;
   --teal-dark:   #0F6E56;
   --teal-light:  #E1F5EE;
@@ -26,24 +30,24 @@
   --green:       #3B6D11;
   --green-light: #EAF3DE;
 
-  /* NEUTRALS — keeping warm ink tones for editorial feel */
-  --ink:         #0f1623;
-  --ink-mid:     #2d3748;
-  --ink-soft:    #5a6476;
-  --ink-muted:   #8896a8;
-  --surface:     #f8fafc;
-  --surface-2:   #f0f4f8;
-  --surface-3:   #e4ecf4;
-  --border:      rgba(26,86,219,0.08);
-  --border-mid:  rgba(26,86,219,0.16);
+  /* NEUTRALS */
+  --ink:         #0F1C2E;
+  --ink-mid:     #1C2430;
+  --ink-soft:    #4B5568;
+  --ink-muted:   #6B7A90;
+  --surface:     #ffffff;
+  --surface-2:   #F4F8FF;
+  --surface-3:   #E7EEF8;
+  --border:      rgba(8,102,255,0.10);
+  --border-mid:  rgba(8,102,255,0.18);
 
-  --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   16px;
+  --radius-sm:   10px;
+  --radius-md:   16px;
+  --radius-lg:   20px;
   --radius-xl:   24px;
-  --font-display:'Fraunces', Georgia, serif;
-  --font-body:   'DM Sans', system-ui, sans-serif;
-  --nav-h:       64px;
+  --font-display:'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
+  --font-body:   'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
+  --nav-h:       68px;
   --max-w:       1160px;
 }
 

@@ -1,0 +1,242 @@
+/* ============================================================
+   MLL 2.0 SHARED COMPONENTS
+   ============================================================ */
+
+/* Category / filter pills */
+.mll-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.mll-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--mll-radius-pill);
+  border: 1px solid var(--border-mid);
+  background: #fff;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.mll-pill:hover, .mll-pill.is-active {
+  background: var(--mll-blue-soft);
+  color: var(--mll-blue-dark);
+  border-color: var(--mll-blue);
+}
+
+/* Search card */
+.mll-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--mll-radius-pill);
+  padding: 8px 8px 8px 18px;
+  box-shadow: var(--mll-shadow);
+  max-width: 760px;
+  margin: 0 auto;
+}
+.mll-search input, .mll-search select {
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  min-width: 0;
+}
+.mll-search input { flex: 1; }
+.mll-search select {
+  border-left: 1px solid var(--border);
+  padding: 8px 10px;
+  color: var(--ink-soft);
+  max-width: 160px;
+}
+.mll-search button {
+  border: 0;
+  background: var(--mll-blue);
+  color: #fff;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 12px 22px;
+  border-radius: var(--mll-radius-pill);
+  cursor: pointer;
+}
+
+/* Action cards */
+.mll-actions {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+.mll-action {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--mll-radius-lg);
+  padding: 20px 16px;
+  text-align: left;
+  box-shadow: var(--mll-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.mll-action:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--mll-shadow-hover);
+}
+.mll-action-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--mll-blue-soft);
+  color: var(--mll-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+.mll-action strong { display: block; font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+.mll-action span { font-size: 12px; color: var(--ink-muted); }
+
+/* Next-best-action list */
+.mll-next-actions { display: grid; gap: 10px; }
+.mll-next-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--mll-radius-md);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.mll-next-item:hover { border-color: var(--mll-blue); transform: translateX(2px); }
+.mll-next-item .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--mll-blue); flex-shrink: 0;
+}
+.mll-next-item.done .dot { background: var(--teal); }
+.mll-next-item .go { margin-left: auto; color: var(--mll-blue); font-size: 13px; font-weight: 600; }
+
+/* Add sheet */
+.mll-sheet-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 28, 46, 0.4);
+  z-index: 240;
+}
+.mll-sheet-backdrop.open { display: block; }
+.mll-sheet {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px calc(24px + env(safe-area-inset-bottom));
+  box-shadow: 0 -12px 40px rgba(15, 28, 46, 0.16);
+}
+.mll-sheet h3 { font-size: 18px; margin-bottom: 14px; }
+.mll-sheet a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  color: var(--ink);
+}
+.mll-sheet a:last-child { border-bottom: 0; }
+
+/* Mobile bottom nav */
+.mll-bottom-nav {
+  display: none;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 220;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  padding: 6px 8px calc(8px + env(safe-area-inset-bottom));
+  grid-template-columns: repeat(5, 1fr);
+  align-items: end;
+}
+.mll-bottom-nav a, .mll-bottom-nav button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: 0;
+  color: var(--ink-muted);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 6px 0;
+  text-decoration: none;
+  cursor: pointer;
+}
+.mll-bottom-nav a.is-active { color: var(--mll-blue); }
+.mll-bottom-nav .mll-add {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--mll-blue);
+  color: #fff;
+  justify-content: center;
+  margin-top: -22px;
+  box-shadow: 0 8px 20px rgba(8, 102, 255, 0.3);
+  font-size: 22px;
+  padding: 0;
+}
+.mll-bottom-nav .mll-add span { display: none; }
+
+body.has-mll-bottom-nav { padding-bottom: var(--mll-bottom-nav); }
+
+/* Homepage hero 2.0 */
+.mll-hero {
+  padding: calc(var(--nav-h) + 36px) 0 28px;
+  background: linear-gradient(180deg, var(--mll-blue-wash) 0%, #fff 70%);
+}
+.mll-hero-inner { text-align: center; max-width: 820px; margin: 0 auto; }
+.mll-kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; color: var(--mll-blue-dark);
+  border: 1px solid var(--border);
+  padding: 6px 14px; border-radius: var(--mll-radius-pill);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; margin-bottom: 18px;
+}
+.mll-hero h1 {
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--mll-navy);
+  margin-bottom: 14px;
+}
+.mll-hero h1 em { font-style: normal; color: var(--mll-blue); display: block; }
+.mll-hero p.lead {
+  font-size: 18px;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+}
+.mll-popular { padding: 48px 0 24px; background: var(--mll-blue-wash); }
+.mll-section-pad { padding: 48px 0; }
+
+.filter-btn, .cat-item, .lang-btn {
+  border-radius: var(--mll-radius-pill) !important;
+}
+.dir-hero {
+  background: linear-gradient(180deg, var(--mll-blue) 0%, #0654D4 100%) !important;
+}
+.login-card, .wizard-card {
+  box-shadow: var(--mll-shadow);
+}
