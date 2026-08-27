@@ -36,6 +36,10 @@ desktop.ini
 *.log
 logs/
 
+# Local database / media dumps — never commit
+.local-backups/
+*.dump
+
 # Supabase local
 supabase/.branches/
 supabase/.temp/
