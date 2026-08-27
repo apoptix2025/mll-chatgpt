@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyLatinoList — The Latino Business Platform</title>
+  <meta name="description" content="The all-in-one platform for Latino businesses to list, sell, hire, and grow together.">
+  <meta property="og:title" content="MyLatinoList — The Latino Business Platform">
+  <meta property="og:description" content="The all-in-one platform for Latino businesses to list, sell, hire, and grow together.">
+  <meta property="og:url" content="https://mylatinolist.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://mylatinolist.io/og-default.png">
+  <meta property="og:site_name" content="MyLatinoList">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MyLatinoList — The Latino Business Platform">
+  <meta name="twitter:description" content="The all-in-one platform for Latino businesses to list, sell, hire, and grow together.">
+  <meta name="twitter:image" content="https://mylatinolist.io/og-default.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav has-mobile" id="nav">
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-mark">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/>
+          </svg>
+        </span>
+        <span class="logo-text">my<strong>latino</strong>list</span>
+      </a>
+      <div class="nav-links">
+        <a href="#directory" data-en="Directory" data-es="Directorio">Directory</a>
+        <a href="pages/marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+        <a href="pages/jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+        <a href="pages/voz.html">La Voz Latino</a>
+        <a href="pages/affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+        <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <div class="nav-actions">
+        <a href="pages/login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+        <a href="pages/enroll.html" class="btn-cta" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="#directory" onclick="document.getElementById('nav-mobile').classList.remove('open')" data-en="Directory" data-es="Directorio">Directory</a>
+      <a href="pages/marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+      <a href="pages/jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+      <a href="pages/voz.html">La Voz Latino</a>
+      <a href="pages/affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+      <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
+      <div class="lang-toggle" style="margin:4px 12px 8px;">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <a href="pages/login.html" id="mob-signin" style="color:var(--coral);font-weight:500;" data-en="Sign in to dashboard" data-es="Acceder al panel">Sign in to dashboard</a>
+      <a href="pages/dashboard.html" id="mob-dashboard" style="display:none;color:var(--coral);font-weight:500;" data-en="My dashboard →" data-es="Mi panel →">My dashboard →</a>
+      <a href="pages/enroll.html" class="btn-cta" style="margin-top:8px;text-align:center;" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-accent-ring"></div>
+    <div class="container hero-inner">
+      <div class="hero-eyebrow reveal">
+        <span class="eyebrow-dot"></span>
+        <span data-en="The Latino business platform" data-es="La plataforma del negocio latino">The Latino business platform</span>
+      </div>
+      <h1 class="hero-h1 reveal reveal-d1" data-en="Grow, sell &amp; connect<br><em>with your community</em>" data-es="Crece, vende y conecta<br><em>con tu comunidad</em>">
+        Grow, sell &amp; connect<br>
+        <em>with your community</em>
+      </h1>
+      <p class="hero-sub reveal reveal-d2" data-en="The all-in-one hub for Latino businesses — list your business, sell products, access bilingual resources, find talent, and amplify your brand nationwide." data-es="La plataforma todo en uno para negocios latinos — lista tu negocio, vende productos, accede a recursos bilingües, encuentra talento y amplía tu marca a nivel nacional.">
+        The all-in-one hub for Latino businesses — list your business, sell products, access bilingual resources, find talent, and amplify your brand nationwide.
+      </p>
+      <div class="hero-btns reveal reveal-d3">
+        <a href="pages/enroll.html" class="btn-hero-primary" data-en="Enroll your business — it's free" data-es="Registra tu negocio — es gratis">Enroll your business — it's free</a>
+        <a href="#directory" class="btn-hero-ghost" data-en="Browse the directory" data-es="Explorar el directorio">Browse the directory</a>
+      </div>
+      <div class="hero-stats reveal reveal-d4">
+        <div class="stat"><span class="stat-n" id="stat-businesses">4,200+</span><span class="stat-l" data-en="Latino businesses" data-es="Negocios latinos">Latino businesses</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-n" id="stat-states">38</span><span class="stat-l" data-en="States covered" data-es="Estados cubiertos">States covered</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-n">$2.1M</span><span class="stat-l" data-en="Marketplace sales" data-es="Ventas en el mercado">Marketplace sales</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-n">12K+</span><span class="stat-l" data-en="Monthly visitors" data-es="Visitantes mensuales">Monthly visitors</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEARCH BAR -->
+  <section class="search-strip">
+    <div class="container">
+      <div class="search-box">
+        <div class="search-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <input type="text" id="search-input" placeholder="Search restaurants, lawyers, salons, contractors..." data-placeholder-en="Search restaurants, lawyers, salons, contractors..." data-placeholder-es="Busca restaurantes, abogados, salones, contratistas..." autocomplete="off">
+        <select id="search-cat" class="search-select">
+          <option value="" data-en="All categories" data-es="Todas las categorías">All categories</option>
+          <option>Food &amp; dining</option>
+          <option>Legal services</option>
+          <option>Health &amp; wellness</option>
+          <option>Beauty &amp; salon</option>
+          <option>Auto &amp; repair</option>
+          <option>Finance</option>
+          <option>Construction</option>
+          <option>Real estate</option>
+          <option>Education</option>
+          <option>Retail</option>
+          <option>Tech</option>
+          <option>Events</option>
+          <option>Other</option>
+        </select>
+        <select id="search-city" class="search-select">
+          <option value="" data-en="All states &amp; cities" data-es="Todos los estados y ciudades">All states &amp; cities</option>
+          <optgroup label="Popular cities">
+            <option>Miami, FL</option>
+            <option>Los Angeles, CA</option>
+            <option>Houston, TX</option>
+            <option>Chicago, IL</option>
+            <option>New York, NY</option>
+            <option>San Antonio, TX</option>
+            <option>Phoenix, AZ</option>
+            <option>Dallas, TX</option>
+            <option>San Diego, CA</option>
+            <option>El Paso, TX</option>
+            <option>McAllen, TX</option>
+            <option>Orlando, FL</option>
+            <option>Tampa, FL</option>
+            <option>Las Vegas, NV</option>
+            <option>Denver, CO</option>
+          </optgroup>
+          <optgroup label="Search by state">
+            <option>Alabama</option>
+            <option>Alaska</option>
+            <option>Arizona</option>
+            <option>Arkansas</option>
+            <option>California</option>
+            <option>Colorado</option>
+            <option>Connecticut</option>
+            <option>Delaware</option>
+            <option>Florida</option>
+            <option>Georgia</option>
+            <option>Hawaii</option>
+            <option>Idaho</option>
+            <option>Illinois</option>
+            <option>Indiana</option>
+            <option>Iowa</option>
+            <option>Kansas</option>
+            <option>Kentucky</option>
+            <option>Louisiana</option>
+            <option>Maine</option>
+            <option>Maryland</option>
+            <option>Massachusetts</option>
+            <option>Michigan</option>
+            <option>Minnesota</option>
+            <option>Mississippi</option>
+            <option>Missouri</option>
+            <option>Montana</option>
+            <option>Nebraska</option>
+            <option>Nevada</option>
+            <option>New Hampshire</option>
+            <option>New Jersey</option>
+            <option>New Mexico</option>
+            <option>New York</option>
+            <option>North Carolina</option>
+            <option>North Dakota</option>
+            <option>Ohio</option>
+            <option>Oklahoma</option>
+            <option>Oregon</option>
+            <option>Pennsylvania</option>
+            <option>Rhode Island</option>
+            <option>South Carolina</option>
+            <option>South Dakota</option>
+            <option>Tennessee</option>
+            <option>Texas</option>
+            <option>Utah</option>
+            <option>Vermont</option>
+            <option>Virginia</option>
+            <option>Washington</option>
+            <option>West Virginia</option>
+            <option>Wisconsin</option>
+            <option>Wyoming</option>
+            <option>District of Columbia</option>
+            <option>Puerto Rico</option>
+            <option>Guam</option>
+            <option>U.S. Virgin Islands</option>
+            <option>American Samoa</option>
+            <option>Northern Mariana Islands</option>
+          </optgroup>
+        </select>
+        <button class="search-btn" onclick="handleSearch()" data-en="Search" data-es="Buscar">Search</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLATFORM MODULES -->
+  <section class="modules-section">
+    <div class="container">
+      <div class="section-label" data-en="Platform modules" data-es="Módulos de la plataforma">Platform modules</div>
+      <div class="modules-grid">
+        <a href="#directory" class="module-card module-active">
+          <div class="module-icon" style="background:#EBF2FF;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" fill="var(--coral)"/><rect x="11" y="2" width="7" height="7" rx="1.5" fill="var(--coral)" opacity="0.5"/><rect x="2" y="11" width="7" height="7" rx="1.5" fill="var(--coral)" opacity="0.5"/><rect x="11" y="11" width="7" height="7" rx="1.5" fill="var(--coral)" opacity="0.5"/></svg>
+          </div>
+          <div class="module-label" data-en="Business directory" data-es="Directorio de negocios">Business directory</div>
+          <div class="module-desc" data-en="Find &amp; get found" data-es="Encuentra y sé encontrado">Find &amp; get found</div>
+        </a>
+        <a href="pages/marketplace.html" class="module-card">
+          <div class="module-icon" style="background:#E8F8F1;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 6h14M3 10h10M3 14h7" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="module-label" data-en="Marketplace" data-es="Mercado">Marketplace</div>
+          <div class="module-desc" data-en="Sell your products" data-es="Vende tus productos">Sell your products</div>
+        </a>
+        <a href="pages/voz.html" class="module-card">
+          <div class="module-icon" style="background:#EEF0FE;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="#534AB7" stroke-width="1.5"/><path d="M3 17c0-3.87 3.13-7 7-7s7 3.13 7 7" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="module-label">La Voz Latino</div>
+          <div class="module-desc" data-en="Resources &amp; grants" data-es="Recursos y subvenciones">Resources &amp; grants</div>
+        </a>
+        <a href="pages/jobs.html" class="module-card">
+          <div class="module-icon" style="background:#E8F3FD;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="6" width="14" height="11" rx="2" stroke="#378ADD" stroke-width="1.5"/><path d="M7 6V5a3 3 0 016 0v1" stroke="#378ADD" stroke-width="1.5"/></svg>
+          </div>
+          <div class="module-label" data-en="Jobs board" data-es="Bolsa de trabajo">Jobs board</div>
+          <div class="module-desc" data-en="Hire Latino talent" data-es="Contrata talento latino">Hire Latino talent</div>
+        </a>
+        <a href="pages/affiliates.html" class="module-card">
+          <div class="module-icon" style="background:#EDF7E4;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 14l5-5 3.5 3.5L17 5" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="module-label" data-en="Affiliates" data-es="Afiliados">Affiliates</div>
+          <div class="module-desc" data-en="Earn commissions" data-es="Gana comisiones">Earn commissions</div>
+        </a>
+        <a href="pages/enroll.html" class="module-card module-cta-card">
+          <div class="module-icon" style="background:rgba(255,255,255,0.15);">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <div class="module-label" style="color:#fff;" data-en="Enroll free" data-es="Regístrate gratis">Enroll free</div>
+          <div class="module-desc" style="color:rgba(255,255,255,0.75);" data-en="Get started today" data-es="Comienza hoy">Get started today</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS — ANIMATED DEMO -->
+  <section class="demo-section" id="how-it-works">
+    <div class="container">
+      <div class="demo-header">
+        <div class="section-label" id="demo-label-top">How it works</div>
+        <h2 class="section-title" id="demo-title-top">Everything your business needs,<br>in one place</h2>
+        <p class="demo-sub" id="demo-sub-top">Watch how Latino business owners list, sell, hire, and grow on MyLatinoList.</p>
+        <button class="demo-lang-toggle" id="demo-lang-btn" onclick="demoToggleLang()">
+          <span id="demo-lang-icon">🌐</span> <span id="demo-lang-label">Ver en Español</span>
+        </button>
+      </div>
+      <div class="demo-stage">
+        <!-- Step nav pills -->
+        <div class="demo-nav" id="demo-nav">
+          <button class="demo-pill active" data-step="0">
+            <span class="dp-num">1</span><span class="dp-lbl" data-en="Enroll" data-es="Registro">Enroll</span>
+          </button>
+          <div class="demo-pill-line"></div>
+          <button class="demo-pill" data-step="1">
+            <span class="dp-num">2</span><span class="dp-lbl" data-en="Get found" data-es="Visibilidad">Get found</span>
+          </button>
+          <div class="demo-pill-line"></div>
+          <button class="demo-pill" data-step="2">
+            <span class="dp-num">3</span><span class="dp-lbl" data-en="Sell" data-es="Vender">Sell</span>
+          </button>
+          <div class="demo-pill-line"></div>
+          <button class="demo-pill" data-step="3">
+            <span class="dp-num">4</span><span class="dp-lbl" data-en="Resources" data-es="Recursos">Resources</span>
+          </button>
+          <div class="demo-pill-line"></div>
+          <button class="demo-pill" data-step="4">
+            <span class="dp-num">5</span><span class="dp-lbl" data-en="Dashboard" data-es="Panel">Dashboard</span>
+          </button>
+          <div class="demo-pill-line"></div>
+          <button class="demo-pill" data-step="5">
+            <span class="dp-num">6</span><span class="dp-lbl" data-en="Affiliates" data-es="Afiliados">Affiliates</span>
+          </button>
+          <div class="demo-pill-line"></div>
+          <button class="demo-pill" data-step="6">
+            <span class="dp-num">7</span><span class="dp-lbl" data-en="Your website" data-es="Tu web">Your website</span>
+          </button>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="demo-progress-track">
+          <div class="demo-progress-fill" id="demo-progress"></div>
+        </div>
+
+        <!-- Screen area -->
+        <div class="demo-screen-wrap">
+          <div class="demo-screen" id="demo-screen">
+
+            <!-- STEP 0: Enroll -->
+            <div class="demo-frame active" id="step-0">
+              <div class="demo-caption">
+                <div class="dc-icon">🚀</div>
+                <div class="dc-text">
+                  <strong>Enroll in minutes</strong>
+                  <span>Fill in your business info, pick your modules, choose a plan — free to start.</span>
+                </div>
+              </div>
+              <div class="mock-window">
+                <div class="mock-bar"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span><span class="mock-url">mylatinolist.io/pages/enroll.html</span></div>
+                <div class="mock-body">
+                  <div class="mock-wizard-top">
+                    <span class="mock-brand">mylatinolist</span>
+                    <div class="mock-steps">
+                      <span class="ms active">1</span>
+                      <span class="ms-line"></span>
+                      <span class="ms">2</span>
+                      <span class="ms-line"></span>
+                      <span class="ms">3</span>
+                      <span class="ms-line"></span>
+                      <span class="ms">4</span>
+                    </div>
+                  </div>
+                  <div class="mock-wiz-body">
+                    <div class="mock-wiz-label">Step 1 of 4 — Your account</div>
+                    <div class="mock-wiz-h">Create your owner account</div>
+                    <div class="mock-field-row">
+                      <div class="mock-field"><div class="mf-label">First name</div><div class="mf-input"><span class="mf-typed" id="type-fname"></span></div></div>
+                      <div class="mock-field"><div class="mf-label">Last name</div><div class="mf-input"><span class="mf-typed" id="type-lname"></span></div></div>
+                    </div>
+                    <div class="mock-field" style="margin-bottom:8px;"><div class="mf-label">Email address</div><div class="mf-input"><span class="mf-typed" id="type-email"></span></div></div>
+                    <div class="mock-wiz-tip">Your information is encrypted and never sold.</div>
+                  </div>
+                  <div class="mock-wiz-foot">
+                    <div class="mock-foot-info">Step 1 of 4 · Free to enroll</div>
+                    <div class="mock-next-btn">Continue →</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 1: Get found -->
+            <div class="demo-frame" id="step-1">
+              <div class="demo-caption">
+                <div class="dc-icon">📍</div>
+                <div class="dc-text">
+                  <strong>Get found by customers</strong>
+                  <span>Your business appears in the directory instantly — searchable by category, city, and state.</span>
+                </div>
+              </div>
+              <div class="mock-window">
+                <div class="mock-bar"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span><span class="mock-url">mylatinolist.io/#directory</span></div>
+                <div class="mock-body">
+                  <div class="mock-search-strip">
+                    <div class="mock-search-box">
+                      <span style="opacity:0.5;font-size:11px;">Search restaurants, lawyers, salons...</span>
+                      <div class="mock-search-btn">Search</div>
+                    </div>
+                  </div>
+                  <div class="mock-biz-grid">
+                    <div class="mock-biz-card featured-card">
+                      <div class="mock-biz-header" style="background:#FAECE7;">🍽️<span class="mock-featured-tag">Featured</span></div>
+                      <div class="mock-biz-body">
+                        <div class="mock-biz-name">La Cocina de Maria</div>
+                        <div class="mock-biz-cat">Food & Dining · Miami, FL</div>
+                        <div class="mock-biz-tags"><span class="mock-tag">Authentic</span><span class="mock-tag">Catering</span><span class="mock-tag">Bilingual</span></div>
+                      </div>
+                      <div class="mock-biz-foot"><span class="mock-rating">★ 4.9 (214)</span><span class="mock-city">Miami, FL</span></div>
+                    </div>
+                    <div class="mock-biz-card">
+                      <div class="mock-biz-header" style="background:#E1F5EE;">⚖️</div>
+                      <div class="mock-biz-body">
+                        <div class="mock-biz-name">Ramos Law Group</div>
+                        <div class="mock-biz-cat">Legal · Houston, TX</div>
+                        <div class="mock-biz-tags"><span class="mock-tag">Immigration</span><span class="mock-tag">Español</span></div>
+                      </div>
+                      <div class="mock-biz-foot"><span class="mock-rating">★ 4.8 (97)</span></div>
+                    </div>
+                    <div class="mock-biz-card">
+                      <div class="mock-biz-header" style="background:#EEEDFE;">💇</div>
+                      <div class="mock-biz-body">
+                        <div class="mock-biz-name">Casa Flores Salon</div>
+                        <div class="mock-biz-cat">Beauty · Los Angeles, CA</div>
+                        <div class="mock-biz-tags"><span class="mock-tag">Color</span><span class="mock-tag">Quinceañera</span></div>
+                      </div>
+                      <div class="mock-biz-foot"><span class="mock-rating">★ 5.0 (183)</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 2: Sell -->
+            <div class="demo-frame" id="step-2">
+              <div class="demo-caption">
+                <div class="dc-icon">🛍️</div>
+                <div class="dc-text">
+                  <strong>Sell in the Latino marketplace</strong>
+                  <span>List products and reach thousands of buyers in the community. Physical or digital items.</span>
+                </div>
+              </div>
+              <div class="mock-window">
+                <div class="mock-bar"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span><span class="mock-url">mylatinolist.io/pages/marketplace.html</span></div>
+                <div class="mock-body" style="padding:12px;">
+                  <div style="font-size:10px;font-weight:600;color:var(--coral);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;">Latino marketplace</div>
+                  <div class="mock-product-grid">
+                    <div class="mock-product"><div class="mock-prod-img" style="background:#FAECE7;">🫔</div><div class="mock-prod-name">Tamale pack (12)</div><div class="mock-prod-price">$48.00</div></div>
+                    <div class="mock-product"><div class="mock-prod-img" style="background:#E1F5EE;">🌶️</div><div class="mock-prod-name">Hot sauce 3-pack</div><div class="mock-prod-price">$22.00</div></div>
+                    <div class="mock-product"><div class="mock-prod-img" style="background:#EEEDFE;">🎨</div><div class="mock-prod-name">Talavera ceramics</div><div class="mock-prod-price">$58.00</div></div>
+                    <div class="mock-product"><div class="mock-prod-img" style="background:#E6F1FB;">👗</div><div class="mock-prod-name">Guayabera shirt</div><div class="mock-prod-price">$65.00</div></div>
+                  </div>
+                  <div class="mock-sell-bar">
+                    <span style="font-size:10px;color:var(--ink-soft);">Ready to sell your products?</span>
+                    <div class="mock-next-btn" style="font-size:10px;padding:5px 12px;">Start selling →</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 3: Resources -->
+            <div class="demo-frame" id="step-3">
+              <div class="demo-caption">
+                <div class="dc-icon">🗣️</div>
+                <div class="dc-text">
+                  <strong>La Voz Latino resource portal</strong>
+                  <span>Access SBA loans, DACA resources, bilingual tax guides, grants, and legal aid — all in one place.</span>
+                </div>
+              </div>
+              <div class="mock-window">
+                <div class="mock-bar"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span><span class="mock-url">mylatinolist.io/pages/voz.html</span></div>
+                <div class="mock-body" style="padding:12px;background:#534AB7;">
+                  <div style="font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;">La Voz Latino</div>
+                  <div style="font-family:var(--font-display,serif);font-size:16px;font-weight:600;color:#fff;margin-bottom:12px;">Your voice. Your resources.</div>
+                  <div class="mock-res-list">
+                    <div class="mock-res-row"><div class="mock-res-ic" style="background:#E1F5EE;">💰</div><div class="mock-res-info"><div class="mock-res-title">SBA loan programs</div><div class="mock-res-tag" style="background:#E1F5EE;color:#085041;">Finance</div></div></div>
+                    <div class="mock-res-row"><div class="mock-res-ic" style="background:#EEEDFE;">🛂</div><div class="mock-res-info"><div class="mock-res-title">DACA business resources</div><div class="mock-res-tag" style="background:#EEEDFE;color:#3C3489;">Legal</div></div></div>
+                    <div class="mock-res-row"><div class="mock-res-ic" style="background:#FAEEDA;">🧾</div><div class="mock-res-info"><div class="mock-res-title">Tax credits checklist 2026</div><div class="mock-res-tag" style="background:#FAEEDA;color:#633806;">Tax</div></div></div>
+                    <div class="mock-res-row"><div class="mock-res-ic" style="background:#EAF3DE;">🤝</div><div class="mock-res-info"><div class="mock-res-title">Minority business grants</div><div class="mock-res-tag" style="background:#EAF3DE;color:#27500A;">Grants</div></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 4: Dashboard -->
+            <div class="demo-frame" id="step-4">
+              <div class="demo-caption">
+                <div class="dc-icon">📊</div>
+                <div class="dc-text">
+                  <strong>Track everything in your dashboard</strong>
+                  <span>See profile views, leads, sales, job applications, and affiliate earnings — all in real time.</span>
+                </div>
+              </div>
+              <div class="mock-window">
+                <div class="mock-bar"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span><span class="mock-url">mylatinolist.io/pages/dashboard.html</span></div>
+                <div class="mock-body" style="padding:0;display:flex;">
+                  <div class="mock-sidebar">
+                    <div class="mock-sb-biz">🍽️<div style="font-size:9px;font-weight:500;margin-top:4px;">La Cocina de Maria</div><div class="mock-plan-badge">Pro</div></div>
+                    <div class="mock-sb-link active-link">Dashboard</div>
+                    <div class="mock-sb-link">Analytics</div>
+                    <div class="mock-sb-link">Marketplace</div>
+                    <div class="mock-sb-link">Jobs board</div>
+                    <div class="mock-sb-link">La Voz Latino</div>
+                  </div>
+                  <div class="mock-dash-main">
+                    <div style="font-family:var(--font-display,serif);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;">Good morning, Maria</div>
+                    <div class="mock-kpi-row">
+                      <div class="mock-kpi"><div class="mk-n" style="color:var(--coral);">1,284</div><div class="mk-l">Profile views</div></div>
+                      <div class="mock-kpi"><div class="mk-n" style="color:#378ADD;">47</div><div class="mk-l">Leads</div></div>
+                      <div class="mock-kpi"><div class="mk-n" style="color:#1D9E75;">$830</div><div class="mk-l">Sales</div></div>
+                      <div class="mock-kpi"><div class="mk-n" style="color:#EF9F27;">$214</div><div class="mk-l">Affiliate</div></div>
+                    </div>
+                    <div class="mock-chart-row">
+                      <div class="mock-bar-wrap">
+                        <div class="mock-bar-chart">
+                          <div class="mb" style="height:38%;background:#B5D4F4;"></div>
+                          <div class="mb" style="height:55%;background:#85B7EB;"></div>
+                          <div class="mb" style="height:44%;background:#B5D4F4;"></div>
+                          <div class="mb" style="height:70%;background:#378ADD;"></div>
+                          <div class="mb" style="height:58%;background:#85B7EB;"></div>
+                          <div class="mb" style="height:82%;background:#378ADD;"></div>
+                          <div class="mb" style="height:96%;background:#185FA5;"></div>
+                        </div>
+                        <div style="font-size:8px;color:var(--ink-muted);margin-top:3px;">Views this week</div>
+                      </div>
+                      <div class="mock-activity">
+                        <div style="font-size:9px;font-weight:500;color:var(--ink);margin-bottom:5px;">Recent activity</div>
+                        <div class="mock-act-row"><span class="mac-dot" style="background:#1D9E75;"></span><span>New 5-star review</span></div>
+                        <div class="mock-act-row"><span class="mac-dot" style="background:#378ADD;"></span><span>Marketplace order</span></div>
+                        <div class="mock-act-row"><span class="mac-dot" style="background:#EF9F27;"></span><span>Job application</span></div>
+                        <div class="mock-act-row"><span class="mac-dot" style="background:#534AB7;"></span><span>SBA loan match</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 5: Affiliates -->
+            <div class="demo-frame" id="step-5">
+              <div class="demo-caption" id="cap-5">
+                <div class="dc-icon">📈</div>
+                <div class="dc-text">
+                  <strong id="cap5-title">Earn with affiliate marketing</strong>
+                  <span id="cap5-desc">Promote trusted brands to your customers and earn commissions on every referral — no extra work needed.</span>
+                </div>
+              </div>
+              <div class="mock-window">
+                <div class="mock-bar"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span><span class="mock-url">mylatinolist.io/pages/affiliates.html</span></div>
+                <div class="mock-body" style="padding:12px;">
+                  <div style="font-size:10px;font-weight:600;color:var(--coral);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;" id="aff-label">Affiliate program</div>
+                  <div class="mock-aff-grid">
+                    <div class="mock-aff-card">
+                      <div class="mock-aff-top"><div class="mock-aff-ic" style="background:#E6F1FB;">🏦</div><div><div class="mock-aff-name">Banco Latino</div><div class="mock-aff-cat" id="aff-cat1">Finance partner</div></div></div>
+                      <div class="mock-aff-desc" id="aff-desc1">SBA-preferred lender, bilingual advisors.</div>
+                      <div class="mock-aff-foot"><span class="mock-aff-comm">Up to $200/referral</span><div class="mock-join-btn" id="aff-join1">Join →</div></div>
+                    </div>
+                    <div class="mock-aff-card">
+                      <div class="mock-aff-top"><div class="mock-aff-ic" style="background:#EAF3DE;">📦</div><div><div class="mock-aff-name">ShipLatino</div><div class="mock-aff-cat" id="aff-cat2">Logistics partner</div></div></div>
+                      <div class="mock-aff-desc" id="aff-desc2">Discounted shipping US, Mexico & LatAm.</div>
+                      <div class="mock-aff-foot"><span class="mock-aff-comm">$15/active shipper</span><div class="mock-join-btn" id="aff-join2">Join →</div></div>
+                    </div>
+                    <div class="mock-aff-card">
+                      <div class="mock-aff-top"><div class="mock-aff-ic" style="background:#FAEEDA;">📱</div><div><div class="mock-aff-name">Verizon Español</div><div class="mock-aff-cat" id="aff-cat3">Tech partner</div></div></div>
+                      <div class="mock-aff-desc" id="aff-desc3">Business plans with Spanish support.</div>
+                      <div class="mock-aff-foot"><span class="mock-aff-comm">$75/activation</span><div class="mock-join-btn" id="aff-join3">Join →</div></div>
+                    </div>
+                  </div>
+                  <div style="background:var(--coral);border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+                    <span style="font-size:10px;color:rgba(255,255,255,0.85);" id="aff-partner-text">Are you a brand? Become a partner.</span>
+                    <div class="mock-next-btn" style="background:#fff;color:var(--coral);font-size:10px;padding:5px 10px;" id="aff-contact-btn">Contact us →</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 6: Free website + QR -->
+            <div class="demo-frame" id="step-6">
+              <div class="demo-caption">
+                <div class="dc-icon">🌐</div>
+                <div class="dc-text">
+                  <strong id="cap6-title">No website? No problem</strong>
+                  <span id="cap6-desc">Every business gets a free page at mylatinolist.io/biz/your-name — plus a QR code and marketing kit to share it everywhere.</span>
+                </div>
+              </div>
+              <div class="mock-window">
+                <div class="mock-bar"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span><span class="mock-url">mylatinolist.io/biz/la-cocina-de-maria</span></div>
+                <div class="mock-body" style="padding:12px;">
+                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+                    <div style="width:44px;height:44px;background:#FAECE7;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🍽️</div>
+                    <div>
+                      <div style="font-size:13px;font-weight:600;color:var(--ink);">La Cocina de Maria</div>
+                      <div style="font-size:10px;color:var(--ink-muted);">Food & Dining · Miami, FL</div>
+                      <div style="font-size:11px;color:var(--amber);">★★★★★ 4.9 (214 reviews)</div>
+                    </div>
+                    <div style="margin-left:auto;display:flex;flex-direction:column;gap:4px;">
+                      <div style="font-size:9px;font-weight:500;padding:5px 10px;background:var(--coral);color:#fff;border-radius:6px;text-align:center;">📞 Call now</div>
+                      <div style="font-size:9px;padding:5px 10px;border:1px solid var(--border-mid);border-radius:6px;text-align:center;color:var(--coral);">📱 QR code</div>
+                    </div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div style="background:var(--coral-light);border:1px solid var(--coral-mid);border-radius:8px;padding:8px;">
+                      <div style="font-size:9px;font-weight:600;color:var(--coral-dark);margin-bottom:3px;">🌐 This is their free website</div>
+                      <div style="font-size:8px;color:var(--coral-dark);opacity:0.8;line-height:1.4;">No separate website needed — this page is their digital home.</div>
+                      <div style="font-size:8px;font-family:monospace;background:rgba(216,90,48,0.1);padding:3px 6px;border-radius:4px;margin-top:5px;color:var(--coral-dark);">mylatinolist.io/biz/la-cocina-de-maria</div>
+                    </div>
+                    <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px;">
+                      <div style="font-size:9px;font-weight:600;color:var(--ink);margin-bottom:6px;">📱 Marketing kit</div>
+                      <div style="display:flex;flex-direction:column;gap:3px;">
+                        <div style="font-size:8px;color:var(--ink-muted);">✓ QR code for your door</div>
+                        <div style="font-size:8px;color:var(--ink-muted);">✓ Social media captions</div>
+                        <div style="font-size:8px;color:var(--ink-muted);">✓ Window sticker (3 styles)</div>
+                        <div style="font-size:8px;color:var(--ink-muted);">✓ "Listed on" badge</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- end demo-screen -->
+        </div><!-- end demo-screen-wrap -->
+
+        <!-- Progress dots -->
+        <div class="demo-dots" id="demo-dots">
+          <div class="demo-dot-wrap" data-step="0">
+            <div class="demo-dot active"></div>
+            <div class="demo-dot-timer"></div>
+          </div>
+          <div class="demo-dot-wrap" data-step="1">
+            <div class="demo-dot"></div>
+            <div class="demo-dot-timer"></div>
+          </div>
+          <div class="demo-dot-wrap" data-step="2">
+            <div class="demo-dot"></div>
+            <div class="demo-dot-timer"></div>
+          </div>
+          <div class="demo-dot-wrap" data-step="3">
+            <div class="demo-dot"></div>
+            <div class="demo-dot-timer"></div>
+          </div>
+          <div class="demo-dot-wrap" data-step="4">
+            <div class="demo-dot"></div>
+            <div class="demo-dot-timer"></div>
+          </div>
+          <div class="demo-dot-wrap" data-step="5">
+            <div class="demo-dot"></div>
+            <div class="demo-dot-timer"></div>
+          </div>
+          <div class="demo-dot-wrap" data-step="6">
+            <div class="demo-dot"></div>
+            <div class="demo-dot-timer"></div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="demo-controls">
+          <button class="demo-ctrl-btn" id="demo-prev" onclick="demoNav(-1)">←</button>
+          <button class="demo-ctrl-btn demo-play-btn" id="demo-play" onclick="demoTogglePlay()">⏸</button>
+          <button class="demo-ctrl-btn" id="demo-next" onclick="demoNav(1)">→</button>
+          <a href="pages/enroll.html" class="demo-enroll-btn" id="demo-enroll-btn">Enroll free — get started →</a>
+        </div>
+
+      </div><!-- end demo-stage -->
+    </div>
+  </section>
+
+  <!-- FEATURED BUSINESSES -->
+  <section class="featured-section" id="directory">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <div class="section-label" data-en="Featured businesses" data-es="Negocios destacados">Featured businesses</div>
+          <h2 class="section-title" data-en="Discover Latino-owned businesses near you" data-es="Descubre negocios latinos cerca de ti">Discover Latino-owned businesses near you</h2>
+        </div>
+        <a href="pages/directory.html" class="section-link" data-en="View all <span>→</span>" data-es="Ver todos <span>→</span>">View all <span>→</span></a>
+      </div>
+      <div class="biz-grid" id="biz-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- LA VOZ LATINO BANNER -->
+  <section class="voz-banner">
+    <div class="container">
+      <div class="voz-inner">
+        <div class="voz-left">
+          <div class="voz-eyebrow" data-en="La Voz Latino — Resource portal" data-es="La Voz Latino — Portal de recursos">La Voz Latino — Resource portal</div>
+          <h2 class="voz-title" data-en="Everything your business needs,<br><em>in your language</em>" data-es="Todo lo que tu negocio necesita,<br><em>en tu idioma</em>">Everything your business needs,<br><em>in your language</em></h2>
+          <p class="voz-sub" data-en="Access SBA loans, grants, legal aid, DACA resources, bilingual tax guidance, and business licensing guides — curated for Latino entrepreneurs." data-es="Accede a préstamos SBA, subvenciones, ayuda legal, recursos DACA, orientación fiscal bilingüe y guías de licencias empresariales — seleccionados para emprendedores latinos.">Access SBA loans, grants, legal aid, DACA resources, bilingual tax guidance, and business licensing guides — curated for Latino entrepreneurs.</p>
+          <div class="voz-tags">
+            <span class="vtag" data-en="SBA loans" data-es="Préstamos SBA">SBA loans</span>
+            <span class="vtag" data-en="DACA resources" data-es="Recursos DACA">DACA resources</span>
+            <span class="vtag" data-en="Tax credits" data-es="Créditos fiscales">Tax credits</span>
+            <span class="vtag" data-en="Legal aid" data-es="Ayuda legal">Legal aid</span>
+            <span class="vtag" data-en="Business licensing" data-es="Licencias de negocio">Business licensing</span>
+            <span class="vtag" data-en="Grants" data-es="Subvenciones">Grants</span>
+          </div>
+          <a href="pages/voz.html" class="btn-voz" data-en="Explore resources →" data-es="Explorar recursos →">Explore resources →</a>
+        </div>
+        <div class="voz-right">
+          <div class="voz-stat-card">
+            <div class="vsc-num">$847K</div>
+            <div class="vsc-lbl" data-en="In grants matched this year" data-es="En subvenciones este año">In grants matched this year</div>
+          </div>
+          <div class="voz-stat-card">
+            <div class="vsc-num">320+</div>
+            <div class="vsc-lbl" data-en="Resources available" data-es="Recursos disponibles">Resources available</div>
+          </div>
+          <div class="voz-stat-card">
+            <div class="vsc-num" data-en="Bilingual" data-es="Bilingüe">Bilingual</div>
+            <div class="vsc-lbl" data-en="All content in EN &amp; ES" data-es="Todo el contenido en EN y ES">All content in EN &amp; ES</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARKETPLACE PREVIEW -->
+  <section class="marketplace-section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <div class="section-label" data-en="Latino marketplace" data-es="Mercado latino">Latino marketplace</div>
+          <h2 class="section-title" data-en="Shop from Latino-owned businesses" data-es="Compra de negocios de dueños latinos">Shop from Latino-owned businesses</h2>
+        </div>
+        <a href="pages/marketplace.html" class="section-link" data-en="Shop all <span>→</span>" data-es="Ver todo <span>→</span>">Shop all <span>→</span></a>
+      </div>
+      <div class="product-grid" id="product-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- AFFILIATES SECTION -->
+  <section class="affiliates-section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <div class="section-label" data-en="Trusted affiliate partners" data-es="Socios afiliados de confianza">Trusted affiliate partners</div>
+          <h2 class="section-title" data-en="Big brands supporting Latino businesses" data-es="Grandes marcas que apoyan negocios latinos">Big brands supporting Latino businesses</h2>
+        </div>
+        <a href="pages/affiliates.html" class="section-link" data-en="All partners <span>→</span>" data-es="Todos los socios <span>→</span>">All partners <span>→</span></a>
+      </div>
+      <div class="aff-grid" id="aff-grid">
+        <!-- Populated by JS -->
+      </div>
+      <div class="aff-cta-strip">
+        <span data-en="Are you a brand that wants to reach Latino business owners and consumers?" data-es="¿Eres una marca que quiere llegar a empresarios y consumidores latinos?">Are you a brand that wants to reach Latino business owners and consumers?</span>
+        <a href="pages/affiliates.html#partner" class="btn-aff-partner" data-en="Become a partner →" data-es="Conviértete en socio →">Become a partner →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOBS PREVIEW -->
+  <section class="jobs-section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <div class="section-label" data-en="Jobs board" data-es="Bolsa de trabajo">Jobs board</div>
+          <h2 class="section-title" data-en="Bilingual &amp; Latino talent, ready to hire" data-es="Talento bilingüe y latino, listo para contratar">Bilingual &amp; Latino talent, ready to hire</h2>
+        </div>
+        <a href="pages/jobs.html" class="section-link" data-en="All jobs <span>→</span>" data-es="Ver empleos <span>→</span>">All jobs <span>→</span></a>
+      </div>
+      <div class="jobs-list" id="jobs-list">
+        <!-- Populated by JS -->
+      </div>
+      <a href="pages/jobs.html" class="btn-post-job" data-en="Post a job opening →" data-es="Publicar una vacante →">Post a job opening →</a>
+    </div>
+  </section>
+
+  <!-- ENROLL CTA -->
+  <section class="enroll-cta">
+    <div class="enroll-cta-bg"></div>
+    <div class="container enroll-cta-inner">
+      <div class="enroll-left">
+        <div class="section-label" style="color:rgba(255,255,255,0.6);" data-en="Ready to grow?" data-es="¿Listo para crecer?">Ready to grow?</div>
+        <h2 class="enroll-h" data-en="Join thousands of Latino<br>entrepreneurs today" data-es="Únete a miles de emprendedores<br>latinos hoy">Join thousands of Latino<br>entrepreneurs today</h2>
+        <p class="enroll-sub" data-en="Free to list. No credit card needed. Be live in minutes." data-es="Gratis para listar. Sin tarjeta de crédito. En línea en minutos.">Free to list. No credit card needed. Be live in minutes.</p>
+        <a href="pages/enroll.html" class="btn-enroll-white" data-en="Enroll your business — free →" data-es="Registra tu negocio — gratis →">Enroll your business — free →</a>
+      </div>
+      <div class="enroll-right">
+        <div class="enroll-card">
+          <div class="ec-row"><span class="ec-check">✓</span><span data-en="Business directory listing" data-es="Listado en el directorio">Business directory listing</span></div>
+          <div class="ec-row"><span class="ec-check">✓</span><span data-en="Analytics dashboard" data-es="Panel de análisis">Analytics dashboard</span></div>
+          <div class="ec-row"><span class="ec-check">✓</span><span data-en="Marketplace selling" data-es="Ventas en el mercado">Marketplace selling</span></div>
+          <div class="ec-row"><span class="ec-check">✓</span><span data-en="Jobs board access" data-es="Acceso a bolsa de trabajo">Jobs board access</span></div>
+          <div class="ec-row"><span class="ec-check">✓</span><span data-en="La Voz Latino resources" data-es="Recursos La Voz Latino">La Voz Latino resources</span></div>
+          <div class="ec-row"><span class="ec-check">✓</span><span data-en="Affiliate commissions" data-es="Comisiones de afiliado">Affiliate commissions</span></div>
+          <div class="ec-divider"></div>
+          <div class="ec-price" data-en="Free to start · Basic from $19/mo · Pro from $49/mo" data-es="Gratis para empezar · Basic desde $19/mes · Pro desde $49/mes">Free to start · Basic from $19/mo · Pro from $49/mo</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" style="padding:80px 0;background:var(--surface-2);">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:48px;">
+        <div class="section-label" data-en="Contact us" data-es="Contáctanos">Contact us</div>
+        <h2 class="section-title" data-en="Get in touch" data-es="Ponte en contacto">Get in touch</h2>
+        <p style="font-size:16px;color:var(--ink-muted);max-width:480px;margin:0 auto;font-weight:300;" data-en="Have questions? We're here to help Latino business owners succeed." data-es="¿Tienes preguntas? Estamos aquí para ayudar a los negocios latinos a tener éxito.">Have questions? We're here to help Latino business owners succeed.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:900px;margin:0 auto;align-items:start;">
+
+        <!-- Left: contact info -->
+        <div>
+          <div class="contact-cards" style="display:flex;flex-direction:column;gap:12px;">
+            <a href="mailto:info@mylatinolist.io" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;text-decoration:none;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--coral)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span style="font-size:22px;flex-shrink:0;">📧</span>
+              <div>
+                <div style="font-size:11px;font-weight:500;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;" data-en="General" data-es="General">General</div>
+                <div style="font-size:13px;font-weight:500;color:var(--coral);">info@mylatinolist.io</div>
+              </div>
+            </a>
+            <a href="tel:+12028237929" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;text-decoration:none;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--coral)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span style="font-size:22px;flex-shrink:0;">📞</span>
+              <div>
+                <div style="font-size:11px;font-weight:500;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;" data-en="Phone" data-es="Teléfono">Phone</div>
+                <div style="font-size:13px;font-weight:500;color:var(--coral);">(202) 823-7929</div>
+              </div>
+            </a>
+            <a href="mailto:support@mylatinolist.io" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;text-decoration:none;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--coral)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span style="font-size:22px;flex-shrink:0;">💬</span>
+              <div>
+                <div style="font-size:11px;font-weight:500;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;" data-en="Support" data-es="Soporte">Support</div>
+                <div style="font-size:13px;font-weight:500;color:var(--coral);">support@mylatinolist.io</div>
+              </div>
+            </a>
+            <a href="mailto:partners@mylatinolist.io" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;text-decoration:none;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--coral)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span style="font-size:22px;flex-shrink:0;">🤝</span>
+              <div>
+                <div style="font-size:11px;font-weight:500;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;" data-en="Partnerships" data-es="Alianzas">Partnerships</div>
+                <div style="font-size:13px;font-weight:500;color:var(--coral);">partners@mylatinolist.io</div>
+              </div>
+            </a>
+            <a href="mailto:billing@mylatinolist.io" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;text-decoration:none;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--coral)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span style="font-size:22px;flex-shrink:0;">💳</span>
+              <div>
+                <div style="font-size:11px;font-weight:500;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;" data-en="Billing &amp; payments" data-es="Pagos y facturación">Billing &amp; payments</div>
+                <div style="font-size:13px;font-weight:500;color:var(--coral);">billing@mylatinolist.io</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right: contact form -->
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 32px;">
+          <div style="font-family:var(--font-display);font-size:20px;font-weight:500;color:var(--ink);margin-bottom:20px;" data-en="Send us a message" data-es="Envíanos un mensaje">Send us a message</div>
+          <div style="display:flex;flex-direction:column;gap:14px;" id="contact-form">
+            <div>
+              <label style="font-size:12px;font-weight:500;color:var(--ink-soft);display:block;margin-bottom:5px;" data-en="Your name" data-es="Tu nombre">Your name</label>
+              <input id="cf-name" type="text" placeholder="Maria Gonzalez" data-placeholder-en="Maria Gonzalez" data-placeholder-es="María González" style="width:100%;padding:10px 13px;border-radius:var(--radius-md);border:1px solid var(--border-mid);font-family:var(--font-body);font-size:14px;color:var(--ink);outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='var(--coral)'" onblur="this.style.borderColor='var(--border-mid)'">
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:500;color:var(--ink-soft);display:block;margin-bottom:5px;" data-en="Email address" data-es="Correo electrónico">Email address</label>
+              <input id="cf-email" type="email" placeholder="you@example.com" style="width:100%;padding:10px 13px;border-radius:var(--radius-md);border:1px solid var(--border-mid);font-family:var(--font-body);font-size:14px;color:var(--ink);outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='var(--coral)'" onblur="this.style.borderColor='var(--border-mid)'">
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:500;color:var(--ink-soft);display:block;margin-bottom:5px;" data-en="Message" data-es="Mensaje">Message</label>
+              <textarea id="cf-message" placeholder="Tell us how we can help..." data-placeholder-en="Tell us how we can help..." data-placeholder-es="Cuéntanos cómo podemos ayudarte..." rows="4" style="width:100%;padding:10px 13px;border-radius:var(--radius-md);border:1px solid var(--border-mid);font-family:var(--font-body);font-size:14px;color:var(--ink);outline:none;resize:none;line-height:1.55;box-sizing:border-box;" onfocus="this.style.borderColor='var(--coral)'" onblur="this.style.borderColor='var(--border-mid)'"></textarea>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <button id="cf-btn" onclick="submitContactForm()" style="padding:11px 28px;background:var(--coral);color:#fff;border:none;border-radius:var(--radius-md);font-size:14px;font-weight:500;font-family:var(--font-body);cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='var(--coral-dark)'" onmouseout="this.style.background='var(--coral)'" data-en="Send message" data-es="Enviar mensaje">Send message</button>
+              <span id="cf-msg" style="font-size:13px;"></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <style>
+    @media(max-width:768px){
+      #contact > .container > div:last-child { grid-template-columns: 1fr !important; }
+    }
+  </style>
+  <script>
+  async function submitContactForm() {
+    const btn  = document.getElementById('cf-btn');
+    const msg  = document.getElementById('cf-msg');
+    const name = document.getElementById('cf-name').value.trim();
+    const email= document.getElementById('cf-email').value.trim();
+    const text = document.getElementById('cf-message').value.trim();
+
+    if (!name || !email || !text) {
+      msg.textContent = '✗ All fields are required.';
+      msg.style.color = 'var(--coral)';
+      return;
+    }
+
+    btn.textContent = 'Sending...'; btn.disabled = true;
+    msg.textContent = ''; msg.style.color = '';
+
+    try {
+      const res  = await fetch(window.MLL_CONFIG.API_URL + '/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message: text }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        msg.textContent = '✓ Message sent! We\'ll be in touch soon.';
+        msg.style.color = '#059669';
+        document.getElementById('cf-name').value    = '';
+        document.getElementById('cf-email').value   = '';
+        document.getElementById('cf-message').value = '';
+        if (typeof gtag !== 'undefined') gtag('event', 'contact_form_submit');
+      } else {
+        msg.textContent = '✗ ' + (data.error || 'Something went wrong.');
+        msg.style.color = 'var(--coral)';
+      }
+    } catch {
+      msg.textContent = '✗ Network error — please try again.';
+      msg.style.color = 'var(--coral)';
+    }
+    btn.textContent = 'Send message'; btn.disabled = false;
+  }
+  </script>
+
+  <!-- QR CODE SECTION -->
+  <section id="qr-section" style="padding:80px 0;background:#fff;">
+    <div class="container" style="max-width:600px;text-align:center;">
+      <div class="section-label" style="margin-bottom:12px;" data-en="Scan &amp; Discover" data-es="Escanea y Descubre">Scan &amp; Discover</div>
+      <h2 style="font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:10px;" data-en="Scan to explore Latino businesses near you" data-es="Escanea para explorar negocios latinos cerca de ti">Scan to explore Latino businesses near you</h2>
+      <p style="font-size:15px;color:var(--ink-muted);margin-bottom:32px;" data-en="Share with friends, family, and your community" data-es="Comparte con tu familia y comunidad">Share with friends, family, and your community</p>
+
+      <div style="display:inline-block;background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:24px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+        <div id="platform-qr" style="width:200px;height:200px;"></div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:14px;">
+        <button onclick="downloadPlatformQR()" style="display:flex;align-items:center;gap:8px;padding:11px 22px;background:var(--coral);color:#fff;border:none;border-radius:var(--radius-md);font-size:14px;font-weight:500;font-family:var(--font-body);cursor:pointer;">
+          ⬇ <span data-en="Download QR code" data-es="Descargar código QR">Download QR code</span>
+        </button>
+        <a id="share-whatsapp" href="#" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:11px 22px;background:#25D366;color:#fff;border-radius:var(--radius-md);font-size:14px;font-weight:500;text-decoration:none;">
+          💬 WhatsApp
+        </a>
+        <a id="share-facebook" href="#" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:11px 22px;background:#1877F2;color:#fff;border-radius:var(--radius-md);font-size:14px;font-weight:500;text-decoration:none;">
+          📘 Facebook
+        </a>
+        <button onclick="copyPlatformLink(this)" style="display:flex;align-items:center;gap:8px;padding:11px 22px;background:#fff;color:var(--ink);border:1px solid var(--border-mid);border-radius:var(--radius-md);font-size:14px;font-weight:500;font-family:var(--font-body);cursor:pointer;">
+          🔗 <span data-en="Copy link" data-es="Copiar enlace">Copy link</span>
+        </button>
+      </div>
+      <div style="font-size:12px;font-family:monospace;color:var(--ink-muted);background:var(--surface-2);display:inline-block;padding:6px 14px;border-radius:var(--radius-sm);">mylatinolist.io</div>
+    </div>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+  const PLATFORM_URL = 'https://mylatinolist.io';
+
+  const _platformQR = new QRCode(document.getElementById('platform-qr'), {
+    text: PLATFORM_URL,
+    width: 200,
+    height: 200,
+    colorDark: '#1a1a2e',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H,
+  });
+
+  document.getElementById('share-whatsapp').href =
+    'https://wa.me/?text=' + encodeURIComponent('Discover Latino businesses near you! ' + PLATFORM_URL);
+  document.getElementById('share-facebook').href =
+    'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(PLATFORM_URL);
+
+  function downloadPlatformQR() {
+    const canvas = document.querySelector('#platform-qr canvas');
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = 'mylatinolist-qr.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  function copyPlatformLink(btn) {
+    navigator.clipboard.writeText(PLATFORM_URL).then(() => {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✅ Copied!';
+      setTimeout(() => { btn.innerHTML = orig; }, 2000);
+    });
+  }
+  </script>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="/" class="logo footer-logo">
+            <span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span>
+            <span class="logo-text">my<strong>latino</strong>list</span>
+          </a>
+          <p class="footer-tagline" data-en="The all-in-one platform for Latino businesses to grow, connect, and thrive." data-es="La plataforma todo en uno para negocios latinos para crecer, conectar y prosperar.">The all-in-one platform for Latino businesses to grow, connect, and thrive.</p>
+          <div class="footer-lang">
+            <button class="lang-btn" data-lang="en" onclick="switchLang('en')">🌍 English</button>
+            <span>|</span>
+            <button class="lang-btn" data-lang="es" onclick="switchLang('es')">🌍 Español</button>
+          </div>
+          <div class="footer-social">
+            <a href="https://www.facebook.com/mylatinolist.io" target="_blank" class="fsoc-btn" aria-label="Facebook">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/mylatinolist.io" target="_blank" class="fsoc-btn" aria-label="Instagram">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+            <a href="https://www.tiktok.com/@mylatinolist.io" target="_blank" class="fsoc-btn" aria-label="TikTok">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.95a8.17 8.17 0 004.77 1.52V7.02a4.85 4.85 0 01-1-.33z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col">
+            <div class="fc-title" data-en="Platform" data-es="Plataforma">Platform</div>
+            <a href="#directory" data-en="Business directory" data-es="Directorio de negocios">Business directory</a>
+            <a href="pages/marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+            <a href="pages/jobs.html" data-en="Jobs board" data-es="Bolsa de trabajo">Jobs board</a>
+            <a href="pages/voz.html">La Voz Latino</a>
+            <a href="pages/affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+            <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+          </div>
+          <div class="footer-col">
+            <div class="fc-title" data-en="For businesses" data-es="Para negocios">For businesses</div>
+            <a href="pages/enroll.html" data-en="Enroll free" data-es="Regístrate gratis">Enroll free</a>
+            <a href="pages/enroll.html#pricing" data-en="Pricing" data-es="Precios">Pricing</a>
+            <a href="pages/dashboard.html" data-en="Dashboard" data-es="Panel">Dashboard</a>
+            <a href="#" data-en="Advertise" data-es="Publicidad">Advertise</a>
+            <a href="/pages/partners.html" data-en="Partner program" data-es="Programa de socios">Partner program</a>
+          </div>
+          <div class="footer-col">
+            <div class="fc-title" data-en="Company" data-es="Empresa">Company</div>
+            <a href="#" data-en="About us" data-es="Acerca de nosotros">About us</a>
+            <a href="#">Blog</a>
+            <a href="#" data-en="Press" data-es="Prensa">Press</a>
+            <a href="#" data-en="Contact" data-es="Contacto">Contact</a>
+            <a href="#" data-en="Careers" data-es="Empleos">Careers</a>
+          </div>
+          <div class="footer-col">
+            <div class="fc-title" data-en="Legal" data-es="Legal">Legal</div>
+            <a href="#" data-en="Privacy policy" data-es="Política de privacidad">Privacy policy</a>
+            <a href="#" data-en="Terms of service" data-es="Términos de servicio">Terms of service</a>
+            <a href="#" data-en="Cookie policy" data-es="Política de cookies">Cookie policy</a>
+            <a href="#" data-en="Accessibility" data-es="Accesibilidad">Accessibility</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 AP Optix LLC DBA MyLatinoList · Powered by Cloudflare · <a href="tel:+12028237929" style="color:inherit;text-decoration:none;">(202) 823-7929</a></span>
+        
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script src="/js/nav.js"></script>
+  <style>
+  /* ── DEMO SECTION ───────────────────────────────────────── */
+  .demo-section { padding: 80px 0 72px; background: var(--surface); }
+  .demo-header { text-align: center; margin-bottom: 40px; }
+  .demo-sub { font-size: 15px; color: var(--ink-soft); margin-top: 10px; font-weight: 300; }
+  .demo-stage { max-width: 860px; margin: 0 auto; }
+  .demo-nav { display: flex; align-items: center; justify-content: center; margin-bottom: 16px; gap: 0; }
+  .demo-pill {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--font-body); font-size: 12px; font-weight: 500;
+    color: var(--ink-muted); background: none; border: none; cursor: pointer;
+    padding: 8px 14px; border-radius: 20px; transition: all 0.2s; white-space: nowrap;
+  }
+  .demo-pill:hover { color: var(--ink); background: var(--surface-2); }
+  .demo-pill.active { color: var(--coral); background: var(--coral-light); }
+  .dp-num {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--surface-3);
+    color: var(--ink-muted); font-size: 10px; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; transition: all 0.2s;
+  }
+  .demo-pill.active .dp-num { background: var(--coral); color: #fff; }
+  .demo-pill-line { width: 32px; height: 1px; background: var(--border-mid); flex-shrink: 0; }
+  .demo-progress-track { height: 3px; background: var(--surface-3); border-radius: 2px; margin-bottom: 20px; overflow: hidden; }
+  .demo-progress-fill { height: 3px; background: var(--coral); border-radius: 2px; transition: width 0.4s ease; width: 20%; }
+  .demo-screen-wrap {
+    background: var(--surface-2); border-radius: var(--radius-xl);
+    border: 1px solid var(--border); padding: 24px; min-height: 420px;
+    position: relative; overflow: hidden;
+  }
+  .demo-frame { display: none; animation: fadeSlide 0.4s ease; }
+  .demo-frame.active { display: block; }
+  @keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .demo-caption {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 14px 18px; margin-bottom: 16px;
+  }
+  .dc-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+  .dc-text { display: flex; flex-direction: column; gap: 2px; }
+  .dc-text strong { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .dc-text span { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  /* Mock browser window */
+  .mock-window { background: #fff; border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+  .mock-bar { background: var(--surface-2); padding: 8px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+  .mock-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .mock-dot.r { background: #FF5F57; }
+  .mock-dot.y { background: #FEBC2E; }
+  .mock-dot.g { background: #28C840; }
+  .mock-url { font-size: 10px; color: var(--ink-muted); margin-left: 6px; background: #fff; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--border); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mock-body { padding: 16px; }
+  /* Wizard mock */
+  .mock-wizard-top { background: var(--coral); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin: -16px -16px 14px; }
+  .mock-brand { font-size: 11px; font-weight: 500; color: #fff; }
+  .mock-steps { display: flex; align-items: center; gap: 4px; }
+  .ms { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); font-size: 9px; display: flex; align-items: center; justify-content: center; }
+  .ms.active { background: #fff; color: var(--coral); font-weight: 600; }
+  .ms-line { width: 16px; height: 1px; background: rgba(255,255,255,0.3); }
+  .mock-wiz-label { font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--coral); margin-bottom: 4px; }
+  .mock-wiz-h { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 12px; font-family: var(--font-display, serif); }
+  .mock-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .mock-field { display: flex; flex-direction: column; gap: 3px; }
+  .mf-label { font-size: 9px; font-weight: 500; color: var(--ink-soft); }
+  .mf-input { padding: 6px 8px; border: 1px solid var(--border-mid); border-radius: 6px; background: var(--surface); font-size: 11px; color: var(--ink); min-height: 24px; }
+  .mf-typed { color: var(--ink); }
+  .mock-wiz-tip { font-size: 10px; color: var(--teal-dark); background: var(--teal-light); padding: 6px 10px; border-radius: 6px; margin-top: 8px; }
+  .mock-wiz-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--border); margin: 14px -16px -16px; background: var(--surface); }
+  .mock-foot-info { font-size: 10px; color: var(--ink-muted); }
+  .mock-next-btn { font-size: 11px; font-weight: 500; padding: 7px 16px; background: var(--coral); color: #fff; border-radius: 6px; cursor: pointer; }
+  /* Biz grid mock */
+  .mock-search-strip { background: var(--teal); margin: -16px -16px 12px; padding: 10px 12px; }
+  .mock-search-box { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 7px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .mock-search-btn { font-size: 10px; font-weight: 500; background: #fff; color: var(--teal-dark); padding: 4px 10px; border-radius: 5px; }
+  .mock-biz-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .mock-biz-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .featured-card { border-color: var(--coral-mid); }
+  .mock-biz-header { height: 48px; display: flex; align-items: center; justify-content: center; font-size: 22px; position: relative; }
+  .mock-featured-tag { position: absolute; top: 4px; right: 4px; font-size: 8px; background: var(--coral); color: #fff; padding: 1px 5px; border-radius: 8px; font-weight: 500; }
+  .mock-biz-body { padding: 6px 8px; }
+  .mock-biz-name { font-size: 10px; font-weight: 500; color: var(--ink); }
+  .mock-biz-cat { font-size: 9px; color: var(--ink-muted); margin-bottom: 4px; }
+  .mock-biz-tags { display: flex; gap: 3px; flex-wrap: wrap; }
+  .mock-tag { font-size: 8px; background: var(--surface-2); color: var(--ink-soft); padding: 1px 5px; border-radius: 8px; }
+  .mock-biz-foot { padding: 5px 8px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+  .mock-rating { font-size: 9px; color: var(--amber); }
+  .mock-city { font-size: 9px; color: var(--ink-muted); }
+  /* Products mock */
+  .mock-product-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 10px; }
+  .mock-product { background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .mock-prod-img { height: 44px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .mock-prod-name { font-size: 9px; font-weight: 500; color: var(--ink); padding: 4px 6px 2px; line-height: 1.3; }
+  .mock-prod-price { font-size: 10px; font-weight: 500; color: var(--teal); padding: 0 6px 6px; }
+  .mock-sell-bar { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
+  /* Resources mock */
+  .mock-res-list { display: flex; flex-direction: column; gap: 6px; }
+  .mock-res-row { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border-radius: 8px; padding: 7px 10px; }
+  .mock-res-ic { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .mock-res-info { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .mock-res-title { font-size: 10px; color: #fff; font-weight: 400; }
+  .mock-res-tag { font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 8px; white-space: nowrap; }
+  /* Dashboard mock */
+  .mock-sidebar { width: 80px; background: #fff; border-right: 1px solid var(--border); padding: 10px 8px; flex-shrink: 0; }
+  .mock-sb-biz { text-align: center; padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  .mock-plan-badge { font-size: 8px; background: var(--coral-light); color: var(--coral-dark); padding: 1px 6px; border-radius: 8px; margin-top: 2px; display: inline-block; }
+  .mock-sb-link { font-size: 9px; color: var(--ink-muted); padding: 5px 6px; border-radius: 5px; margin-bottom: 2px; cursor: pointer; }
+  .active-link { background: var(--coral-light); color: var(--coral-dark); font-weight: 500; }
+  .mock-dash-main { flex: 1; padding: 10px 12px; overflow: hidden; }
+  .mock-kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 10px; }
+  .mock-kpi { background: var(--surface-2); border-radius: 6px; padding: 7px 6px; text-align: center; }
+  .mk-n { font-size: 13px; font-weight: 600; line-height: 1; }
+  .mk-l { font-size: 8px; color: var(--ink-muted); margin-top: 2px; }
+  .mock-chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .mock-bar-wrap { background: var(--surface-2); border-radius: 8px; padding: 8px; }
+  .mock-bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 40px; }
+  .mb { flex: 1; border-radius: 2px 2px 0 0; }
+  .mock-activity { background: var(--surface-2); border-radius: 8px; padding: 8px; }
+  .mock-act-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 9px; color: var(--ink-soft); }
+  .mac-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  /* Controls */
+  .demo-controls { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; }
+  .demo-ctrl-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border-mid); background: #fff; font-size: 14px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+  .demo-ctrl-btn:hover { background: var(--surface-2); border-color: var(--ink-muted); }
+  .demo-play-btn { background: var(--coral); color: #fff; border-color: var(--coral); font-size: 12px; }
+  .demo-play-btn:hover { background: var(--coral-dark); border-color: var(--coral-dark); }
+  .demo-enroll-btn { font-size: 13px; font-weight: 500; padding: 10px 22px; background: var(--coral); color: #fff; border-radius: var(--radius-md); transition: all 0.15s; margin-left: 8px; }
+  .demo-enroll-btn:hover { background: var(--coral-dark); transform: translateY(-1px); }
+  /* Progress dots */
+  .demo-dots { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; }
+  .demo-dot-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+  .demo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--surface-3); transition: all 0.25s; }
+  .demo-dot.active { background: var(--coral); transform: scale(1.3); }
+  .demo-dot.done { background: var(--coral-mid); }
+  .demo-dot-timer { width: 8px; height: 2px; border-radius: 1px; background: var(--surface-3); overflow: hidden; }
+  .demo-dot-timer-fill { height: 2px; background: var(--coral); width: 0%; transition: width linear; border-radius: 1px; }
+  /* Lang toggle */
+  .demo-lang-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--coral); background: var(--coral-light); border: 1px solid var(--coral-mid); border-radius: 20px; padding: 6px 14px; cursor: pointer; margin-top: 14px; transition: all 0.15s; font-family: var(--font-body); }
+  .demo-lang-toggle:hover { background: var(--coral); color: #fff; }
+  /* Affiliates mock */
+  .mock-aff-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 0; }
+  .mock-aff-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+  .mock-aff-top { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .mock-aff-ic { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .mock-aff-name { font-size: 10px; font-weight: 500; color: var(--ink); }
+  .mock-aff-cat { font-size: 9px; color: var(--ink-muted); }
+  .mock-aff-desc { font-size: 9px; color: var(--ink-soft); line-height: 1.4; margin-bottom: 7px; }
+  .mock-aff-foot { display: flex; align-items: center; justify-content: space-between; }
+  .mock-aff-comm { font-size: 9px; font-weight: 500; color: var(--teal-dark); }
+  .mock-join-btn { font-size: 9px; font-weight: 500; padding: 3px 8px; border-radius: 8px; border: 1px solid var(--coral); color: var(--coral); cursor: pointer; }
+  @media(max-width:768px){
+    .demo-pill-line { width: 12px; }
+    .demo-pill { font-size: 10px; padding: 5px 8px; }
+    .mock-biz-grid { grid-template-columns: 1fr 1fr; }
+    .mock-product-grid { grid-template-columns: repeat(2,1fr); }
+    .mock-kpi-row { grid-template-columns: repeat(2,1fr); }
+    .mock-aff-grid { grid-template-columns: 1fr; }
+    .demo-enroll-btn { display: none; }
+  }
+  </style>
+  <script>
+  // ── DEMO CONTROLLER ─────────────────────────────────────
+  const DEMO_STEPS = 7;
+  const DEMO_DURATION = 4500;
+  let demoStep = 0;
+  let demoPlaying = true;
+  let demoTimer = null;
+  let demoLang = 'en';
+  let dotTimerInterval = null;
+
+  // ── Bilingual content ────────────────────────────────────
+  const demoContent = {
+    en: {
+      sectionLabel: 'How it works',
+      title: 'Everything your business needs,<br>in one place',
+      sub: 'Watch how Latino business owners list, sell, hire, and grow on MyLatinoList.',
+      langBtn: '🌐 Ver en Español',
+      enrollBtn: 'Enroll free — get started →',
+      captions: [
+        { icon:'🚀', title:'Enroll in minutes', desc:'Fill in your business info, pick your modules, choose a plan — free to start.' },
+        { icon:'📍', title:'Get found by customers', desc:'Your business appears in the directory instantly — searchable by category, city, and state.' },
+        { icon:'🛍️', title:'Sell in the Latino marketplace', desc:'List products and reach thousands of buyers in the community. Physical or digital items.' },
+        { icon:'🗣️', title:'La Voz Latino resource portal', desc:'Access SBA loans, DACA resources, bilingual tax guides, grants, and legal aid — all in one place.' },
+        { icon:'📊', title:'Track everything in your dashboard', desc:'See profile views, leads, sales, job applications, and affiliate earnings — all in real time.' },
+        { icon:'📈', title:'Earn with affiliate marketing', desc:'Promote trusted brands to your customers and earn commissions on every referral — no extra work needed.' },
+        { icon:'🌐', title:'No website? No problem', desc:'Every business gets a free page at mylatinolist.io/biz/your-name — plus a QR code and marketing kit to share everywhere.' },
+      ],
+      wiz: { label:'Step 1 of 4 — Your account', h:'Create your owner account', foot:'Step 1 of 4 · Free to enroll', tip:'Your information is encrypted and never sold.', btn:'Continue →' },
+      type: { fname:'Maria', lname:'Gonzalez', email:'maria@lacocina.com' },
+      affLabel: 'Affiliate program',
+      affPartner: 'Are you a brand? Become a partner.',
+      affContact: 'Contact us →',
+      affJoin: 'Join →',
+    },
+    es: {
+      sectionLabel: 'Cómo funciona',
+      title: 'Todo lo que tu negocio necesita,<br>en un solo lugar',
+      sub: 'Mira cómo los empresarios latinos listan, venden, contratan y crecen en MyLatinoList.',
+      langBtn: '🌐 View in English',
+      enrollBtn: 'Regístrate gratis — empieza hoy →',
+      captions: [
+        { icon:'🚀', title:'Regístrate en minutos', desc:'Llena los datos de tu negocio, elige tus módulos, selecciona un plan — gratis para empezar.' },
+        { icon:'📍', title:'Que te encuentren clientes', desc:'Tu negocio aparece en el directorio al instante — buscable por categoría, ciudad y estado.' },
+        { icon:'🛍️', title:'Vende en el mercado latino', desc:'Lista productos y llega a miles de compradores en la comunidad. Artículos físicos o digitales.' },
+        { icon:'🗣️', title:'Portal de recursos La Voz Latino', desc:'Accede a préstamos SBA, recursos DACA, guías de impuestos bilingües, subvenciones y ayuda legal.' },
+        { icon:'📊', title:'Controla todo desde tu panel', desc:'Ve visitas al perfil, contactos, ventas, solicitudes de empleo y ganancias de afiliados en tiempo real.' },
+        { icon:'📈', title:'Gana con marketing de afiliados', desc:'Promociona marcas de confianza y gana comisiones por cada referido — sin esfuerzo extra.' },
+        { icon:'🌐', title:'¿Sin sitio web? Sin problema', desc:'Cada negocio obtiene una página gratis en mylatinolist.io/biz/tu-nombre — más un código QR y kit de marketing para compartir.' },
+      ],
+      wiz: { label:'Paso 1 de 4 — Tu cuenta', h:'Crea tu cuenta de propietario', foot:'Paso 1 de 4 · Gratis', tip:'Tu información está encriptada y nunca se vende.', btn:'Continuar →' },
+      type: { fname:'María', lname:'González', email:'maria@micocina.com' },
+      affLabel: 'Programa de afiliados',
+      affPartner: '¿Eres una marca? Conviértete en socio.',
+      affContact: 'Contáctanos →',
+      affJoin: 'Unirse →',
+    }
+  };
+
+  // Typewriter
+  function typeText(elId, text, speed, delay) {
+    setTimeout(() => {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.textContent = '';
+      let i = 0;
+      const t = setInterval(() => { if (i < text.length) { el.textContent += text[i++]; } else clearInterval(t); }, speed);
+    }, delay || 0);
+  }
+
+  function startTypewriter() {
+    const c = demoContent[demoLang];
+    typeText('type-fname', c.type.fname, 80, 0);
+    typeText('type-lname', c.type.lname, 80, 600);
+    typeText('type-email', c.type.email, 55, 1200);
+  }
+
+  // Update all translatable text
+  function applyLang() {
+    const c = demoContent[demoLang];
+    document.getElementById('demo-label-top').textContent = c.sectionLabel;
+    document.getElementById('demo-title-top').innerHTML = c.title;
+    document.getElementById('demo-sub-top').textContent = c.sub;
+    document.getElementById('demo-lang-label').textContent = c.langBtn.replace('🌐 ','');
+    document.getElementById('demo-enroll-btn').textContent = c.enrollBtn;
+    // Update pill labels
+    document.querySelectorAll('.dp-lbl').forEach(el => { el.textContent = el.dataset[demoLang] || el.dataset.en; });
+    // Update captions
+    c.captions.forEach((cap, i) => {
+      const f = document.getElementById('step-'+i);
+      if (!f) return;
+      const strong = f.querySelector('.dc-text strong');
+      const span   = f.querySelector('.dc-text span');
+      if (strong) strong.textContent = cap.title;
+      if (span)   span.textContent   = cap.desc;
+    });
+    // Update wizard text
+    const wiz = c.wiz;
+    const wl = document.querySelector('.mock-wiz-label'); if(wl) wl.textContent = wiz.label;
+    const wh = document.querySelector('.mock-wiz-h');     if(wh) wh.textContent = wiz.h;
+    const wt = document.querySelector('.mock-wiz-tip');   if(wt) wt.textContent = wiz.tip;
+    const wb = document.querySelector('.mock-wiz-foot .mock-next-btn'); if(wb) wb.textContent = wiz.btn;
+    const wf = document.querySelector('.mock-foot-info'); if(wf) wf.textContent = wiz.foot;
+    document.querySelectorAll('#type-fname,#type-lname,#type-email').forEach(el => el.textContent = '');
+    // Affiliates text
+    const al = document.getElementById('aff-label');         if(al) al.textContent = c.affLabel;
+    const ap = document.getElementById('aff-partner-text');  if(ap) ap.textContent = c.affPartner;
+    const ac = document.getElementById('aff-contact-btn');   if(ac) ac.textContent = c.affContact;
+    ['aff-join1','aff-join2','aff-join3'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=c.affJoin; });
+    if (demoStep === 0) startTypewriter();
+  }
+
+  function demoToggleLang() {
+    demoLang = demoLang === 'en' ? 'es' : 'en';
+    pageLang = demoLang;
+    localStorage.setItem('mll_lang', pageLang);
+    applyLang();
+    applyPageLang(pageLang);
+  }
+
+  // Dots
+  function updateDots(step) {
+    clearInterval(dotTimerInterval);
+    document.querySelectorAll('.demo-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === step);
+      d.classList.toggle('done', i < step);
+    });
+    // Reset all timer fills
+    document.querySelectorAll('.demo-dot-timer').forEach(t => { t.innerHTML = ''; });
+    // Animate active dot timer
+    const activeDotTimer = document.querySelector(`.demo-dot-wrap[data-step="${step}"] .demo-dot-timer`);
+    if (activeDotTimer && demoPlaying) {
+      const fill = document.createElement('div');
+      fill.className = 'demo-dot-timer-fill';
+      activeDotTimer.appendChild(fill);
+      setTimeout(() => { fill.style.transition = `width ${DEMO_DURATION}ms linear`; fill.style.width = '100%'; }, 20);
+    }
+    // Dot click handlers
+    document.querySelectorAll('.demo-dot-wrap').forEach(dw => {
+      dw.onclick = () => { demoNav(parseInt(dw.dataset.step) - demoStep); };
+    });
+  }
+
+  function demoGo(n) {
+    demoStep = ((n % DEMO_STEPS) + DEMO_STEPS) % DEMO_STEPS;
+    document.querySelectorAll('.demo-frame').forEach((f, i) => f.classList.toggle('active', i === demoStep));
+    document.querySelectorAll('.demo-pill').forEach((p, i) => p.classList.toggle('active', i === demoStep));
+    document.getElementById('demo-progress').style.width = ((demoStep + 1) / DEMO_STEPS * 100) + '%';
+    updateDots(demoStep);
+    if (demoStep === 0) startTypewriter();
+  }
+
+  function demoNav(dir) {
+    clearTimeout(demoTimer);
+    demoGo(demoStep + dir);
+    if (demoPlaying) demoSchedule();
+  }
+
+  function demoSchedule() {
+    clearTimeout(demoTimer);
+    demoTimer = setTimeout(() => { demoGo(demoStep + 1); demoSchedule(); }, DEMO_DURATION);
+  }
+
+  function demoTogglePlay() {
+    demoPlaying = !demoPlaying;
+    const btn = document.getElementById('demo-play');
+    btn.textContent = demoPlaying ? '⏸' : '▶';
+    if (demoPlaying) { demoSchedule(); updateDots(demoStep); }
+    else { clearTimeout(demoTimer); clearInterval(dotTimerInterval); document.querySelectorAll('.demo-dot-timer').forEach(t => t.innerHTML=''); }
+  }
+
+  // Pill click
+  document.querySelectorAll('.demo-pill').forEach((p, i) => {
+    p.addEventListener('click', () => { clearTimeout(demoTimer); demoGo(i); if (demoPlaying) demoSchedule(); });
+  });
+
+  // Live hero stats — fetch real counts with seed minimums
+  (async () => {
+    try {
+      const res = await fetch(window.MLL_CONFIG.API_URL + '/api/stats');
+      if (!res.ok) return;
+      const { businesses, states } = await res.json();
+      const bizEl   = document.getElementById('stat-businesses');
+      const stateEl = document.getElementById('stat-states');
+      if (bizEl)   bizEl.textContent   = Math.max(businesses, 21).toLocaleString() + '+';
+      if (stateEl) stateEl.textContent = Math.max(states, 12) + '+';
+    } catch { /* fall back to hardcoded values silently */ }
+  })();
+
+  // Auto-start when section enters viewport
+  document.addEventListener('DOMContentLoaded', () => {
+    applyLang();
+    const obs = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) { demoGo(0); demoSchedule(); obs.disconnect(); }
+    }, { threshold: 0.3 });
+    const section = document.getElementById('how-it-works');
+    if (section) obs.observe(section);
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketplace — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .page-hero{padding:64px 0 40px;text-align:center;}
+    .filter-bar{display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap;}
+    .filter-select{padding:9px 14px;border-radius:var(--radius-md);border:1px solid var(--border-mid);background:#fff;font-family:var(--font-body);font-size:13px;color:var(--ink);outline:none;cursor:pointer;}
+    .filter-select:focus{border-color:var(--coral);}
+    .filter-count{font-size:13px;color:var(--ink-muted);margin-left:auto;}
+    .page-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding-bottom:80px;}
+    .add-product-bar{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+    .skeleton{background:var(--surface-3);border-radius:var(--radius-md);animation:pulse 1.4s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    .skel-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+    .skel-img{height:100px;}
+    .skel-body{padding:14px;display:flex;flex-direction:column;gap:8px;}
+    .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink-muted);}
+    .empty-state .es-icon{font-size:40px;margin-bottom:12px;}
+    .empty-state p{font-size:15px;margin-bottom:16px;}
+    @media(max-width:768px){.page-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:480px){.page-grid{grid-template-columns:1fr;}}
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav has-mobile" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div class="nav-links">
+        <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+        <a href="marketplace.html" style="color:var(--coral);font-weight:500;" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+        <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+        <a href="voz.html">La Voz Latino</a>
+        <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+        <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+        <a href="enroll.html" class="btn-cta" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+      </div>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+      <a href="marketplace.html" style="color:var(--coral);font-weight:500;" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+      <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+      <a href="voz.html">La Voz Latino</a>
+      <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+      <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
+      <div class="lang-toggle" style="margin:4px 12px 8px;">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <a href="login.html" style="color:var(--coral);font-weight:500;" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+      <a href="enroll.html" class="btn-cta" style="margin-top:8px;text-align:center;" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="page-hero">
+      <div class="section-label" data-en="Latino marketplace" data-es="Mercado latino">Latino marketplace</div>
+      <h1 data-en="Shop Latino-owned products" data-es="Compra productos de negocios latinos" style="font-family:var(--font-display);font-size:clamp(32px,5vw,52px);font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:12px;">Shop Latino-owned products</h1>
+      <p data-en="Handmade, artisanal, and everyday products from businesses in our community." data-es="Productos hechos a mano, artesanales y de uso diario de negocios de nuestra comunidad." style="font-size:16px;color:var(--ink-soft);max-width:480px;margin:0 auto;font-weight:300;">Handmade, artisanal, and everyday products from businesses in our community.</p>
+    </div>
+    <div class="add-product-bar">
+      <div><div style="font-size:15px;font-weight:500;color:var(--ink);" data-en="Sell your products here" data-es="Vende tus productos aquí">Sell your products here</div><div style="font-size:13px;color:var(--ink-muted);margin-top:2px;" data-en="Enrolled businesses can list products in minutes" data-es="Los negocios registrados pueden publicar productos en minutos">Enrolled businesses can list products in minutes</div></div>
+      <a href="enroll.html" class="btn-cta" data-en="Start selling →" data-es="Empieza a vender →">Start selling →</a>
+    </div>
+    <div class="filter-bar">
+      <select class="filter-select" id="cat-filter" onchange="loadProducts()">
+        <option value="" data-en="All categories" data-es="Todas las categorías">All categories</option>
+        <option value="Food" data-en="Food &amp; dining" data-es="Comida y restaurantes">Food &amp; dining</option>
+        <option value="Beauty" data-en="Beauty" data-es="Belleza">Beauty</option>
+        <option value="Clothing" data-en="Clothing" data-es="Ropa">Clothing</option>
+        <option value="Art" data-en="Art &amp; crafts" data-es="Arte y manualidades">Art &amp; crafts</option>
+        <option value="Home" data-en="Home &amp; garden" data-es="Hogar y jardín">Home &amp; garden</option>
+        <option value="Books" data-en="Books &amp; media" data-es="Libros y medios">Books &amp; media</option>
+        <option value="Other" data-en="Other" data-es="Otros">Other</option>
+      </select>
+      <span class="filter-count" id="filter-count"></span>
+    </div>
+    <div class="page-grid" id="product-grid"></div>
+  </div>
+<script>
+const API=window.MLL_CONFIG.API_URL;
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>20));
+function skelCards(){return Array(8).fill('<div class="skel-card"><div class="skel-img skeleton"></div><div class="skel-body"><div class="skeleton" style="height:14px;width:80%;border-radius:4px;"></div><div class="skeleton" style="height:12px;width:55%;border-radius:4px;"></div></div></div>').join('');}
+let lastProducts=null, lastCat='';
+async function loadProducts(){
+  const cat=document.getElementById('cat-filter').value;
+  const grid=document.getElementById('product-grid');
+  grid.innerHTML=skelCards();
+  try{
+    const url=cat?`${API}/api/marketplace?category=${encodeURIComponent(cat)}`:`${API}/api/marketplace`;
+    const res=await fetch(url);
+    const data=await res.json();
+    lastProducts=data.products||[];
+    lastCat=cat;
+    renderProducts();
+  }catch(err){
+    grid.innerHTML=`<div class="empty-state"><div class="es-icon">⚠️</div><p>${t('Could not load products. Please try again.')}</p></div>`;
+  }
+}
+function renderProducts(){
+  if(lastProducts===null) return;   // not loaded yet; loadProducts will render
+  const grid=document.getElementById('product-grid');
+  const countEl=document.getElementById('filter-count');
+  const products=lastProducts;
+  countEl.textContent=products.length?t('{n} products',{n:products.length}):'';
+  if(!products.length){
+    grid.innerHTML=`<div class="empty-state"><div class="es-icon">🛍️</div><p>${lastCat?t('No products found in this category.'):t('No products found.')}</p><a href="enroll.html" class="btn-cta">${t('Be the first to sell here →')}</a></div>`;
+    return;
+  }
+  grid.innerHTML=products.map(p=>`
+      <div class="product-card">
+        <div class="product-img" style="background:${p.bg_color||'#EBF2FF'}"><span style="font-size:44px;">${p.emoji||'📦'}</span></div>
+        <div class="product-body">
+          <div class="product-name">${p.name}</div>
+          <div class="product-seller">${t('by {seller}',{seller:p.seller_name})}</div>
+          <div class="product-bottom">
+            <span class="product-price">$${Number(p.price).toFixed(2)}</span>
+            <span class="product-rating">★ ${p.rating||'—'}</span>
+          </div>
+        </div>
+      </div>`).join('');
+}
+document.addEventListener('mll:langswitch', renderProducts);
+loadProducts();
+</script>
+  <script src="/js/nav.js"></script>
+</body></html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .admin-wrap{max-width:1100px;margin:0 auto;padding:32px 20px;}
+    .admin-h{font-family:var(--font-display);font-size:26px;font-weight:500;color:var(--ink);margin-bottom:4px;}
+    .admin-sub{font-size:13px;color:var(--ink-muted);margin-bottom:28px;}
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+    .kpi{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;}
+    .kpi-lbl{font-size:12px;color:var(--ink-muted);margin-bottom:6px;}
+    .kpi-num{font-family:var(--font-display);font-size:28px;font-weight:500;color:var(--ink);line-height:1;}
+    .kpi-sub{font-size:12px;color:var(--ink-muted);margin-top:5px;}
+    .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:20px;}
+    .card-h{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-size:11px;font-weight:500;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);}
+    td{font-size:13px;color:var(--ink-soft);padding:10px 12px;border-bottom:1px solid var(--surface-2);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:var(--surface-2);}
+    .plan-badge{font-size:11px;font-weight:500;padding:2px 10px;border-radius:10px;display:inline-block;}
+    .plan-free{background:#f5f5f5;color:#666;}
+    .plan-pro{background:#E6F1FB;color:#0C447C;}
+    .plan-featured{background:#FFF3CD;color:#856404;}
+    .plan-admin{background:#FCE7F3;color:#9D174D;}
+    .search-bar{padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:13px;width:240px;font-family:var(--font-body);}
+    .filter-btn{padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:12px;background:#fff;cursor:pointer;font-family:var(--font-body);color:var(--ink-soft);}
+    .filter-btn.active{background:var(--coral);color:#fff;border-color:var(--coral);}
+    .filters{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+    .empty{font-size:13px;color:var(--ink-muted);padding:20px 0;text-align:center;}
+    .revenue-bar{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+    .rb-label{font-size:13px;color:var(--ink);width:80px;}
+    .rb-track{flex:1;height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;}
+    .rb-fill{height:8px;border-radius:4px;}
+    .rb-val{font-size:13px;font-weight:500;color:var(--ink);width:60px;text-align:right;}
+    /* Action buttons */
+    .action-btn{font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:var(--font-body);color:var(--ink-soft);text-decoration:none;display:inline-block;line-height:1.6;}
+    .action-btn:hover{background:var(--surface-2);}
+    .action-btn.suspend{color:#dc2626;border-color:#fca5a5;}
+    .action-btn.suspend:hover{background:#fef2f2;}
+    .action-btn.suspended{color:#9ca3af;border-color:#e5e7eb;cursor:default;}
+    .plan-select{font-size:11px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--ink-soft);font-family:var(--font-body);cursor:pointer;}
+    .actions-cell{display:flex;gap:6px;align-items:center;flex-wrap:nowrap;}
+    /* Export button */
+    .export-btn{padding:7px 14px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius-md);font-size:12px;font-family:var(--font-body);cursor:pointer;font-weight:500;white-space:nowrap;}
+    .export-btn:hover{opacity:0.85;}
+    /* Reviews */
+    .star-rating{color:#f59e0b;font-size:13px;letter-spacing:1px;}
+    .review-snippet{font-size:12px;color:var(--ink-muted);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    @media(max-width:768px){.kpi-row{grid-template-columns:1fr 1fr;}.admin-wrap{padding:20px 16px;}.search-bar{width:180px;}}
+    /* Set-plan modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;display:none;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal-box{background:#fff;border-radius:var(--radius-lg);padding:28px 32px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.18);}
+    .modal-title{font-family:var(--font-display);font-size:18px;font-weight:500;margin-bottom:6px;}
+    .modal-sub{font-size:13px;color:var(--ink-muted);margin-bottom:20px;}
+    .modal-plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
+    .plan-card{border:2px solid var(--border);border-radius:10px;padding:12px 10px;text-align:center;cursor:pointer;transition:all 0.15s;}
+    .plan-card:hover{border-color:var(--coral);}
+    .plan-card.selected{border-color:var(--coral);background:var(--coral-light);}
+    .plan-card-name{font-size:13px;font-weight:600;color:var(--ink);}
+    .plan-card-price{font-size:11px;color:var(--ink-muted);margin-top:2px;}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+    .modal-cancel{padding:8px 18px;background:none;border:1px solid var(--border);border-radius:var(--radius-md);font-size:13px;cursor:pointer;font-family:var(--font-body);}
+    .modal-confirm{padding:8px 18px;background:var(--coral);color:#fff;border:none;border-radius:var(--radius-md);font-size:13px;cursor:pointer;font-family:var(--font-body);font-weight:500;}
+    .modal-confirm:disabled{opacity:0.5;cursor:default;}
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;background:#111;color:#fff;font-size:13px;padding:10px 18px;border-radius:8px;z-index:2000;opacity:0;transform:translateY(10px);transition:all 0.25s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav scrolled">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+        </div>
+        <span style="font-size:12px;background:#FCEBEB;color:#791F1F;padding:3px 10px;border-radius:10px;font-weight:500;">🔐 Admin</span>
+        <a href="health.html" style="font-size:13px;color:var(--ink-muted);text-decoration:none;">🩺 System health</a>
+        <a href="dashboard.html" style="font-size:13px;color:var(--ink-muted);text-decoration:none;">← Dashboard</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="admin-wrap">
+    <div class="admin-h">Admin Panel</div>
+    <div class="admin-sub">Subscriber overview and revenue for MyLatinoList · AP Optix LLC</div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-lbl">Total businesses</div>
+        <div class="kpi-num" id="kpi-total">—</div>
+        <div class="kpi-sub">All registered</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Paid subscribers</div>
+        <div class="kpi-num" id="kpi-paid" style="color:var(--teal);">—</div>
+        <div class="kpi-sub">Pro + Featured</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Monthly revenue</div>
+        <div class="kpi-num" id="kpi-mrr" style="color:var(--coral);">—</div>
+        <div class="kpi-sub">MRR estimate</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Free accounts</div>
+        <div class="kpi-num" id="kpi-free" style="color:var(--ink-muted);">—</div>
+        <div class="kpi-sub">Upgrade opportunities</div>
+      </div>
+    </div>
+
+    <!-- Recent Enrollments -->
+    <div class="card">
+      <div class="card-h"><span>Recent enrollments</span></div>
+      <div id="recent-enrollments"><div class="empty">Loading...</div></div>
+    </div>
+
+    <!-- Revenue breakdown -->
+    <div class="card">
+      <div class="card-h">Revenue breakdown</div>
+      <div id="revenue-chart">
+        <div class="revenue-bar">
+          <div class="rb-label">Featured</div>
+          <div class="rb-track"><div class="rb-fill" id="rb-featured" style="background:var(--amber);width:0%"></div></div>
+          <div class="rb-val" id="rv-featured">$0</div>
+        </div>
+        <div class="revenue-bar">
+          <div class="rb-label">Pro</div>
+          <div class="rb-track"><div class="rb-fill" id="rb-pro" style="background:var(--coral);width:0%"></div></div>
+          <div class="rb-val" id="rv-pro">$0</div>
+        </div>
+        <div class="revenue-bar">
+          <div class="rb-label">Free</div>
+          <div class="rb-track"><div class="rb-fill" id="rb-free" style="background:var(--surface-3);width:0%"></div></div>
+          <div class="rb-val" id="rv-free">$0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subscribers table -->
+    <div class="card">
+      <div class="card-h">
+        <span>All businesses</span>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+          <input class="search-bar" id="search" placeholder="Search by name, city, plan..." oninput="filterTable()">
+        </div>
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+        <button class="filter-btn" onclick="setFilter('featured', this)">Featured</button>
+        <button class="filter-btn" onclick="setFilter('pro', this)">Pro</button>
+        <button class="filter-btn" onclick="setFilter('free', this)">Free</button>
+      </div>
+      <div id="table-wrap">
+        <div class="empty">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Recent Reviews -->
+    <div class="card">
+      <div class="card-h"><span>Recent reviews</span></div>
+      <div id="recent-reviews"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+
+<script>
+const API = window.MLL_CONFIG.API_URL;
+const token = sessionStorage.getItem('mll_token');
+if (!token) window.location.href = 'login.html';
+
+const ADMIN_EMAILS = ['info@apoptix.io'];
+
+let allBusinesses = [];
+let currentFilter = 'all';
+
+async function loadAdmin() {
+  const me = await fetch(`${API}/api/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` }
+  }).then(r => r.json());
+
+  if (!me?.profile) { window.location.href = 'login.html'; return; }
+
+  // Admin gate — allowed emails or admin plan
+  if (!ADMIN_EMAILS.includes(me.profile.email) && me.profile.plan !== 'admin') {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  // Fetch all businesses (paginated)
+  let page = 1;
+  let allBiz = [];
+  while (true) {
+    const res = await fetch(`${API}/api/businesses?page=${page}&limit=100`).then(r => r.json());
+    if (!res?.businesses?.length) break;
+    allBiz = [...allBiz, ...res.businesses];
+    if (res.businesses.length < 100) break;
+    page++;
+  }
+
+  allBusinesses = allBiz;
+
+  // KPIs
+  const total     = allBiz.length;
+  const proCount  = allBiz.filter(b => b.plan === 'pro').length;
+  const featCount = allBiz.filter(b => b.plan === 'featured').length;
+  const freeCount = allBiz.filter(b => b.plan === 'free' || !b.plan).length;
+  const mrr       = (proCount * 39) + (featCount * 89);
+
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-paid').textContent  = proCount + featCount;
+  document.getElementById('kpi-mrr').textContent   = '$' + mrr.toLocaleString();
+  document.getElementById('kpi-free').textContent  = freeCount;
+
+  // Revenue bars
+  const maxRev = Math.max(featCount * 89, proCount * 39, 1);
+  document.getElementById('rb-featured').style.width = Math.round((featCount * 89 / maxRev) * 100) + '%';
+  document.getElementById('rb-pro').style.width      = Math.round((proCount * 39 / maxRev) * 100) + '%';
+  document.getElementById('rb-free').style.width     = '5%';
+  document.getElementById('rv-featured').textContent = '$' + (featCount * 89).toLocaleString();
+  document.getElementById('rv-pro').textContent      = '$' + (proCount * 39).toLocaleString();
+  document.getElementById('rv-free').textContent     = '$0';
+
+  renderRecentEnrollments(allBiz);
+  renderTable(allBiz);
+  loadRecentReviews();
+}
+
+// ── Recent Enrollments ───────────────────────────────────────
+function renderRecentEnrollments(businesses) {
+  const recent = [...businesses]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 10);
+  const wrap = document.getElementById('recent-enrollments');
+  if (!recent.length) {
+    wrap.innerHTML = '<div class="empty">No enrollments yet.</div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Business</th>
+          <th>Category</th>
+          <th>Location</th>
+          <th>Plan</th>
+          <th>Enrolled</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${recent.map(b => `
+          <tr>
+            <td><strong>${b.name || '—'}</strong><br><span style="font-size:11px;color:var(--ink-muted);">${b.email || ''}</span></td>
+            <td style="font-size:12px;">${b.category || '—'}</td>
+            <td>${b.city || '—'}${b.state ? ', ' + b.state : ''}</td>
+            <td><span class="plan-badge plan-${b.plan || 'free'}">${planLabel(b.plan)}</span></td>
+            <td style="font-size:12px;">${b.created_at ? new Date(b.created_at).toLocaleDateString() : '—'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// ── Businesses table ─────────────────────────────────────────
+function renderTable(businesses) {
+  const wrap = document.getElementById('table-wrap');
+  if (!businesses.length) {
+    wrap.innerHTML = '<div class="empty">No businesses found.</div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Business</th>
+          <th>Location</th>
+          <th>Category</th>
+          <th>Plan</th>
+          <th>Stripe ID</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${businesses.map(b => `
+          <tr>
+            <td><strong>${b.name || '—'}</strong><br><span style="font-size:11px;color:var(--ink-muted);">${b.email || ''}</span></td>
+            <td>${b.city || '—'}${b.state ? ', ' + b.state : ''}</td>
+            <td style="font-size:12px;">${b.category || '—'}</td>
+            <td><span class="plan-badge plan-${b.plan || 'free'}">${planLabel(b.plan)}</span></td>
+            <td style="font-size:11px;color:var(--ink-muted);">${b.stripe_customer_id ? b.stripe_customer_id.slice(0, 16) + '...' : '—'}</td>
+            <td style="font-size:12px;">${b.created_at ? new Date(b.created_at).toLocaleDateString() : '—'}</td>
+            <td>
+              <div class="actions-cell">
+                <a href="listing.html?id=${b.id}" target="_blank" class="action-btn">View</a>
+                <button class="action-btn suspend ${b.status === 'suspended' ? 'suspended' : ''}"
+                  onclick="suspendBusiness('${b.id}', this)"
+                  ${b.status === 'suspended' ? 'disabled' : ''}>
+                  ${b.status === 'suspended' ? 'Suspended' : 'Suspend'}
+                </button>
+                <button class="action-btn" onclick="openPlanModal('${b.id}', '${b.plan || 'free'}', ${JSON.stringify(b.name || '—')})">Set Plan</button>
+              </div>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// ── Actions ──────────────────────────────────────────────────
+async function suspendBusiness(id, btn) {
+  if (!confirm('Suspend this business? They will lose access to their dashboard.')) return;
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    const res = await fetch(`${API}/api/businesses/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status: 'suspended' })
+    });
+    if (res.ok) {
+      btn.textContent = 'Suspended';
+      btn.classList.add('suspended');
+      const biz = allBusinesses.find(b => String(b.id) === String(id));
+      if (biz) biz.status = 'suspended';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Suspend';
+      alert('Failed to suspend business.');
+    }
+  } catch {
+    btn.disabled = false;
+    btn.textContent = 'Suspend';
+    alert('Network error.');
+  }
+}
+
+
+function recalcKPIs() {
+  const proCount  = allBusinesses.filter(b => b.plan === 'pro').length;
+  const featCount = allBusinesses.filter(b => b.plan === 'featured').length;
+  const freeCount = allBusinesses.filter(b => b.plan === 'free' || !b.plan).length;
+  const mrr       = (proCount * 39) + (featCount * 89);
+  document.getElementById('kpi-total').textContent = allBusinesses.length;
+  document.getElementById('kpi-paid').textContent  = proCount + featCount;
+  document.getElementById('kpi-mrr').textContent   = '$' + mrr.toLocaleString();
+  document.getElementById('kpi-free').textContent  = freeCount;
+  const maxRev = Math.max(featCount * 89, proCount * 39, 1);
+  document.getElementById('rb-featured').style.width = Math.round((featCount * 89 / maxRev) * 100) + '%';
+  document.getElementById('rb-pro').style.width      = Math.round((proCount * 39 / maxRev) * 100) + '%';
+  document.getElementById('rv-featured').textContent = '$' + (featCount * 89).toLocaleString();
+  document.getElementById('rv-pro').textContent      = '$' + (proCount * 39).toLocaleString();
+}
+
+// ── Filters & search ─────────────────────────────────────────
+function setFilter(plan, btn) {
+  currentFilter = plan;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterTable();
+}
+
+function filterTable() {
+  const search = document.getElementById('search').value.toLowerCase();
+  let filtered = allBusinesses;
+  if (currentFilter !== 'all') {
+    filtered = filtered.filter(b => (b.plan || 'free') === currentFilter);
+  }
+  if (search) {
+    filtered = filtered.filter(b =>
+      (b.name || '').toLowerCase().includes(search) ||
+      (b.city || '').toLowerCase().includes(search) ||
+      (b.plan || '').toLowerCase().includes(search) ||
+      (b.category || '').toLowerCase().includes(search)
+    );
+  }
+  renderTable(filtered);
+}
+
+// ── Export CSV ───────────────────────────────────────────────
+function exportCSV() {
+  const search = document.getElementById('search').value.toLowerCase();
+  let filtered = allBusinesses;
+  if (currentFilter !== 'all') {
+    filtered = filtered.filter(b => (b.plan || 'free') === currentFilter);
+  }
+  if (search) {
+    filtered = filtered.filter(b =>
+      (b.name || '').toLowerCase().includes(search) ||
+      (b.city || '').toLowerCase().includes(search) ||
+      (b.plan || '').toLowerCase().includes(search) ||
+      (b.category || '').toLowerCase().includes(search)
+    );
+  }
+  const rows = [['Name', 'Email', 'City', 'State', 'Category', 'Plan', 'Status', 'Stripe ID', 'Joined']];
+  for (const b of filtered) {
+    rows.push([
+      b.name || '',
+      b.email || '',
+      b.city || '',
+      b.state || '',
+      b.category || '',
+      b.plan || 'free',
+      b.status || 'active',
+      b.stripe_customer_id || '',
+      b.created_at ? new Date(b.created_at).toLocaleDateString() : ''
+    ]);
+  }
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = `mll-businesses-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+}
+
+// ── Recent Reviews ───────────────────────────────────────────
+async function loadRecentReviews() {
+  const wrap = document.getElementById('recent-reviews');
+  try {
+    const res = await fetch(`${API}/api/reviews?limit=10&sort=recent`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    const reviews = data?.reviews || (Array.isArray(data) ? data : []);
+    if (!reviews.length) {
+      wrap.innerHTML = '<div class="empty">No reviews yet.</div>';
+      return;
+    }
+    wrap.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Rating</th>
+            <th>Reviewer</th>
+            <th>Business</th>
+            <th>Review</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${reviews.map(r => `
+            <tr>
+              <td><span class="star-rating">${'★'.repeat(Math.min(r.rating || 5, 5))}${'☆'.repeat(Math.max(5 - (r.rating || 5), 0))}</span></td>
+              <td style="font-size:13px;">${r.reviewer_name || r.name || '—'}</td>
+              <td style="font-size:13px;">${r.business_name || '—'}</td>
+              <td><div class="review-snippet" title="${(r.body || r.comment || '').replace(/"/g, '&quot;')}">${r.body || r.comment || '—'}</div></td>
+              <td style="font-size:12px;">${r.created_at ? new Date(r.created_at).toLocaleDateString() : '—'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch {
+    wrap.innerHTML = '<div class="empty">Could not load reviews.</div>';
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function planLabel(plan) {
+  const p = plan || 'free';
+  return p.charAt(0).toUpperCase() + p.slice(1);
+}
+
+loadAdmin();
+</script>
+
+<!-- Set Plan Modal -->
+<div class="modal-overlay" id="plan-modal">
+  <div class="modal-box">
+    <div class="modal-title">Set Plan</div>
+    <div class="modal-sub" id="modal-biz-name">—</div>
+    <div class="modal-plan-grid">
+      <div class="plan-card" id="pc-free" onclick="selectPlanCard('free')">
+        <div class="plan-card-name">Free</div>
+        <div class="plan-card-price">$0/mo</div>
+      </div>
+      <div class="plan-card" id="pc-pro" onclick="selectPlanCard('pro')">
+        <div class="plan-card-name">Pro</div>
+        <div class="plan-card-price">$39/mo</div>
+      </div>
+      <div class="plan-card" id="pc-featured" onclick="selectPlanCard('featured')">
+        <div class="plan-card-name">Featured</div>
+        <div class="plan-card-price">$89/mo</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closePlanModal()">Cancel</button>
+      <button class="modal-confirm" id="modal-confirm-btn" onclick="confirmSetPlan()">Set Plan</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let modalBizId = null;
+let modalSelectedPlan = null;
+
+function openPlanModal(bizId, currentPlan, bizName) {
+  modalBizId = bizId;
+  modalSelectedPlan = currentPlan || 'free';
+  document.getElementById('modal-biz-name').textContent = bizName || 'Business';
+  selectPlanCard(modalSelectedPlan);
+  document.getElementById('plan-modal').classList.add('open');
+}
+
+function closePlanModal() {
+  document.getElementById('plan-modal').classList.remove('open');
+  modalBizId = null;
+  modalSelectedPlan = null;
+}
+
+function selectPlanCard(plan) {
+  modalSelectedPlan = plan;
+  ['free','pro','featured'].forEach(p => {
+    document.getElementById('pc-' + p).classList.toggle('selected', p === plan);
+  });
+}
+
+async function confirmSetPlan() {
+  if (!modalBizId || !modalSelectedPlan) return;
+  const btn = document.getElementById('modal-confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  try {
+    const res = await fetch(`${API}/api/admin/set-plan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ business_id: modalBizId, plan: modalSelectedPlan })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      const biz = allBusinesses.find(b => String(b.id) === String(modalBizId));
+      if (biz) biz.plan = modalSelectedPlan;
+      recalcKPIs();
+      renderTable(getFilteredBiz());
+      closePlanModal();
+      showToast('✓ Plan updated to ' + modalSelectedPlan);
+    } else {
+      showToast('Error: ' + (data.error || 'Failed to update plan'));
+    }
+  } catch {
+    showToast('Network error. Try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Set Plan';
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function getFilteredBiz() {
+  const search = (document.getElementById('search')?.value || '').toLowerCase();
+  let filtered = allBusinesses;
+  if (currentFilter) filtered = filtered.filter(b => (b.plan || 'free') === currentFilter);
+  if (search) filtered = filtered.filter(b =>
+    (b.name||'').toLowerCase().includes(search) ||
+    (b.city||'').toLowerCase().includes(search) ||
+    (b.plan||'').toLowerCase().includes(search)
+  );
+  return filtered;
+}
+
+// Close modal on overlay click
+document.getElementById('plan-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePlanModal();
+});
+</script>
+  <script src="/js/nav.js"></script>
+</body>
+</html>

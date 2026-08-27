@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jobs Board — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .page-hero{padding:64px 0 40px;text-align:center;}
+    .filter-bar{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap;}
+    .filter-select{padding:9px 14px;border-radius:var(--radius-md);border:1px solid var(--border-mid);background:#fff;font-family:var(--font-body);font-size:13px;color:var(--ink);outline:none;cursor:pointer;}
+    .filter-select:focus{border-color:var(--coral);}
+    .filter-count{font-size:13px;color:var(--ink-muted);margin-left:auto;}
+    .jobs-page-list{display:flex;flex-direction:column;gap:12px;padding-bottom:80px;}
+    .skeleton{background:var(--surface-3);border-radius:var(--radius-md);animation:pulse 1.4s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    .skel-job{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 22px;display:flex;align-items:center;gap:16px;}
+    .skel-logo{width:44px;height:44px;border-radius:var(--radius-md);flex-shrink:0;}
+    .skel-info{flex:1;display:flex;flex-direction:column;gap:8px;}
+    .bilingual-badge{font-size:10px;font-weight:500;background:#EEEDFE;color:#3C3489;padding:2px 8px;border-radius:10px;margin-left:6px;}
+    .empty-state{text-align:center;padding:60px 20px;color:var(--ink-muted);}
+    .empty-state .es-icon{font-size:40px;margin-bottom:12px;}
+    .empty-state p{font-size:15px;margin-bottom:16px;}
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav has-mobile" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div class="nav-links">
+        <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+        <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+        <a href="jobs.html" style="color:var(--coral);font-weight:500;" data-en="Jobs" data-es="Empleos">Jobs</a>
+        <a href="voz.html">La Voz Latino</a>
+        <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+        <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+        <a href="enroll.html" class="btn-cta" data-en="Post a job" data-es="Publica un empleo">Post a job</a>
+      </div>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+      <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+      <a href="jobs.html" style="color:var(--coral);font-weight:500;" data-en="Jobs" data-es="Empleos">Jobs</a>
+      <a href="voz.html">La Voz Latino</a>
+      <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+      <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
+      <div class="lang-toggle" style="margin:4px 12px 8px;">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <a href="login.html" style="color:var(--coral);font-weight:500;" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+      <a href="enroll.html" class="btn-cta" style="margin-top:8px;text-align:center;" data-en="Post a job" data-es="Publica un empleo">Post a job</a>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="page-hero">
+      <div class="section-label" data-en="Jobs board" data-es="Bolsa de trabajo">Jobs board</div>
+      <h1 data-en="Bilingual &amp; Latino talent" data-es="Talento bilingüe y latino" style="font-family:var(--font-display);font-size:clamp(32px,5vw,52px);font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:12px;">Bilingual &amp; Latino talent</h1>
+      <p data-en="Find your next hire or your next opportunity in the Latino business community." data-es="Encuentra tu próxima contratación o tu próxima oportunidad en la comunidad de negocios latinos." style="font-size:16px;color:var(--ink-soft);max-width:460px;margin:0 auto 28px;font-weight:300;">Find your next hire or your next opportunity in the Latino business community.</p>
+      <a href="enroll.html" class="btn-cta" style="font-size:14px;padding:11px 24px;" data-en="Post a job opening →" data-es="Publica un empleo →">Post a job opening →</a>
+    </div>
+    <div class="filter-bar">
+      <select class="filter-select" id="type-filter" onchange="loadJobs()">
+        <option value="" data-en="All job types" data-es="Todos los tipos">All job types</option>
+        <option value="Full-time" data-en="Full-time" data-es="Tiempo completo">Full-time</option>
+        <option value="Part-time" data-en="Part-time" data-es="Medio tiempo">Part-time</option>
+        <option value="Contract" data-en="Contract" data-es="Por contrato">Contract</option>
+        <option value="Seasonal" data-en="Seasonal" data-es="Temporal">Seasonal</option>
+        <option value="Internship" data-en="Internship" data-es="Pasantía">Internship</option>
+      </select>
+      <select class="filter-select" id="bilingual-filter" onchange="loadJobs()">
+        <option value="" data-en="All jobs" data-es="Todos los empleos">All jobs</option>
+        <option value="true" data-en="Bilingual required" data-es="Bilingüe requerido">Bilingual required</option>
+      </select>
+      <span class="filter-count" id="filter-count"></span>
+    </div>
+    <div class="jobs-page-list" id="jobs-page-list"></div>
+  </div>
+<script>
+const API=window.MLL_CONFIG.API_URL;
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>20));
+function timeAgo(d){if(!d)return'';const s=Math.floor((Date.now()-new Date(d))/1000);if(s<86400)return t('{n}h ago',{n:Math.floor(s/3600)});if(s<604800)return t('{n} days ago',{n:Math.floor(s/86400)});return t('{n} weeks ago',{n:Math.floor(s/604800)});}
+function skelJobs(){return Array(5).fill('<div class="skel-job"><div class="skel-logo skeleton"></div><div class="skel-info"><div class="skeleton" style="height:15px;width:65%;border-radius:4px;"></div><div class="skeleton" style="height:12px;width:40%;border-radius:4px;"></div></div></div>').join('');}
+let allJobs=null;
+async function loadJobs(){
+  const list=document.getElementById('jobs-page-list');
+  list.innerHTML=skelJobs();
+  try{
+    const res=await fetch(`${API}/api/jobs`);
+    const data=await res.json();
+    allJobs=data.jobs||[];
+    renderJobs();
+  }catch(err){
+    list.innerHTML=`<div class="empty-state"><div class="es-icon">⚠️</div><p>${t('Could not load jobs. Please try again.')}</p></div>`;
+  }
+}
+function renderJobs(){
+  if(allJobs===null) return;   // not loaded yet; loadJobs will render
+  const typeFilter=document.getElementById('type-filter').value;
+  const bilingualFilter=document.getElementById('bilingual-filter').value;
+  const list=document.getElementById('jobs-page-list');
+  const countEl=document.getElementById('filter-count');
+  let jobs=allJobs.slice();
+  if(typeFilter) jobs=jobs.filter(j=>j.job_type===typeFilter);
+  if(bilingualFilter) jobs=jobs.filter(j=>j.bilingual_required===true);
+  countEl.textContent=jobs.length?t('{n} open positions',{n:jobs.length}):'';
+  if(!jobs.length){
+    list.innerHTML=`<div class="empty-state"><div class="es-icon">💼</div><p>${t('No jobs found matching your filters.')}</p><a href="enroll.html" class="btn-cta">${t('Post the first job →')}</a></div>`;
+    return;
+  }
+  list.innerHTML=jobs.map(j=>`
+      <div class="job-item">
+        <div class="job-co-logo" style="background:${j.emoji_bg||'#EBF2FF'}">${j.emoji||'💼'}</div>
+        <div class="job-info">
+          <div class="job-title">${j.title}${j.bilingual_required?'<span class="bilingual-badge">'+t('Bilingual')+'</span>':''}</div>
+          <div class="job-meta">
+            <span>${j.company_name}</span>
+            <span>${j.city}, ${j.state}</span>
+            <span>${t('Posted')} ${timeAgo(j.posted_at)}</span>
+          </div>
+        </div>
+        <div class="job-right">
+          <span class="job-type" style="background:${j.type_bg||'#E1F5EE'};color:${j.type_color||'#085041'}">${j.job_type}</span>
+          <span class="job-salary">${j.salary_range||''}</span>
+        </div>
+      </div>`).join('');
+}
+document.addEventListener('mll:langswitch', renderJobs);
+loadJobs();
+</script>
+  <script src="/js/nav.js"></script>
+</body></html>

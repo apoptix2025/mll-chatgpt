@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Directory — MyLatinoList</title>
+  <meta name="description" content="Find Latino-owned businesses near you. Search by category, city, and state.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body { background: var(--surface-2); padding-top: var(--nav-h); }
+
+    /* Hero */
+    .dir-hero { background: var(--coral); padding: 48px 0 0; }
+    .dir-hero-inner { text-align: center; padding-bottom: 32px; }
+    .dir-hero-inner h1 { font-family: var(--font-display); font-size: clamp(28px,5vw,48px); font-weight: 700; color: #fff; letter-spacing: -0.02em; margin-bottom: 8px; }
+    .dir-hero-inner p { font-size: 15px; color: rgba(255,255,255,0.75); font-weight: 300; margin-bottom: 24px; }
+
+    /* Search bar inside hero */
+    .dir-search-bar { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-md); padding: 6px 6px 6px 16px; display: flex; align-items: center; gap: 10px; max-width: 760px; margin: 0 auto; }
+    .dir-search-bar input { flex: 1; background: none; border: none; outline: none; font-family: var(--font-body); font-size: 14px; color: #fff; min-width: 0; }
+    .dir-search-bar input::placeholder { color: rgba(255,255,255,0.55); }
+    .dir-search-icon { color: rgba(255,255,255,0.6); display: flex; flex-shrink: 0; }
+    .dir-search-btn { padding: 10px 22px; background: #fff; color: var(--coral-dark); border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0; }
+    .dir-search-btn:hover { background: var(--coral-light); }
+
+    /* Filter strip */
+    .filter-strip { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 0; position: sticky; top: var(--nav-h); z-index: 50; }
+    .filter-inner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .filter-select { padding: 8px 13px; border-radius: var(--radius-md); border: 1px solid var(--border-mid); background: var(--surface); font-family: var(--font-body); font-size: 13px; color: var(--ink); outline: none; cursor: pointer; transition: border-color 0.15s; }
+    .filter-select:focus { border-color: var(--coral); }
+    .filter-divider { width: 1px; height: 24px; background: var(--border-mid); }
+    .filter-count { font-size: 13px; color: var(--ink-muted); margin-left: auto; white-space: nowrap; }
+    .clear-filters { font-size: 12px; color: var(--coral); cursor: pointer; font-weight: 500; padding: 6px 10px; border-radius: var(--radius-sm); transition: background 0.15s; }
+    .clear-filters:hover { background: var(--coral-light); }
+    .featured-toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-soft); cursor: pointer; }
+    .featured-toggle input { accent-color: var(--coral); width: 14px; height: 14px; cursor: pointer; }
+
+    /* Grid layout */
+    .dir-layout { display: grid; grid-template-columns: 240px 1fr; gap: 24px; padding: 28px 0 80px; align-items: start; }
+    
+    /* Sidebar filters */
+    .dir-sidebar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; position: sticky; top: calc(var(--nav-h) + 60px); }
+    .dsb-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .dsb-section { margin-bottom: 18px; }
+    .dsb-section-label { font-size: 11px; font-weight: 500; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px; }
+    .dsb-cat-list { display: flex; flex-direction: column; gap: 2px; }
+    .dsb-cat-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; color: var(--ink-soft); transition: all 0.15s; }
+    .dsb-cat-item:hover { background: var(--surface-2); color: var(--ink); }
+    .dsb-cat-item.active { background: var(--coral-light); color: var(--coral-dark); font-weight: 500; }
+    .dsb-cat-count { font-size: 11px; color: var(--ink-muted); background: var(--surface-2); padding: 1px 6px; border-radius: 10px; }
+    .dsb-cat-item.active .dsb-cat-count { background: rgba(216,90,48,0.12); color: var(--coral-dark); }
+
+    /* Business grid */
+    .dir-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    
+    /* Skeleton */
+    .skeleton { background: var(--surface-3); border-radius: var(--radius-md); animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .skel-biz { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .skel-header { height: 88px; }
+    .skel-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+
+    /* Empty state */
+    .empty-state { grid-column: 1/-1; text-align: center; padding: 60px 20px; }
+    .empty-icon { font-size: 48px; margin-bottom: 14px; }
+    .empty-h { font-family: var(--font-display); font-size: 22px; font-weight: 500; color: var(--ink); margin-bottom: 8px; }
+    .empty-p { font-size: 14px; color: var(--ink-muted); margin-bottom: 20px; }
+
+    /* Load more */
+    .load-more-wrap { text-align: center; margin-top: 24px; }
+    .load-more-btn { font-size: 14px; font-weight: 500; padding: 11px 28px; border: 1.5px solid var(--coral); color: var(--coral); background: transparent; border-radius: var(--radius-md); cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
+    .load-more-btn:hover { background: var(--coral); color: #fff; }
+    .load-more-btn:disabled { opacity: 0.4; cursor: default; }
+
+    @media(max-width:1024px) { .dir-grid { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:768px) {
+      .dir-layout { grid-template-columns: 1fr; }
+      .dir-sidebar { display: none; }
+      .filter-inner { gap: 8px; }
+      .dir-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media(max-width:480px) { .dir-grid { grid-template-columns: 1fr; } }
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav scrolled has-mobile" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo">
+        <span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span>
+        <span class="logo-text">my<strong>latino</strong>list</span>
+      </a>
+      <div class="nav-links">
+        <a href="/#directory" style="color:var(--coral);font-weight:500;" data-en="Directory" data-es="Directorio">Directory</a>
+        <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+        <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+        <a href="voz.html">La Voz Latino</a>
+        <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+        <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+        <a href="enroll.html" class="btn-cta" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+      </div>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="/#directory" style="color:var(--coral);font-weight:500;" data-en="Directory" data-es="Directorio">Directory</a>
+      <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+      <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+      <a href="voz.html">La Voz Latino</a>
+      <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+      <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
+      <div class="lang-toggle" style="margin:4px 12px 8px;">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <a href="login.html" style="color:var(--coral);font-weight:500;" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+      <a href="enroll.html" class="btn-cta" style="margin-top:8px;text-align:center;" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+    </div>
+  </nav>
+
+  <!-- HERO + SEARCH -->
+  <div class="dir-hero">
+    <div class="container dir-hero-inner">
+      <h1 data-en="Latino business directory" data-es="Directorio de negocios latinos">Latino business directory</h1>
+      <p data-en="Find trusted Latino-owned businesses near you — restaurants, lawyers, salons, contractors, and more." data-es="Encuentra negocios latinos de confianza cerca de ti — restaurantes, abogados, salones, contratistas y más.">Find trusted Latino-owned businesses near you — restaurants, lawyers, salons, contractors, and more.</p>
+      <div class="dir-search-bar">
+        <div class="dir-search-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/><path d="M10.5 10.5L13.5 13.5" stroke="rgba(255,255,255,0.7)" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <input type="text" id="search-input" placeholder="Search businesses, services, keywords..." data-en-ph="Search businesses, services, keywords..." data-es-ph="Busca negocios, servicios, palabras clave..." autocomplete="off">
+        <button class="dir-search-btn" onclick="applyFilters()" data-en="Search" data-es="Buscar">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STICKY FILTER STRIP -->
+  <div class="filter-strip">
+    <div class="container filter-inner">
+      <select class="filter-select" id="cat-filter" onchange="applyFilters()">
+        <option value="" data-en="All categories" data-es="Todas las categorías">All categories</option>
+        <option value="Food &amp; Dining" data-en="Food &amp; Dining" data-es="Comida y restaurantes">Food &amp; Dining</option>
+        <option value="Legal Services" data-en="Legal Services" data-es="Servicios legales">Legal Services</option>
+        <option value="Health &amp; Wellness" data-en="Health &amp; Wellness" data-es="Salud y bienestar">Health &amp; Wellness</option>
+        <option value="Beauty &amp; Salon" data-en="Beauty &amp; Salon" data-es="Belleza y salón">Beauty &amp; Salon</option>
+        <option value="Auto &amp; Repair" data-en="Auto &amp; Repair" data-es="Autos y reparación">Auto &amp; Repair</option>
+        <option value="Finance" data-en="Finance" data-es="Finanzas">Finance</option>
+        <option value="Construction" data-en="Construction" data-es="Construcción">Construction</option>
+        <option value="Real Estate" data-en="Real Estate" data-es="Bienes raíces">Real Estate</option>
+        <option value="Education" data-en="Education" data-es="Educación">Education</option>
+        <option value="Retail" data-en="Retail" data-es="Comercio">Retail</option>
+        <option value="Tech" data-en="Tech" data-es="Tecnología">Tech</option>
+        <option value="Events" data-en="Events" data-es="Eventos">Events</option>
+        <option value="Other" data-en="Other" data-es="Otros">Other</option>
+      </select>
+      <div class="filter-divider"></div>
+      <select class="filter-select" id="state-filter" onchange="applyFilters()">
+        <option value="" data-en="All states" data-es="Todos los estados">All states</option>
+        <option>Alabama</option><option>Alaska</option><option>Arizona</option>
+        <option>Arkansas</option><option>California</option><option>Colorado</option>
+        <option>Connecticut</option><option>Delaware</option><option>Florida</option>
+        <option>Georgia</option><option>Hawaii</option><option>Idaho</option>
+        <option>Illinois</option><option>Indiana</option><option>Iowa</option>
+        <option>Kansas</option><option>Kentucky</option><option>Louisiana</option>
+        <option>Maine</option><option>Maryland</option><option>Massachusetts</option>
+        <option>Michigan</option><option>Minnesota</option><option>Mississippi</option>
+        <option>Missouri</option><option>Montana</option><option>Nebraska</option>
+        <option>Nevada</option><option>New Hampshire</option><option>New Jersey</option>
+        <option>New Mexico</option><option>New York</option><option>North Carolina</option>
+        <option>North Dakota</option><option>Ohio</option><option>Oklahoma</option>
+        <option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option>
+        <option>South Carolina</option><option>South Dakota</option><option>Tennessee</option>
+        <option>Texas</option><option>Utah</option><option>Vermont</option>
+        <option>Virginia</option><option>Washington</option><option>West Virginia</option>
+        <option>Wisconsin</option><option>Wyoming</option>
+        <option>District of Columbia</option><option>Puerto Rico</option><option>Guam</option>
+      </select>
+      <div class="filter-divider"></div>
+      <select class="filter-select" id="sort-filter" onchange="applyFilters()">
+        <option value="featured" data-en="Featured first" data-es="Destacados primero">Featured first</option>
+        <option value="rating" data-en="Highest rated" data-es="Mejor calificados">Highest rated</option>
+        <option value="newest" data-en="Newest" data-es="Más recientes">Newest</option>
+        <option value="az" data-en="A → Z" data-es="A → Z">A → Z</option>
+      </select>
+      <label class="featured-toggle">
+        <input type="checkbox" id="featured-only" onchange="applyFilters()">
+        <span data-en="Featured only" data-es="Solo destacados">Featured only</span>
+      </label>
+      <span class="filter-count" id="filter-count"></span>
+      <span class="clear-filters" id="clear-btn" onclick="clearFilters()" style="display:none;" data-en="Clear filters ✕" data-es="Borrar filtros ✕">Clear filters ✕</span>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="container">
+    <div class="dir-layout">
+
+      <!-- Sidebar -->
+      <aside class="dir-sidebar">
+        <div class="dsb-title" data-en="Browse by category" data-es="Explora por categoría">Browse by category</div>
+        <div class="dsb-cat-list" id="dsb-cats">
+          <div class="dsb-cat-item active" data-cat="" onclick="setSidebarCat(this,'')">
+            <span data-en="All businesses" data-es="Todos los negocios">All businesses</span> <span class="dsb-cat-count" id="cnt-all">—</span>
+          </div>
+          <div class="dsb-cat-item" data-cat="Food & Dining" onclick="setSidebarCat(this,'Food & Dining')"><span data-en="🍽️ Food &amp; Dining" data-es="🍽️ Comida">🍽️ Food &amp; Dining</span> <span class="dsb-cat-count" id="cnt-food">—</span></div>
+          <div class="dsb-cat-item" data-cat="Legal Services" onclick="setSidebarCat(this,'Legal Services')"><span data-en="⚖️ Legal Services" data-es="⚖️ Servicios legales">⚖️ Legal Services</span> <span class="dsb-cat-count" id="cnt-legal">—</span></div>
+          <div class="dsb-cat-item" data-cat="Health & Wellness" onclick="setSidebarCat(this,'Health & Wellness')"><span data-en="🏥 Health" data-es="🏥 Salud">🏥 Health</span> <span class="dsb-cat-count" id="cnt-health">—</span></div>
+          <div class="dsb-cat-item" data-cat="Beauty & Salon" onclick="setSidebarCat(this,'Beauty & Salon')"><span data-en="💇 Beauty" data-es="💇 Belleza">💇 Beauty</span> <span class="dsb-cat-count" id="cnt-beauty">—</span></div>
+          <div class="dsb-cat-item" data-cat="Auto & Repair" onclick="setSidebarCat(this,'Auto & Repair')"><span data-en="🚗 Auto &amp; Repair" data-es="🚗 Autos y reparación">🚗 Auto &amp; Repair</span> <span class="dsb-cat-count" id="cnt-auto">—</span></div>
+          <div class="dsb-cat-item" data-cat="Finance" onclick="setSidebarCat(this,'Finance')"><span data-en="💰 Finance" data-es="💰 Finanzas">💰 Finance</span> <span class="dsb-cat-count" id="cnt-finance">—</span></div>
+          <div class="dsb-cat-item" data-cat="Construction" onclick="setSidebarCat(this,'Construction')"><span data-en="🏗️ Construction" data-es="🏗️ Construcción">🏗️ Construction</span> <span class="dsb-cat-count" id="cnt-construction">—</span></div>
+          <div class="dsb-cat-item" data-cat="Real Estate" onclick="setSidebarCat(this,'Real Estate')"><span data-en="🏠 Real Estate" data-es="🏠 Bienes raíces">🏠 Real Estate</span> <span class="dsb-cat-count" id="cnt-realestate">—</span></div>
+          <div class="dsb-cat-item" data-cat="Education" onclick="setSidebarCat(this,'Education')"><span data-en="📚 Education" data-es="📚 Educación">📚 Education</span> <span class="dsb-cat-count" id="cnt-education">—</span></div>
+          <div class="dsb-cat-item" data-cat="Retail" onclick="setSidebarCat(this,'Retail')"><span data-en="🛍️ Retail" data-es="🛍️ Comercio">🛍️ Retail</span> <span class="dsb-cat-count" id="cnt-retail">—</span></div>
+          <div class="dsb-cat-item" data-cat="Tech" onclick="setSidebarCat(this,'Tech')"><span data-en="💻 Tech" data-es="💻 Tecnología">💻 Tech</span> <span class="dsb-cat-count" id="cnt-tech">—</span></div>
+          <div class="dsb-cat-item" data-cat="Events" onclick="setSidebarCat(this,'Events')"><span data-en="🎉 Events" data-es="🎉 Eventos">🎉 Events</span> <span class="dsb-cat-count" id="cnt-events">—</span></div>
+          <div class="dsb-cat-item" data-cat="Other" onclick="setSidebarCat(this,'Other')"><span data-en="➕ Other" data-es="➕ Otros">➕ Other</span> <span class="dsb-cat-count" id="cnt-other">—</span></div>
+        </div>
+        <div class="dsb-section" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+          <div class="dsb-section-label" data-en="Own a business?" data-es="¿Tienes un negocio?">Own a business?</div>
+          <a href="enroll.html" class="btn-cta" style="display:block;text-align:center;font-size:12px;padding:9px 16px;" data-en="List your business free →" data-es="Registra tu negocio gratis →">List your business free →</a>
+        </div>
+      </aside>
+
+      <!-- Grid -->
+      <div>
+        <div class="dir-grid" id="dir-grid"></div>
+        <div class="load-more-wrap" id="load-more-wrap" style="display:none;">
+          <button class="load-more-btn" id="load-more-btn" onclick="loadMore()">Load more businesses</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+const API = window.MLL_CONFIG.API_URL;
+let allBusinesses = [];
+let filtered = [];
+let page = 1;
+let dirLoaded = false;
+const PER_PAGE = 12;
+
+// Read URL params on load
+const urlParams = new URLSearchParams(window.location.search);
+const initQ    = urlParams.get('q')        || '';
+const initCat  = urlParams.get('category') || '';
+const initCity = urlParams.get('city')     || '';
+
+function skelGrid() {
+  return Array(6).fill(`
+    <div class="skel-biz">
+      <div class="skel-header skeleton"></div>
+      <div class="skel-body">
+        <div class="skeleton" style="height:15px;width:70%;border-radius:4px;"></div>
+        <div class="skeleton" style="height:12px;width:45%;border-radius:4px;"></div>
+        <div class="skeleton" style="height:12px;width:85%;border-radius:4px;"></div>
+      </div>
+    </div>`).join('');
+}
+
+function bizCard(b) {
+  return `
+    <div class="biz-card" onclick="window.location='business.html?id=${b.slug}'">
+      <div class="biz-header" style="background:${b.logo_url ? '#f8f8f8' : b.bg_color||'#EBF2FF'};">
+        ${b.logo_url
+          ? `<img src="${b.logo_url}" alt="${b.name}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,0.10);">`
+          : `<span style="font-size:40px;">${b.emoji||'🏢'}</span>`}
+        ${b.is_featured ? '<span class="biz-featured-tag">'+t('Featured')+'</span>' : ''}
+      </div>
+      <div class="biz-body">
+        <div class="biz-name">${b.name}</div>
+        <div class="biz-cat">${b.category} · ${b.city}, ${b.state}</div>
+        <div class="biz-desc">${b.description||''}</div>
+        <div class="biz-tags">${(b.tags||[]).map(t=>`<span class="biz-tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="biz-footer">
+        <span class="biz-rating">★ ${b.rating||'—'} <span style="color:var(--ink-muted);font-weight:400;">(${b.review_count||0})</span></span>
+        <span class="biz-city">${b.city}, ${b.state}</span>
+      </div>
+    </div>`;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('dir-grid');
+  const slice = filtered.slice(0, page * PER_PAGE);
+
+  if (!filtered.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-h">${t('No businesses found')}</div>
+        <div class="empty-p">${t('Try adjusting your search or filters.')}</div>
+        <button class="btn-cta" onclick="clearFilters()">${t('Clear all filters')}</button>
+      </div>`;
+    document.getElementById('load-more-wrap').style.display = 'none';
+    return;
+  }
+
+  grid.innerHTML = slice.map(bizCard).join('');
+
+  const wrap = document.getElementById('load-more-wrap');
+  const btn  = document.getElementById('load-more-btn');
+  if (filtered.length > slice.length) {
+    wrap.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = t('Load more businesses ({n} remaining)', {n: filtered.length - slice.length});
+  } else {
+    wrap.style.display = 'none';
+  }
+
+  document.getElementById('filter-count').textContent =
+    filtered.length === allBusinesses.length
+      ? t('{n} businesses', {n: allBusinesses.length})
+      : t('{n} of {m} businesses', {n: filtered.length, m: allBusinesses.length});
+}
+
+function applyFilters() {
+  const q        = document.getElementById('search-input').value.trim().toLowerCase();
+  const cat      = document.getElementById('cat-filter').value;
+  const state    = document.getElementById('state-filter').value;
+  const sort     = document.getElementById('sort-filter').value;
+  const featOnly = document.getElementById('featured-only').checked;
+  page = 1;
+
+  filtered = allBusinesses.filter(b => {
+    if (q && !b.name.toLowerCase().includes(q) && !(b.description||'').toLowerCase().includes(q) && !(b.category||'').toLowerCase().includes(q)) return false;
+    if (cat && b.category !== cat) return false;
+    if (state && b.state !== state && b.city !== state) return false;
+    if (featOnly && !b.is_featured) return false;
+    return true;
+  });
+
+  // Sort
+  if (sort === 'rating')   filtered.sort((a,b) => (b.rating||0)-(a.rating||0));
+  else if (sort === 'az')  filtered.sort((a,b) => a.name.localeCompare(b.name));
+  else if (sort === 'newest') filtered.sort((a,b) => new Date(b.created_at||0)-new Date(a.created_at||0));
+  else filtered.sort((a,b) => (b.is_featured?1:0)-(a.is_featured?1:0) || (b.rating||0)-(a.rating||0));
+
+  // Show/hide clear button
+  const hasFilters = q || cat || state || featOnly;
+  document.getElementById('clear-btn').style.display = hasFilters ? 'inline' : 'none';
+
+  // Sync sidebar
+  document.querySelectorAll('.dsb-cat-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.cat === cat);
+  });
+  if (cat) document.getElementById('cat-filter').value = cat;
+
+  renderGrid();
+}
+
+function clearFilters() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('cat-filter').value = '';
+  document.getElementById('state-filter').value = '';
+  document.getElementById('sort-filter').value = 'featured';
+  document.getElementById('featured-only').checked = false;
+  applyFilters();
+}
+
+function setSidebarCat(el, cat) {
+  document.getElementById('cat-filter').value = cat;
+  applyFilters();
+}
+
+function loadMore() {
+  page++;
+  renderGrid();
+  window.scrollBy({ top: 200, behavior: 'smooth' });
+}
+
+function updateSidebarCounts(businesses) {
+  const cats = {
+    'all': businesses.length,
+    'food': businesses.filter(b=>b.category==='Food & Dining').length,
+    'legal': businesses.filter(b=>b.category==='Legal Services').length,
+    'health': businesses.filter(b=>b.category==='Health & Wellness').length,
+    'beauty': businesses.filter(b=>b.category==='Beauty & Salon').length,
+    'auto': businesses.filter(b=>b.category==='Auto & Repair').length,
+    'finance': businesses.filter(b=>b.category==='Finance').length,
+    'construction': businesses.filter(b=>b.category==='Construction').length,
+    'realestate': businesses.filter(b=>b.category==='Real Estate').length,
+    'education': businesses.filter(b=>b.category==='Education').length,
+    'retail': businesses.filter(b=>b.category==='Retail').length,
+    'tech': businesses.filter(b=>b.category==='Tech').length,
+    'events': businesses.filter(b=>b.category==='Events').length,
+    'other': businesses.filter(b=>b.category==='Other').length,
+  };
+  Object.entries(cats).forEach(([k,v]) => {
+    const el = document.getElementById('cnt-'+k);
+    if (el) el.textContent = v || '0';
+  });
+}
+
+async function loadAllBusinesses() {
+  const grid = document.getElementById('dir-grid');
+  grid.innerHTML = skelGrid();
+
+  try {
+    // Fetch all pages
+    let all = [];
+    let pg = 1;
+    while (true) {
+      const res  = await fetch(`${API}/api/businesses?page=${pg}&limit=100`);
+      const data = await res.json();
+      const biz  = data.businesses || [];
+      all = all.concat(biz);
+      if (biz.length < 100 || all.length >= (data.total||0)) break;
+      pg++;
+    }
+
+    allBusinesses = all;
+    filtered      = all;
+
+    updateSidebarCounts(all);
+
+    // Apply URL params from homepage search
+    if (initQ)    document.getElementById('search-input').value = initQ;
+    if (initCat)  document.getElementById('cat-filter').value   = initCat;
+    if (initCity) document.getElementById('state-filter').value = initCity;
+
+    applyFilters();
+    dirLoaded = true;
+
+  } catch (err) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-h">${t('Could not load businesses')}</div>
+        <div class="empty-p">${t('Please check your connection and try again.')}</div>
+        <button class="btn-cta" onclick="loadAllBusinesses()">${t('Retry')}</button>
+      </div>`;
+  }
+}
+
+// Enter key search
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') applyFilters();
+});
+
+// Re-render from the cached businesses when the language toggles (no re-fetch).
+document.addEventListener('mll:langswitch', () => { if (dirLoaded) renderGrid(); });
+
+loadAllBusinesses();
+</script>
+  <script src="/js/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enroll Your Business — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body { background: var(--surface-2); padding-top: var(--nav-h); }
+    .enroll-page { min-height: calc(100vh - var(--nav-h)); display: flex; align-items: flex-start; justify-content: center; padding: 48px 16px 80px; }
+    .wizard { width: 100%; max-width: 680px; }
+    .wizard-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; }
+    .wizard-top { background: var(--coral); padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; }
+    .wiz-brand { font-family: var(--font-body); font-size: 15px; font-weight: 300; color: #fff; }
+    .wiz-brand strong { font-weight: 500; }
+    .step-track { display: flex; align-items: center; }
+    .st-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; transition: all 0.3s; flex-shrink: 0; }
+    .st-dot.done { background: rgba(255,255,255,0.9); color: var(--coral); }
+    .st-dot.active { background: #fff; color: var(--coral); font-weight: 600; box-shadow: 0 0 0 3px rgba(255,255,255,0.3); }
+    .st-dot.todo { background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.6); }
+    .st-line { width: 40px; height: 1px; background: rgba(255,255,255,0.3); transition: background 0.3s; }
+    .st-line.done { background: rgba(255,255,255,0.8); }
+    .prog-bar { height: 3px; background: rgba(0,0,0,0.06); }
+    .prog-fill { height: 3px; background: var(--coral); transition: width 0.5s ease; }
+    .wiz-body { padding: 36px 40px 28px; }
+    .wiz-step-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--coral); margin-bottom: 6px; }
+    .wiz-h { font-family: var(--font-display); font-size: 26px; font-weight: 500; color: var(--ink); margin-bottom: 4px; letter-spacing: -0.02em; }
+    .wiz-p { font-size: 14px; color: var(--ink-soft); margin-bottom: 28px; line-height: 1.55; }
+    .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .f3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .f1 { margin-bottom: 16px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 12px; font-weight: 500; color: var(--ink-soft); letter-spacing: 0.02em; }
+    .field input, .field select, .field textarea {
+      padding: 11px 14px; border-radius: var(--radius-md);
+      border: 1px solid var(--border-mid); background: var(--surface);
+      font-family: var(--font-body); font-size: 14px; color: var(--ink);
+      transition: border-color 0.15s, box-shadow 0.15s; outline: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--coral); box-shadow: 0 0 0 3px rgba(216,90,48,0.08);
+    }
+    .field textarea { resize: none; height: 88px; line-height: 1.55; }
+    .tip-box { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; background: var(--teal-light); border-radius: var(--radius-md); margin-bottom: 20px; }
+    .tip-icon { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); margin-top: 6px; flex-shrink: 0; }
+    .tip-box p { font-size: 13px; color: var(--teal-dark); line-height: 1.5; }
+    .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+    .cat-item:last-child { grid-column: span 4; }
+    .cat-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 8px; text-align: center; cursor: pointer; background: var(--surface); transition: all 0.15s; }
+    .cat-item:hover { border-color: var(--coral-mid); background: var(--coral-light); }
+    .cat-item.on { border: 2px solid var(--coral); background: var(--coral-light); }
+    .cat-ic { font-size: 22px; margin-bottom: 5px; }
+    .cat-lbl { font-size: 11px; color: var(--ink-soft); font-weight: 400; }
+    .cat-item.on .cat-lbl { color: var(--coral-dark); font-weight: 500; }
+    .mod-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .mod-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.15s; }
+    .mod-item:hover { border-color: var(--border-mid); }
+    .mod-item.on { background: var(--coral-light); border-color: var(--coral-mid); }
+    .mod-ico { width: 38px; height: 38px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .mod-txt { flex: 1; }
+    .mod-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+    .mod-desc { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+    .tog { width: 38px; height: 22px; border-radius: 11px; position: relative; transition: background 0.2s; flex-shrink: 0; }
+    .tog.on { background: var(--coral); }
+    .tog.off { background: var(--surface-3); }
+    .tog-t { width: 18px; height: 18px; border-radius: 50%; background: #fff; position: absolute; top: 2px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .tog.on .tog-t { left: 18px; }
+    .tog.off .tog-t { left: 2px; }
+    .plan-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 20px; }
+    .plan-item { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 18px; cursor: pointer; position: relative; transition: all 0.15s; background: var(--surface); }
+    .plan-item:hover { border-color: var(--border-mid); }
+    .plan-item.on { border: 2px solid var(--coral); background: #fff; }
+    .plan-pop { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--coral); color: #fff; font-size: 10px; font-weight: 500; padding: 3px 12px; border-radius: 20px; white-space: nowrap; }
+    .plan-name-lbl { font-size: 12px; font-weight: 500; color: var(--ink-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .plan-price-big { font-family: var(--font-display); font-size: 30px; font-weight: 500; color: var(--ink); line-height: 1; margin-bottom: 14px; }
+    .plan-price-big sub { font-size: 14px; font-weight: 300; color: var(--ink-muted); font-family: var(--font-body); }
+    .plan-feats { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .plan-feats li { font-size: 12px; color: var(--ink-soft); display: flex; align-items: center; gap: 7px; }
+    .plan-feats li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+    .plan-feats li.no { opacity: 0.4; }
+    .plan-feats li.no::before { background: var(--border-mid); }
+    .review-box { background: var(--surface-2); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px; }
+    .rv-lbl { font-size: 11px; font-weight: 500; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 12px; }
+    .rv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .rv-item { background: #fff; border-radius: var(--radius-md); padding: 12px 14px; }
+    .rv-item-lbl { font-size: 11px; color: var(--ink-muted); margin-bottom: 3px; }
+    .rv-item-val { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .rv-coral { color: var(--coral); }
+    .terms-row { display: flex; align-items: center; gap: 10px; }
+    .terms-row input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--coral); cursor: pointer; }
+    .terms-row label { font-size: 13px; color: var(--ink-soft); cursor: pointer; }
+    .terms-row a { color: var(--coral); }
+    .wiz-foot { padding: 18px 40px; border-top: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; }
+    .btn-wiz-back { font-size: 14px; padding: 10px 22px; border-radius: var(--radius-md); border: 1px solid var(--border-mid); background: #fff; color: var(--ink-soft); transition: all 0.15s; font-family: var(--font-body); }
+    .btn-wiz-back:hover { background: var(--surface-2); color: var(--ink); }
+    .btn-wiz-next { font-size: 14px; font-weight: 500; padding: 10px 28px; border-radius: var(--radius-md); border: none; background: var(--coral); color: #fff; transition: all 0.15s; font-family: var(--font-body); }
+    .btn-wiz-next:hover { background: var(--coral-dark); }
+    .btn-wiz-next:disabled { opacity: 0.35; cursor: not-allowed; }
+    .foot-info { font-size: 12px; color: var(--ink-muted); }
+    .success-inner { text-align: center; padding: 48px 40px 40px; }
+    .success-circle { width: 64px; height: 64px; border-radius: 50%; background: var(--teal-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .success-circle svg { width: 32px; height: 32px; }
+    .success-h { font-family: var(--font-display); font-size: 28px; font-weight: 500; color: var(--ink); margin-bottom: 10px; letter-spacing: -0.02em; }
+    .success-p { font-size: 14px; color: var(--ink-soft); max-width: 380px; margin: 0 auto 28px; line-height: 1.65; }
+    .next-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; max-width: 460px; margin: 0 auto 28px; }
+    .next-card { background: var(--surface-2); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; text-decoration: none; color: inherit; display: block; transition: all 0.15s; border: 1px solid transparent; }
+    .next-card:hover { background: var(--coral-light); border-color: var(--coral-mid); transform: translateY(-2px); }
+    .nc-ic { font-size: 22px; margin-bottom: 6px; }
+    .nc-lbl { font-size: 12px; color: var(--ink-soft); line-height: 1.4; }
+    .btn-dash { display: inline-block; font-size: 14px; font-weight: 500; padding: 12px 28px; background: var(--coral); color: #fff; border-radius: var(--radius-md); transition: all 0.15s; }
+    .btn-dash:hover { background: var(--coral-dark); transform: translateY(-1px); }
+    @media (max-width: 600px) {
+      .wiz-body, .wiz-foot { padding-left: 20px; padding-right: 20px; }
+      .f2, .f3 { grid-template-columns: 1fr; }
+      .cat-grid { grid-template-columns: repeat(3,1fr); }
+      .plan-row { grid-template-columns: 1fr 1fr; }
+      .rv-grid { grid-template-columns: 1fr; }
+      .wizard-top { flex-direction: column; gap: 16px; align-items: flex-start; }
+    }
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo">
+        <span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span>
+        <span class="logo-text">my<strong>latino</strong>list</span>
+      </a>
+      <div class="nav-actions" style="margin-left:auto;">
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+        </div>
+        <a href="/index.html" class="btn-ghost" data-en="← Back to home" data-es="← Volver al inicio">← Back to home</a>
+        <a href="login.html" class="btn-ghost" data-en="Already enrolled? Sign in" data-es="¿Ya te registraste? Inicia sesión">Already enrolled? Sign in</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="enroll-page">
+    <div class="wizard">
+      <div style="text-align:center;margin-bottom:24px;">
+        <h1 data-en="Enroll your business" data-es="Registra tu negocio" style="font-family:var(--font-display);font-size:32px;font-weight:500;color:var(--ink);letter-spacing:-0.02em;margin-bottom:6px;">Enroll your business</h1>
+        <p data-en="Free to start · Be live in minutes · No credit card required" data-es="Gratis para empezar · Publícate en minutos · Sin tarjeta de crédito" style="font-size:15px;color:var(--ink-soft);font-weight:300;">Free to start · Be live in minutes · No credit card required</p>
+      </div>
+
+      <div class="wizard-card">
+        <div class="wizard-top">
+          <div class="wiz-brand">my<strong>latino</strong>list</div>
+          <div class="step-track" id="step-track">
+            <div class="st-dot active" id="sd1">1</div>
+            <div class="st-line" id="sl1"></div>
+            <div class="st-dot todo" id="sd2">2</div>
+            <div class="st-line" id="sl2"></div>
+            <div class="st-dot todo" id="sd3">3</div>
+            <div class="st-line" id="sl3"></div>
+            <div class="st-dot todo" id="sd4">4</div>
+          </div>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:25%"></div></div>
+        <div id="wiz-body"></div>
+        <div class="wiz-foot" id="wiz-foot">
+          <button class="btn-wiz-back" id="btn-back" style="visibility:hidden" data-en="← Back" data-es="← Atrás">← Back</button>
+          <span class="foot-info" id="foot-info">Step 1 of 4</span>
+          <button class="btn-wiz-next" id="btn-next">Continue →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="/js/data.js"></script>
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 10));
+
+let step = 1;
+let formData = {
+  fname:'', lname:'', email:'', lang:'English',
+  bname:'', phone:'', city:'', state:'Florida', zip:'', website:'', desc:'',
+  cats:[], mods:['directory'], plan:'pro', agreed:false
+};
+
+const cats = [
+  {k:'food',ic:'🍽️',lbl:'Food & Dining'},{k:'legal',ic:'⚖️',lbl:'Legal Services'},
+  {k:'health',ic:'🏥',lbl:'Health & Wellness'},{k:'beauty',ic:'💇',lbl:'Beauty & Salon'},
+  {k:'auto',ic:'🚗',lbl:'Auto & Repair'},{k:'finance',ic:'💰',lbl:'Finance'},
+  {k:'construction',ic:'🏗️',lbl:'Construction'},{k:'retail',ic:'🛍️',lbl:'Retail'},
+  {k:'education',ic:'📚',lbl:'Education'},{k:'realestate',ic:'🏠',lbl:'Real Estate'},
+  {k:'tech',ic:'💻',lbl:'Tech'},{k:'events',ic:'🎉',lbl:'Events'},
+  {k:'other',ic:'➕',lbl:'Other'}
+];
+
+const mods = [
+  {k:'directory',ic:'📋',bg:'var(--coral-light)',lbl:'Business directory listing',desc:'Appear in search, collect reviews, get customer inquiries',locked:true},
+  {k:'marketplace',ic:'🛍️',bg:'#E1F5EE',lbl:'Marketplace — sell products',desc:'List products for sale to the Latino community',locked:false},
+  {k:'jobs',ic:'💼',bg:'#E6F1FB',lbl:'Jobs board',desc:'Post openings and hire bilingual Latino talent',locked:false},
+  {k:'voz',ic:'🗣️',bg:'#EEEDFE',lbl:'La Voz Latino resource portal',desc:'Access SBA loans, grants, legal aid, and bilingual guides',locked:false},
+  {k:'affiliate',ic:'📈',bg:'#EAF3DE',lbl:'Affiliate marketing',desc:'Promote partner brands and earn commissions',locked:false},
+];
+
+const plans = [
+  { k:'free', name:'Starter', price:'$0', feats:[
+    {t:'Basic directory listing'},{t:'Business name, phone & category'},
+    {t:'Community badge'},{t:'1 photo & QR code'},{t:'Free for 90 days'}
+  ]},
+  { k:'basic', name:'Basic', price:'$19', feats:[
+    {t:'Never expires'},{t:'Full profile + 5 photos'},
+    {t:'Business hours'},{t:'Review management'},{t:'Share listing tools'}
+  ]},
+  { k:'pro', name:'Pro', price:'$49', pop:true, feats:[
+    {t:'Everything in Basic'},{t:'Unlimited photos'},{t:'Analytics dashboard'},
+    {t:'Marketplace selling'},{t:'Jobs board (10 posts/mo)'},{t:'La Voz Latino & affiliates'},{t:'Priority support + custom URL'}
+  ]},
+  { k:'featured', name:'Featured', price:'$99', feats:[
+    {t:'Everything in Pro'},{t:'Homepage featured slot'},{t:'Unlimited job posts'},
+    {t:'Priority search #1–3'},{t:'Custom landing page'},{t:'Account rep + verified ✓'},{t:'Monthly social shoutout'}
+  ]},
+  { k:'agency', name:'Agency', price:'$299', feats:[
+    {t:'Manage up to 10 businesses'},{t:'White-label dashboard'},
+    {t:'Bulk enrollment'},{t:'Priority homepage placement'},{t:'Monthly strategy call'}
+  ]},
+];
+
+const states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming','District of Columbia','Puerto Rico','Guam','U.S. Virgin Islands','American Samoa','Northern Mariana Islands'];
+
+function planLabel() {
+  return {free:'Starter — $0', basic:'Basic — $19/month', pro:'Pro — $49/month', featured:'Featured — $99/month', agency:'Agency — $299/month'}[formData.plan] || 'Starter — $0';
+}
+
+function catDisplay() {
+  const found = cats.filter(c => formData.cats.includes(c.k));
+  return found.length ? found.map(c=>c.lbl).join(', ') : 'Not selected';
+}
+
+function updateDots(n) {
+  for (let i=1; i<=4; i++) {
+    const d = document.getElementById('sd'+i);
+    const l = document.getElementById('sl'+i);
+    if (i < n) { d.className='st-dot done'; d.textContent='✓'; }
+    else if (i===n) { d.className='st-dot active'; d.textContent=i; }
+    else { d.className='st-dot todo'; d.textContent=i; }
+    if (l) l.className = i<n ? 'st-line done' : 'st-line';
+  }
+  const progs = ['25%','50%','75%','100%'];
+  document.getElementById('prog-fill').style.width = progs[n-1];
+  document.getElementById('foot-info').textContent = n<=4 ? `Step ${n} of 4` : '';
+  document.getElementById('btn-back').style.visibility = n===1 ? 'hidden' : 'visible';
+  document.getElementById('btn-next').textContent = n===4 ? 'Complete enrollment →' : 'Continue →';
+}
+
+function renderStep1() {
+  document.getElementById('wiz-body').innerHTML = `
+    <div class="wiz-body">
+      <div class="wiz-step-label">Step 1 of 4 — Account</div>
+      <div class="wiz-h">Create your owner account</div>
+      <div class="wiz-p">You'll use this to manage your listing, track leads, and access your dashboard.</div>
+      <div class="f2">
+        <div class="field"><label>First name</label><input id="f-fname" type="text" value="${formData.fname}" placeholder="Maria"></div>
+        <div class="field"><label>Last name</label><input id="f-lname" type="text" value="${formData.lname}" placeholder="Gonzalez"></div>
+      </div>
+      <div class="f1 field"><label>Email address</label><input id="f-email" type="email" value="${formData.email}" placeholder="you@yourbusiness.com"></div>
+      <div class="f2">
+        <div class="field"><label>Password</label><input id="f-pw" type="password" placeholder="Min. 8 characters"></div>
+        <div class="field"><label>Confirm password</label><input id="f-pw2" type="password" placeholder="Repeat password"></div>
+      </div>
+      <div class="f1 field"><label>Preferred language</label>
+        <select id="f-lang">
+          <option ${formData.lang==='English'?'selected':''}>English</option>
+          <option ${formData.lang==='Español'?'selected':''}>Español</option>
+          <option ${formData.lang==='Bilingual'?'selected':''}>Bilingual (English + Español)</option>
+        </select>
+      </div>
+      <div class="tip-box"><div class="tip-icon"></div><p>Your information is encrypted and never sold. We use it only to manage your listing and send relevant resources.</p></div>
+    </div>`;
+}
+
+function renderStep2() {
+  const catHTML = cats.map(c => `
+    <div class="cat-item${formData.cats.includes(c.k)?' on':''}" data-cat="${c.k}">
+      <div class="cat-ic">${c.ic}</div>
+      <div class="cat-lbl">${c.lbl}</div>
+    </div>`).join('');
+  document.getElementById('wiz-body').innerHTML = `
+    <div class="wiz-body">
+      <div class="wiz-step-label">Step 2 of 4 — Business profile</div>
+      <div class="wiz-h">Tell us about your business</div>
+      <div class="wiz-p">This is how customers will find and contact you in the directory.</div>
+      <div class="f2">
+        <div class="field"><label>Business name</label><input id="f-bname" type="text" value="${formData.bname}" placeholder="La Cocina de Maria"></div>
+        <div class="field"><label>Phone number</label><input id="f-phone" type="tel" value="${formData.phone}" placeholder="(202) 823-7929"></div>
+      </div>
+      <div class="f3">
+        <div class="field"><label>City</label><input id="f-city" type="text" value="${formData.city}" placeholder="Miami"></div>
+        <div class="field"><label>State</label><select id="f-state">${states.map(s=>`<option${s===formData.state?' selected':''}>${s}</option>`).join('')}</select></div>
+        <div class="field"><label>ZIP code</label><input id="f-zip" type="text" value="${formData.zip}" placeholder="33101"></div>
+      </div>
+      <div class="f1 field"><label>Website <span style="font-weight:300;color:var(--ink-muted)">(optional)</span></label><input id="f-web" type="url" value="${formData.website}" placeholder="https://yourbusiness.com"></div>
+      <div class="f1 field"><label>Business description</label><textarea id="f-desc" placeholder="Tell customers what makes your business special...">${formData.desc}</textarea></div>
+      <div style="font-size:12px;font-weight:500;color:var(--ink-soft);margin-bottom:10px;letter-spacing:0.02em;">Primary category</div>
+      <div class="cat-grid">${catHTML}</div>
+    </div>`;
+  document.querySelectorAll('.cat-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const k = el.dataset.cat;
+      formData.cats = [k];
+      document.querySelectorAll('.cat-item').forEach(x => x.classList.remove('on'));
+      el.classList.add('on');
+    });
+  });
+}
+
+function renderStep3() {
+  const modHTML = mods.map(m => {
+    const on = formData.mods.includes(m.k);
+    return `<div class="mod-item${on?' on':''}" data-mod="${m.k}">
+      <div class="mod-ico" style="background:${m.bg}">${m.ic}</div>
+      <div class="mod-txt">
+        <div class="mod-title">${m.lbl}${m.locked?' <span style="font-size:10px;color:var(--teal);background:var(--teal-light);padding:1px 6px;border-radius:10px;margin-left:4px;">Always included</span>':''}</div>
+        <div class="mod-desc">${m.desc}</div>
+      </div>
+      <div class="tog ${on?'on':'off'}" data-mod="${m.k}"><div class="tog-t"></div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('wiz-body').innerHTML = `
+    <div class="wiz-body">
+      <div class="wiz-step-label">Step 3 of 4 — Modules</div>
+      <div class="wiz-h">Choose your platform modules</div>
+      <div class="wiz-p">Activate only what you need. You can turn modules on or off anytime from your dashboard.</div>
+      <div class="mod-list">${modHTML}</div>
+      <div class="tip-box"><div class="tip-icon"></div><p>All modules are free to activate. Some features are unlocked on paid plans.</p></div>
+    </div>`;
+  document.querySelectorAll('.mod-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const k = el.dataset.mod;
+      if (k === 'directory') return;
+      const idx = formData.mods.indexOf(k);
+      const tog = el.querySelector('.tog');
+      if (idx > -1) { formData.mods.splice(idx,1); el.classList.remove('on'); tog.className='tog off'; }
+      else { formData.mods.push(k); el.classList.add('on'); tog.className='tog on'; }
+    });
+  });
+}
+
+function renderStep4() {
+  const planHTML = plans.map(p => `
+    <div class="plan-item${formData.plan===p.k?' on':''}" data-plan="${p.k}">
+      ${p.pop?'<div class="plan-pop">Most popular</div>':''}
+      <div class="plan-name-lbl">${p.name}</div>
+      <div class="plan-price-big">${p.price}<sub>/mo</sub></div>
+      <ul class="plan-feats">${p.feats.map(f=>`<li class="${f.no?'no':''}">${f.t}</li>`).join('')}</ul>
+    </div>`).join('');
+  document.getElementById('wiz-body').innerHTML = `
+    <div class="wiz-body">
+      <div class="wiz-step-label">Step 4 of 4 — Plan</div>
+      <div class="wiz-h">Choose your plan</div>
+      <div class="wiz-p">Start free and upgrade anytime. No contracts, cancel anytime.</div>
+      <div class="plan-row">${planHTML}</div>
+      <div class="review-box">
+        <div class="rv-lbl">Enrollment summary</div>
+        <div class="rv-grid">
+          <div class="rv-item"><div class="rv-item-lbl">Business name</div><div class="rv-item-val">${formData.bname||'—'}</div></div>
+          <div class="rv-item"><div class="rv-item-lbl">Location</div><div class="rv-item-val">${formData.city?formData.city+', ':''} ${formData.state.slice(0,2)}</div></div>
+          <div class="rv-item"><div class="rv-item-lbl">Category</div><div class="rv-item-val">${catDisplay()}</div></div>
+          <div class="rv-item"><div class="rv-item-lbl">Selected plan</div><div class="rv-item-val rv-coral" id="rv-plan-val">${planLabel()}</div></div>
+          <div class="rv-item" style="grid-column:span 2"><div class="rv-item-lbl">Active modules</div><div class="rv-item-val">${formData.mods.map(k=>{const m=mods.find(x=>x.k===k);return m?m.lbl.split('—')[0].trim():'';}).filter(Boolean).join(', ')}</div></div>
+        </div>
+      </div>
+      <div class="terms-row">
+        <input type="checkbox" id="agree" ${formData.agreed?'checked':''}>
+        <label for="agree">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> of MyLatinoList</label>
+      </div>
+    </div>`;
+  document.querySelectorAll('.plan-item').forEach(el => {
+    el.addEventListener('click', () => {
+      formData.plan = el.dataset.plan;
+      document.querySelectorAll('.plan-item').forEach(x => { x.classList.remove('on'); });
+      el.classList.add('on');
+      const rv = document.getElementById('rv-plan-val');
+      if (rv) rv.textContent = planLabel();
+    });
+  });
+  document.getElementById('agree')?.addEventListener('change', e => { formData.agreed = e.target.checked; });
+}
+
+function renderSuccess() {
+  document.getElementById('step-track').innerHTML = `<span style="font-size:13px;color:rgba(255,255,255,0.85);font-weight:500;">✓ Enrollment complete</span>`;
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('wiz-body').innerHTML = `
+    <div class="success-inner">
+      <div class="success-circle">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" stroke="#1D9E75" stroke-width="1.5"/><path d="M9 16.5l5 5 9-9" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="success-h">Welcome to MyLatinoList!</div>
+      <div class="success-p">Your business enrollment is complete. <strong>${formData.bname||'Your business'}</strong> will be live in the directory within a few minutes. Here's what to do next:</div>
+      <div class="next-cards">
+        <a href="listing.html" class="next-card"><div class="nc-ic">📸</div><div class="nc-lbl">Add photos to your profile</div></a>
+        <a href="listing.html" class="next-card"><div class="nc-ic">🕐</div><div class="nc-lbl">Set your business hours</div></a>
+        <a href="dashboard.html" class="next-card"><div class="nc-ic">📊</div><div class="nc-lbl">Visit your dashboard</div></a>
+      </div>
+      <a href="dashboard.html" class="btn-dash">Go to my dashboard →</a>
+      <p style="font-size:12px;color:var(--ink-muted);margin-top:16px;">A confirmation email has been sent${formData.email?' to '+formData.email:''}.</p>
+    </div>`;
+  document.getElementById('wiz-foot').innerHTML = `<div style="width:100%;text-align:center;font-size:12px;color:var(--ink-muted);">Questions? <a href="mailto:support@mylatinolist.io" style="color:var(--coral);">support@mylatinolist.io</a> · <a href="tel:+12028237929" style="color:var(--coral);">(202) 823-7929</a></div>`;
+}
+
+const API = window.MLL_CONFIG.API_URL;
+
+function saveStep() {
+  if (step === 1) {
+    formData.fname = document.getElementById('f-fname')?.value.trim()||'';
+    formData.lname = document.getElementById('f-lname')?.value.trim()||'';
+    formData.email = document.getElementById('f-email')?.value.trim()||'';
+    formData.pw    = document.getElementById('f-pw')?.value||'';
+    formData.pw2   = document.getElementById('f-pw2')?.value||'';
+    formData.lang  = document.getElementById('f-lang')?.value||'English';
+  } else if (step === 2) {
+    formData.bname   = document.getElementById('f-bname')?.value.trim()||'';
+    formData.phone   = document.getElementById('f-phone')?.value.trim()||'';
+    formData.city    = document.getElementById('f-city')?.value.trim()||'';
+    formData.state   = document.getElementById('f-state')?.value||'Florida';
+    formData.zip     = document.getElementById('f-zip')?.value.trim()||'';
+    formData.website = document.getElementById('f-web')?.value.trim()||'';
+    formData.desc    = document.getElementById('f-desc')?.value.trim()||'';
+  }
+}
+
+function showError(msg) {
+  let el = document.getElementById('wiz-error');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'wiz-error';
+    el.style.cssText = 'background:#FCEBEB;color:#791F1F;border-radius:8px;padding:12px 16px;font-size:13px;margin:0 40px 16px;line-height:1.5;';
+    document.getElementById('wiz-foot').before(el);
+  }
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function clearError() {
+  const el = document.getElementById('wiz-error');
+  if (el) el.style.display = 'none';
+}
+
+function validateStep(n) {
+  if (n === 1) {
+    if (!formData.fname) return 'Please enter your first name.';
+    if (!formData.email || !formData.email.includes('@')) return 'Please enter a valid email address.';
+    if (!formData.pw || formData.pw.length < 8) return 'Password must be at least 8 characters.';
+    if (formData.pw !== formData.pw2) return 'Passwords do not match.';
+  }
+  if (n === 2) {
+    if (!formData.bname) return 'Please enter your business name.';
+    if (!formData.phone) return 'Please enter a phone number.';
+    if (!formData.city)  return 'Please enter your city.';
+    if (!formData.cats.length) return 'Please select a business category.';
+  }
+  return null;
+}
+
+function setLoading(loading) {
+  const btn = document.getElementById('btn-next');
+  const back = document.getElementById('btn-back');
+  btn.disabled = loading;
+  back.disabled = loading;
+  btn.textContent = loading ? 'Submitting...' : 'Complete enrollment →';
+  btn.style.opacity = loading ? '0.7' : '1';
+}
+
+async function submitEnrollment() {
+  setLoading(true);
+  clearError();
+
+  try {
+    const payload = {
+      // Step 1 — account
+      email:         formData.email,
+      password:      formData.pw,
+      first_name:    formData.fname,
+      last_name:     formData.lname,
+      language:      formData.lang,
+      // Step 2 — business
+      business_name: formData.bname,
+      phone:         formData.phone,
+      city:          formData.city,
+      state:         formData.state,
+      zip:           formData.zip,
+      website:       formData.website || null,
+      description:   formData.desc,
+      category:      cats.find(c => c.k === formData.cats[0])?.lbl || formData.cats[0] || 'General',
+      // Step 3 — modules
+      modules:       formData.mods,
+      // Step 4 — plan
+      plan:          formData.plan,
+    };
+
+    const res = await fetch(`${API}/api/enroll`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setLoading(false);
+      showError(data.error || 'Enrollment failed. Please try again.');
+      return;
+    }
+
+    // Store token if returned
+    if (data.access_token) {
+      sessionStorage.setItem('mll_token', data.access_token);
+    }
+    if (data.business_id) {
+      sessionStorage.setItem('mll_business_id', data.business_id);
+    }
+
+    // ── If paid plan selected → redirect to Stripe checkout ──
+    if (data.checkout_url) {
+      gtag('event', 'enrollment', {event_category: 'conversion', plan: payload.plan});
+      window.location.href = data.checkout_url;
+      return;
+    }
+
+    // ── Free plan → show success screen ──────────────────────
+    gtag('event', 'enrollment', {event_category: 'conversion', plan: payload.plan});
+    renderSuccess();
+
+  } catch (err) {
+    setLoading(false);
+    showError('Network error — please check your connection and try again.');
+    console.error('Enroll error:', err);
+  }
+}
+
+function goTo(n) {
+  step = n;
+  clearError();
+  updateDots(n);
+  if (n===1) renderStep1();
+  else if (n===2) renderStep2();
+  else if (n===3) renderStep3();
+  else if (n===4) renderStep4();
+}
+
+document.getElementById('btn-next').addEventListener('click', async () => {
+  saveStep();
+  clearError();
+
+  // Validate current step before proceeding
+  const err = validateStep(step);
+  if (err) { showError(err); return; }
+
+  if (step === 4) {
+    const agreed = document.getElementById('agree')?.checked;
+    if (!agreed) {
+      showError('Please agree to the Terms of Service to continue.');
+      return;
+    }
+    await submitEnrollment();
+  } else {
+    goTo(step + 1);
+  }
+});
+
+document.getElementById('btn-back').addEventListener('click', () => {
+  saveStep();
+  clearError();
+  if (step > 1) goTo(step - 1);
+});
+
+goTo(1);
+</script>
+  <script src="/js/nav.js"></script>
+</body>
+</html>
+

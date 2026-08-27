@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Affiliate Brands — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .page-hero{padding:64px 0 48px;text-align:center;}
+    .aff-page-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding-bottom:32px;}
+    .skeleton{background:var(--surface-3);border-radius:var(--radius-md);animation:pulse 1.4s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    .skel-aff{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;display:flex;flex-direction:column;gap:10px;}
+    .join-btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1.5px solid var(--coral);color:var(--coral);background:transparent;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;}
+    .join-btn:hover{background:var(--coral);color:#fff;}
+    .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink-muted);}
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+    .stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;text-align:center;}
+    .stat-card .n{font-family:var(--font-display);font-size:28px;font-weight:500;color:var(--coral);}
+    .stat-card .l{font-size:13px;color:var(--ink-muted);margin-top:4px;}
+    @media(max-width:768px){.aff-page-grid{grid-template-columns:1fr;}.stats-row{grid-template-columns:1fr;}}
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav scrolled has-mobile" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div class="nav-links">
+        <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+        <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+        <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+        <a href="voz.html">La Voz Latino</a>
+        <a href="affiliates.html" style="color:var(--coral);font-weight:500;" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+        <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+        <a href="enroll.html" class="btn-cta" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+      </div>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+      <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+      <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+      <a href="voz.html">La Voz Latino</a>
+      <a href="affiliates.html" style="color:var(--coral);font-weight:500;" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+      <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
+      <div class="lang-toggle" style="margin:4px 12px 8px;">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <a href="login.html" style="color:var(--coral);font-weight:500;" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+      <a href="enroll.html" class="btn-cta" style="margin-top:8px;text-align:center;" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="page-hero">
+      <div class="section-label" data-en="Affiliate program" data-es="Programa de afiliados">Affiliate program</div>
+      <h1 data-en="Big brands supporting Latino business" data-es="Grandes marcas que apoyan a los negocios latinos" style="font-family:var(--font-display);font-size:clamp(32px,5vw,52px);font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:12px;">Big brands supporting Latino business</h1>
+      <p data-en="Promote trusted brands. Earn commission on every referral." data-es="Promociona marcas confiables. Gana comisión por cada referido." style="font-size:16px;color:var(--ink-soft);max-width:480px;margin:0 auto 28px;font-weight:300;">Promote trusted brands. Earn commission on every referral.</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="n" id="stat-programs">—</div><div class="l" data-en="Affiliate programs" data-es="Programas de afiliados">Affiliate programs</div></div>
+      <div class="stat-card"><div class="n">$0</div><div class="l" data-en="Avg. commission per referral" data-es="Comisión promedio por referido">Avg. commission per referral</div></div>
+      <div class="stat-card"><div class="n" data-en="Free" data-es="Gratis">Free</div><div class="l" data-en="To join any program" data-es="Para unirte a cualquier programa">To join any program</div></div>
+    </div>
+
+    <div class="aff-page-grid" id="aff-page-grid"></div>
+
+    <div id="partner" style="background:var(--coral);border-radius:var(--radius-xl);padding:48px;text-align:center;margin-bottom:80px;">
+      <h2 data-en="Are you a brand?" data-es="¿Tienes una marca?" style="font-family:var(--font-display);font-size:32px;font-weight:500;color:#fff;letter-spacing:-0.02em;margin-bottom:10px;">Are you a brand?</h2>
+      <p data-en="Reach thousands of Latino business owners and consumers. Join the affiliate program." data-es="Llega a miles de dueños de negocios latinos y consumidores. Únete al programa de afiliados." style="font-size:15px;color:rgba(255,255,255,0.75);margin-bottom:24px;font-weight:300;">Reach thousands of Latino business owners and consumers. Join the affiliate program.</p>
+      <a href="mailto:partners@mylatinolist.io" style="font-size:14px;font-weight:500;padding:12px 28px;background:#fff;color:var(--coral);border-radius:var(--radius-md);display:inline-block;" data-en="Join the affiliate program →" data-es="Únete al programa de afiliados →">Join the affiliate program →</a>
+    </div>
+  </div>
+<script>
+const API=window.MLL_CONFIG.API_URL;
+function skelAffs(){return Array(6).fill('<div class="skel-aff"><div class="skeleton" style="height:44px;width:44px;border-radius:8px;"></div><div class="skeleton" style="height:15px;width:60%;border-radius:4px;"></div><div class="skeleton" style="height:12px;width:90%;border-radius:4px;"></div><div class="skeleton" style="height:12px;width:70%;border-radius:4px;"></div></div>').join('');}
+async function loadAffiliates(){
+  const grid=document.getElementById('aff-page-grid');
+  grid.innerHTML=skelAffs();
+  try{
+    const res=await fetch(`${API}/api/affiliates`);
+    const data=await res.json();
+    const affiliates=data.affiliates||[];
+    document.getElementById('stat-programs').textContent=affiliates.length||'—';
+    if(!affiliates.length){
+      grid.innerHTML=`<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">🤝</div><p>No affiliate programs available yet.</p></div>`;
+      return;
+    }
+    grid.innerHTML=affiliates.map(a=>`
+      <div class="aff-card">
+        <div class="aff-top">
+          <div class="aff-logo" style="background:${a.bg_color||'#EBF2FF'}">${a.emoji||'🤝'}</div>
+          <div>
+            <div class="aff-name">${a.name}</div>
+            <div class="aff-category">${a.category||''}</div>
+          </div>
+        </div>
+        <div class="aff-desc">${a.description||''}</div>
+        <div class="aff-footer">
+          <span class="aff-commission">${a.commission_text||''}</span>
+          <button class="join-btn" onclick="handleJoin('${a.id}','${a.name}')">Join →</button>
+        </div>
+      </div>`).join('');
+  }catch(err){
+    grid.innerHTML=`<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">⚠️</div><p>Could not load programs. Please try again.</p></div>`;
+  }
+}
+function handleJoin(id, name){
+  const token=sessionStorage.getItem('mll_token');
+  if(!token){
+    if(confirm(`Sign in to join the ${name} affiliate program. Go to sign in?`)){
+      window.location.href='login.html';
+    }
+    return;
+  }
+  window.location.href='dashboard.html';
+}
+loadAffiliates();
+</script>
+  <script src="/js/nav.js"></script>
+</body></html>

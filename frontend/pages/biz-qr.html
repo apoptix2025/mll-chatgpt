@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your QR Code — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .qr-page{max-width:600px;margin:0 auto;padding:48px 16px 80px;}
+    .qr-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);padding:36px;text-align:center;margin-bottom:16px;}
+    .qr-biz-name{font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:4px;}
+    .qr-biz-cat{font-size:13px;color:var(--ink-muted);margin-bottom:24px;}
+    .qr-wrap{display:inline-block;padding:16px;background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);margin-bottom:20px;}
+    #qr-canvas{display:block;}
+    .qr-url{font-size:12px;font-family:monospace;color:var(--ink-muted);background:var(--surface-2);padding:8px 14px;border-radius:var(--radius-sm);margin-bottom:20px;word-break:break-all;}
+    .qr-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .qr-btn-dl{font-size:14px;font-weight:500;padding:12px;background:var(--coral);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;}
+    .qr-btn-dl:hover{background:var(--coral-dark);}
+    .qr-btn-kit{font-size:14px;font-weight:500;padding:12px;background:#fff;color:var(--ink);border:1px solid var(--border-mid);border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;text-decoration:none;display:block;}
+    .qr-btn-kit:hover{background:var(--surface-2);}
+    .use-cases{background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;}
+    .uc-title{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:16px;}
+    .uc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .uc-item{background:var(--surface-2);border-radius:var(--radius-md);padding:14px;text-align:center;}
+    .uc-icon{font-size:28px;margin-bottom:8px;}
+    .uc-label{font-size:12px;font-weight:500;color:var(--ink);}
+    .uc-desc{font-size:11px;color:var(--ink-muted);margin-top:3px;line-height:1.4;}
+    .tracking-note{background:var(--teal-light);border-radius:var(--radius-md);padding:14px 16px;margin-top:16px;font-size:12px;color:var(--teal-dark);line-height:1.5;}
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav scrolled">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div class="nav-actions" style="margin-left:auto;">
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+        </div>
+        <a href="login.html" class="btn-ghost">Sign in</a>
+        <a href="enroll.html" class="btn-cta">List your business</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="qr-page">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div class="section-label">QR code</div>
+      <h1 style="font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:6px;">Your business QR code</h1>
+      <p style="font-size:14px;color:var(--ink-soft);font-weight:300;">Print it, share it, put it on your door — every scan brings customers to your listing.</p>
+    </div>
+
+    <div class="qr-card">
+      <div class="qr-biz-name" id="qr-biz-name">Loading...</div>
+      <div class="qr-biz-cat" id="qr-biz-cat"></div>
+      <div class="qr-wrap">
+        <canvas id="qr-canvas" width="200" height="200"></canvas>
+      </div>
+      <div class="qr-url" id="qr-url-display"></div>
+      <div class="qr-btns">
+        <button class="qr-btn-dl" onclick="downloadQR()">⬇ Download PNG</button>
+        <a href="#" class="qr-btn-kit" id="kit-link">🎨 Get marketing kit</a>
+      </div>
+      <div class="tracking-note">📊 Every QR scan is tracked in your dashboard — you'll see how many customers found you this way.</div>
+    </div>
+
+    <div class="use-cases">
+      <div class="uc-title">Where to use your QR code</div>
+      <div class="uc-grid">
+        <div class="uc-item"><div class="uc-icon">🚪</div><div class="uc-label">Window &amp; door</div><div class="uc-desc">Sticker on your storefront for walk-by customers</div></div>
+        <div class="uc-item"><div class="uc-icon">🪪</div><div class="uc-label">Business cards</div><div class="uc-desc">Print on cards so customers can find you online</div></div>
+        <div class="uc-item"><div class="uc-icon">📋</div><div class="uc-label">Menus &amp; receipts</div><div class="uc-desc">Add to menus, invoices, or packaging</div></div>
+        <div class="uc-item"><div class="uc-icon">📱</div><div class="uc-label">Social media</div><div class="uc-desc">Share as image in your Instagram or Facebook bio</div></div>
+        <div class="uc-item"><div class="uc-icon">✉️</div><div class="uc-label">Flyers &amp; mailers</div><div class="uc-desc">Add to any printed marketing material</div></div>
+        <div class="uc-item"><div class="uc-icon">💬</div><div class="uc-label">WhatsApp</div><div class="uc-desc">Share the QR image directly in group chats</div></div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const API  = window.MLL_CONFIG.API_URL;
+const slug = new URLSearchParams(window.location.search).get('id') || '';
+let bizName = '';
+
+async function loadAndRenderQR() {
+  if (!slug) return;
+  try {
+    const res  = await fetch(`${API}/api/businesses/${slug}`);
+    const data = await res.json();
+    const b    = data.business;
+    if (!b) return;
+    bizName = b.name;
+    document.getElementById('qr-biz-name').textContent = b.name;
+    document.getElementById('qr-biz-cat').textContent  = `${b.category} · ${b.city}, ${b.state}`;
+
+    const qrUrl = `https://mylatinolist.io/biz/${b.slug}?src=qr`;
+    document.getElementById('qr-url-display').textContent = qrUrl;
+    document.getElementById('kit-link').href = `biz-kit.html?id=${b.slug}`;
+
+    // Generate QR code on canvas
+    const canvas = document.getElementById('qr-canvas');
+    const ctx    = canvas.getContext('2d');
+
+    // Use QRCode lib to get modules, draw manually for clean result
+    const qr = new QRCode(document.createElement('div'), {
+      text: qrUrl,
+      width: 200,
+      height: 200,
+      colorDark: '#1a1714',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H,
+    });
+
+    // Give QR lib a moment to render, then snapshot
+    setTimeout(() => {
+      const img = qr._el.querySelector('img') || qr._el.querySelector('canvas');
+      if (img) {
+        const tmp = new Image();
+        tmp.onload = () => ctx.drawImage(tmp, 0, 0, 200, 200);
+        tmp.src = img.src || img.toDataURL();
+      }
+    }, 100);
+
+  } catch(err) {
+    document.getElementById('qr-biz-name').textContent = 'Could not load QR code';
+  }
+}
+
+function downloadQR() {
+  const canvas = document.getElementById('qr-canvas');
+  // Add white padding + business name below
+  const out  = document.createElement('canvas');
+  out.width  = 260;
+  out.height = 300;
+  const ctx  = out.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, 260, 300);
+  ctx.drawImage(canvas, 30, 20, 200, 200);
+  ctx.fillStyle = '#1a1714';
+  ctx.font = 'bold 13px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(bizName, 130, 242);
+  ctx.fillStyle = '#6b6760';
+  ctx.font = '11px sans-serif';
+  ctx.fillText('mylatinolist.io', 130, 260);
+  const link = document.createElement('a');
+  link.download = `${slug}-qrcode.png`;
+  link.href = out.toDataURL('image/png');
+  link.click();
+}
+
+loadAndRenderQR();
+</script>
+  <script src="/js/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+# Environment variables - NEVER commit these
+.env
+.env.local
+.env.production
+.dev.vars
+*.env
+
+# Wrangler
+.wrangler/
+workers/.wrangler/
+
+# Node
+node_modules/
+workers/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+workers/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+code-review.txt
+full-review.txt
+stripe-review.txt

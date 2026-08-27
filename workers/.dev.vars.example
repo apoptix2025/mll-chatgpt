@@ -1,0 +1,17 @@
+# Copy this file to .dev.vars and fill in your values
+# .dev.vars is gitignored - NEVER commit actual secrets
+
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_KEY=your_supabase_service_role_key_here
+
+STRIPE_SECRET_KEY=sk_test_your_stripe_test_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+
+RESEND_API_KEY=re_your_resend_api_key_here
+
+ALGOLIA_APP_ID=your_algolia_app_id
+ALGOLIA_ADMIN_KEY=your_algolia_admin_key
+
+ENVIRONMENT=development
+FRONTEND_URL=http://localhost:3000

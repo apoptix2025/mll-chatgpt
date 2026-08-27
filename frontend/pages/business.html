@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Business — MyLatinoList</title>
+  <meta name="description" id="page-desc" content="Latino-owned business on MyLatinoList">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .biz-hero{background:#fff;border-bottom:1px solid var(--border);padding:40px 0 0;}
+    .biz-hero-inner{display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:flex-start;padding-bottom:0;}
+    .biz-avatar{width:96px;height:96px;border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;font-size:48px;flex-shrink:0;border:3px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
+    .biz-info{flex:1;}
+    .biz-info h1{font-family:var(--font-display);font-size:clamp(24px,4vw,36px);font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:4px;}
+    .biz-meta-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+    .biz-cat-badge{font-size:12px;font-weight:500;background:var(--coral-light);color:var(--coral-dark);padding:3px 10px;border-radius:20px;}
+    .biz-location{font-size:13px;color:var(--ink-muted);}
+    .biz-rating-row{display:flex;align-items:center;gap:8px;}
+    .biz-stars{color:var(--amber);font-size:16px;}
+    .biz-rating-num{font-size:14px;font-weight:500;color:var(--ink);}
+    .biz-review-count{font-size:13px;color:var(--ink-muted);}
+    .biz-actions{display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
+    .btn-call{font-size:13px;font-weight:500;padding:10px 20px;background:var(--coral);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;text-align:center;text-decoration:none;display:block;}
+    .btn-call:hover{background:var(--coral-dark);}
+    .btn-website{font-size:13px;padding:10px 20px;border:1px solid var(--border-mid);color:var(--ink);border-radius:var(--radius-md);text-align:center;text-decoration:none;display:block;transition:all 0.15s;background:#fff;}
+    .btn-website:hover{background:var(--surface-2);}
+    .btn-qr{font-size:12px;padding:8px 16px;border:1px solid var(--border-mid);color:var(--ink-muted);border-radius:var(--radius-md);text-align:center;cursor:pointer;transition:all 0.15s;background:#fff;font-family:var(--font-body);}
+    .btn-qr:hover{border-color:var(--coral);color:var(--coral);}
+    .biz-tabs{display:flex;gap:0;border-top:1px solid var(--border);margin-top:20px;}
+    .biz-tab{font-size:13px;padding:12px 20px;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;font-weight:400;}
+    .biz-tab:hover{color:var(--ink);}
+    .biz-tab.active{color:var(--coral);border-bottom-color:var(--coral);font-weight:500;}
+    .biz-layout{display:grid;grid-template-columns:1fr 320px;gap:24px;padding:28px 0 80px;align-items:start;}
+    .biz-main{}
+    .biz-card-section{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px;}
+    .bcs-title{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+    .biz-desc-text{font-size:14px;color:var(--ink-soft);line-height:1.7;}
+    .biz-tags-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+    .hours-grid{display:grid;grid-template-columns:100px 1fr;gap:6px 12px;}
+    .hours-day{font-size:13px;color:var(--ink-muted);}
+    .hours-time{font-size:13px;color:var(--ink);}
+    .hours-today{font-weight:500;color:var(--teal-dark);}
+    .product-grid-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+    .review-list{display:flex;flex-direction:column;gap:14px;}
+    .review-item{padding-bottom:14px;border-bottom:1px solid var(--border);}
+    .review-item:last-child{border-bottom:none;padding-bottom:0;}
+    .review-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+    .review-avatar{width:34px;height:34px;border-radius:50%;background:var(--coral-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--coral-dark);flex-shrink:0;}
+    .review-name{font-size:13px;font-weight:500;color:var(--ink);}
+    .review-date{font-size:11px;color:var(--ink-muted);}
+    .review-stars{color:var(--amber);font-size:13px;margin-bottom:4px;}
+    .review-text{font-size:13px;color:var(--ink-soft);line-height:1.55;}
+    .review-form{background:var(--surface-2);border-radius:var(--radius-md);padding:16px;margin-top:16px;}
+    .rf-title{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:10px;}
+    .star-select{display:flex;gap:4px;margin-bottom:10px;}
+    .star-btn{font-size:22px;cursor:pointer;opacity:0.3;transition:opacity 0.1s;background:none;border:none;padding:0;}
+    .star-btn.sel{opacity:1;}
+    .rf-input{width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1px solid var(--border-mid);font-family:var(--font-body);font-size:13px;outline:none;margin-bottom:8px;}
+    .rf-textarea{width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1px solid var(--border-mid);font-family:var(--font-body);font-size:13px;outline:none;resize:none;height:72px;line-height:1.5;}
+    .rf-input:focus,.rf-textarea:focus{border-color:var(--coral);}
+    .rf-submit{font-size:13px;font-weight:500;padding:9px 20px;background:var(--coral);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;}
+    .rf-submit:hover{background:var(--coral-dark);}
+    .biz-sidebar{}
+    .contact-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;}
+    .cc-title{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:12px;}
+    .cc-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:13px;color:var(--ink-soft);}
+    .cc-icon{width:18px;flex-shrink:0;margin-top:1px;}
+    .cc-val{color:var(--ink);}
+    .cc-val a{color:var(--coral);text-decoration:none;}
+
+    .share-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;}
+    .share-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+    .share-btn{font-size:12px;font-weight:500;padding:9px 12px;border-radius:var(--radius-sm);border:1px solid var(--border-mid);background:#fff;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;text-align:center;text-decoration:none;display:block;color:var(--ink);}
+    .share-btn:hover{background:var(--surface-2);}
+    .share-btn.qr-btn{background:var(--coral);color:#fff;border-color:var(--coral);grid-column:span 2;}
+    .share-btn.qr-btn:hover{background:var(--coral-dark);}
+    .no-website-card{background:var(--coral-light);border:1px solid var(--coral-mid);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;}
+    .nwc-title{font-size:14px;font-weight:500;color:var(--coral-dark);margin-bottom:6px;}
+    .nwc-p{font-size:12px;color:var(--coral-dark);opacity:0.8;line-height:1.5;margin-bottom:12px;}
+    .nwc-url{font-size:11px;font-family:monospace;background:rgba(216,90,48,0.1);padding:6px 10px;border-radius:6px;color:var(--coral-dark);word-break:break-all;margin-bottom:10px;}
+    .nwc-copy{font-size:12px;font-weight:500;padding:8px 16px;background:var(--coral);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-body);width:100%;transition:all 0.15s;}
+    .nwc-copy:hover{background:var(--coral-dark);}
+    .mll-badge{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px;margin-top:8px;cursor:pointer;transition:all 0.15s;}
+    .mll-badge:hover{border-color:var(--coral);}
+    .mll-badge-icon{width:28px;height:28px;background:var(--coral);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .mll-badge-text{font-size:11px;font-weight:500;color:var(--ink);}
+    .mll-badge-sub{font-size:10px;color:var(--ink-muted);}
+    .skeleton{background:var(--surface-3);border-radius:4px;animation:pulse 1.4s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    @media(max-width:900px){.biz-layout{grid-template-columns:1fr;}.biz-sidebar{order:-1;}.biz-hero-inner{grid-template-columns:auto 1fr;}.biz-actions{display:none;}}
+    @media(max-width:600px){.product-grid-mini{grid-template-columns:repeat(2,1fr);}.share-btns{grid-template-columns:1fr;}.share-btn.qr-btn{grid-column:1;}}
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav scrolled has-mobile" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div class="nav-links">
+        <a href="directory.html" data-en="Directory" data-es="Directorio">Directory</a>
+        <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+        <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+        <a href="voz.html">La Voz Latino</a>
+        <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+        <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+        <a href="enroll.html" class="btn-cta" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+      </div>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="directory.html" data-en="Directory" data-es="Directorio">Directory</a>
+      <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+      <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+      <a href="voz.html">La Voz Latino</a>
+      <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+      <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
+      <div class="lang-toggle" style="margin:4px 12px 8px;">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <a href="login.html" style="color:var(--coral);font-weight:500;" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+      <a href="enroll.html" class="btn-cta" style="margin-top:8px;text-align:center;" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="biz-hero" id="biz-hero">
+    <div class="container">
+      <div class="biz-hero-inner">
+        <div class="biz-avatar" id="biz-avatar" style="background:#EBF2FF;">🏢</div>
+        <div class="biz-info">
+          <h1 id="biz-name">Loading...</h1>
+          <div class="biz-meta-row">
+            <span class="biz-cat-badge" id="biz-cat">—</span>
+            <span class="biz-location" id="biz-location">—</span>
+          </div>
+          <div class="biz-rating-row">
+            <span class="biz-stars" id="biz-stars">★★★★★</span>
+            <span class="biz-rating-num" id="biz-rating">—</span>
+            <span class="biz-review-count" id="biz-review-count"></span>
+          </div>
+        </div>
+        <div class="biz-actions">
+          <a href="#" class="btn-call" id="btn-call">📞 Call now</a>
+          <a href="#" class="btn-website" id="btn-website" target="_blank">🌐 Visit website</a>
+          <button class="btn-qr" onclick="window.location='biz-qr.html?id='+bizSlug" data-en="📱 Get QR code" data-es="📱 Obtener código QR">📱 Get QR code</button>
+        </div>
+      </div>
+      <div class="biz-tabs">
+        <div class="biz-tab active" onclick="showTab('overview',this)" data-en="Overview" data-es="Resumen">Overview</div>
+        <div class="biz-tab" onclick="showTab('products',this)" data-en="Products" data-es="Productos">Products</div>
+        <div class="biz-tab" onclick="showTab('reviews',this)" data-en="Reviews" data-es="Reseñas">Reviews</div>
+        <div class="biz-tab" onclick="showTab('hours',this)" data-en="Hours" data-es="Horario">Hours</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="container">
+    <div class="biz-layout">
+      <div class="biz-main">
+
+        <!-- OVERVIEW TAB -->
+        <div id="tab-overview">
+          <div class="biz-card-section">
+            <div class="bcs-title" data-en="About this business" data-es="Sobre este negocio">About this business</div>
+            <div class="biz-desc-text" id="biz-desc">Loading...</div>
+            <div class="biz-tags-wrap" id="biz-tags"></div>
+          </div>
+          <div class="biz-card-section" id="products-preview" style="display:none;">
+            <div class="bcs-title" data-en="Products for sale" data-es="Productos a la venta">Products for sale</div>
+            <div class="product-grid-mini" id="products-mini"></div>
+            <a href="marketplace.html" style="display:inline-block;margin-top:12px;font-size:13px;color:var(--coral);" data-en="View all in marketplace →" data-es="Ver todo en el mercado →">View all in marketplace →</a>
+          </div>
+        </div>
+
+        <!-- PRODUCTS TAB -->
+        <div id="tab-products" style="display:none;">
+          <div class="biz-card-section">
+            <div class="bcs-title" data-en="Products &amp; services" data-es="Productos y servicios">Products &amp; services</div>
+            <div class="product-grid-mini" id="products-full"></div>
+            <div id="no-products" style="display:none;font-size:14px;color:var(--ink-muted);padding:20px 0;" data-en="No products listed yet." data-es="Todavía no hay productos.">No products listed yet.</div>
+          </div>
+        </div>
+
+        <!-- REVIEWS TAB -->
+        <div id="tab-reviews" style="display:none;">
+          <div class="biz-card-section">
+            <div class="bcs-title"><span data-en="Customer reviews" data-es="Reseñas de clientes">Customer reviews</span> <span id="review-count-label" style="font-weight:300;color:var(--ink-muted);font-size:13px;"></span></div>
+            <div class="review-list" id="review-list"></div>
+            <div class="review-form">
+              <div class="rf-title" data-en="Leave a review" data-es="Deja una reseña">Leave a review</div>
+              <div class="star-select" id="star-select">
+                <button class="star-btn" data-v="1" onclick="setRating(1)">★</button>
+                <button class="star-btn" data-v="2" onclick="setRating(2)">★</button>
+                <button class="star-btn" data-v="3" onclick="setRating(3)">★</button>
+                <button class="star-btn" data-v="4" onclick="setRating(4)">★</button>
+                <button class="star-btn" data-v="5" onclick="setRating(5)">★</button>
+              </div>
+              <input class="rf-input" id="rf-name" placeholder="Your name" data-en-ph="Your name" data-es-ph="Tu nombre" type="text">
+              <input class="rf-input" id="rf-email" placeholder="Your email (not shown publicly)" data-en-ph="Your email (not shown publicly)" data-es-ph="Tu correo (no se muestra públicamente)" type="email">
+              <textarea class="rf-textarea" id="rf-text" placeholder="Tell others about your experience..." data-en-ph="Tell others about your experience..." data-es-ph="Cuéntales a otros sobre tu experiencia..."></textarea>
+              <button class="rf-submit" onclick="submitReview()" data-en="Submit review" data-es="Enviar reseña">Submit review</button>
+              <span id="rf-msg" style="font-size:12px;margin-left:10px;"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HOURS TAB -->
+        <div id="tab-hours" style="display:none;">
+          <div class="biz-card-section">
+            <div class="bcs-title" data-en="Business hours" data-es="Horario de atención">Business hours</div>
+            <div class="hours-grid" id="hours-grid">
+              <div class="hours-day">Monday</div><div class="hours-time">—</div>
+              <div class="hours-day">Tuesday</div><div class="hours-time">—</div>
+              <div class="hours-day">Wednesday</div><div class="hours-time">—</div>
+              <div class="hours-day">Thursday</div><div class="hours-time">—</div>
+              <div class="hours-day">Friday</div><div class="hours-time">—</div>
+              <div class="hours-day">Saturday</div><div class="hours-time">—</div>
+              <div class="hours-day">Sunday</div><div class="hours-time">—</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="biz-sidebar">
+
+        <!-- No website card -->
+        <div class="no-website-card" id="no-website-card" style="display:none;">
+          <div class="nwc-title" data-en="🌐 This is their free website" data-es="🌐 Este es su sitio web gratis">🌐 This is their free website</div>
+          <div class="nwc-p" data-en="This business doesn't have a separate website — this page on MyLatinoList is their digital home. Share it with friends and family!" data-es="Este negocio no tiene un sitio web aparte — esta página en MyLatinoList es su hogar digital. ¡Compártela con tu familia y amigos!">This business doesn't have a separate website — this page on MyLatinoList is their digital home. Share it with friends and family!</div>
+          <div class="nwc-url" id="biz-url-display"></div>
+          <button class="nwc-copy" onclick="copyBizUrl()" data-en="Copy link to share" data-es="Copiar enlace para compartir">Copy link to share</button>
+          <div class="mll-badge" onclick="window.location='enroll.html'">
+            <div class="mll-badge-icon"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></div>
+            <div><div class="mll-badge-text" data-en="Listed on MyLatinoList" data-es="Listado en MyLatinoList">Listed on MyLatinoList</div><div class="mll-badge-sub" data-en="Free business listing" data-es="Listado de negocio gratis">Free business listing</div></div>
+          </div>
+        </div>
+
+        <!-- Contact card -->
+        <div class="contact-card">
+          <div class="cc-title" data-en="Contact &amp; location" data-es="Contacto y ubicación">Contact &amp; location</div>
+          <div class="cc-row"><span class="cc-icon">📞</span><div class="cc-val"><a href="#" id="cc-phone">—</a></div></div>
+          <div class="cc-row"><span class="cc-icon">📧</span><div class="cc-val"><a href="#" id="cc-email">—</a></div></div>
+          <div class="cc-row"><span class="cc-icon">🌐</span><div class="cc-val"><a href="#" id="cc-website" target="_blank">—</a></div></div>
+          <div class="cc-row"><span class="cc-icon">📍</span><div class="cc-val" id="cc-address">—</div></div>
+          <div id="map-placeholder" style="margin-top:10px;"></div>
+          <div id="map-directions" style="margin-top:6px;display:none;"></div>
+        </div>
+
+        <!-- Share card -->
+        <div class="share-card">
+          <div class="cc-title" data-en="Share this business" data-es="Comparte este negocio">Share this business</div>
+          <div style="font-size:12px;color:var(--ink-muted);margin-bottom:10px;" data-en="Help them get more customers — share their listing with friends and family." data-es="Ayúdalos a conseguir más clientes — comparte su listado con tu familia y amigos.">Help them get more customers — share their listing with friends and family.</div>
+          <div class="share-btns">
+            <a href="#" class="share-btn" id="share-whatsapp" target="_blank">💬 WhatsApp</a>
+            <a href="#" class="share-btn" id="share-facebook" target="_blank">👍 Facebook</a>
+            <button class="share-btn" onclick="copyBizUrl()" data-en="🔗 Copy link" data-es="🔗 Copiar enlace">🔗 Copy link</button>
+            <button class="share-btn" onclick="nativeShare()" data-en="↗ Share" data-es="↗ Compartir">↗ Share</button>
+            <a href="#" class="share-btn qr-btn" id="get-qr-btn" data-en="📱 Get QR code &amp; marketing kit" data-es="📱 Obtener código QR y kit de marketing">📱 Get QR code &amp; marketing kit</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+const API = window.MLL_CONFIG.API_URL;
+const slug = new URLSearchParams(window.location.search).get('id') || '';
+let bizSlug = slug;
+
+function normalizeUrl(url) {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return 'https://' + url;
+}
+let bizData = null;
+let selectedRating = 0;
+
+function showTab(name, el) {
+  ['overview','products','reviews','hours'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name?'block':'none';
+  });
+  document.querySelectorAll('.biz-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setRating(n) {
+  selectedRating = n;
+  document.querySelectorAll('.star-btn').forEach((b,i) => b.classList.toggle('sel', i < n));
+}
+
+function starsHtml(rating) {
+  const n = Math.round(rating);
+  return '★'.repeat(n) + '☆'.repeat(5-n);
+}
+
+async function loadBusiness() {
+  if (!slug) { document.getElementById('biz-name').textContent = 'Business not found'; return; }
+
+  // Track visit with source
+  const src = new URLSearchParams(window.location.search).get('src') || 'direct';
+
+  try {
+    const res  = await fetch(`${API}/api/businesses/${slug}?src=${src}`);
+    const data = await res.json();
+    const b    = data.business;
+    if (!b) { document.getElementById('biz-name').textContent = 'Business not found'; return; }
+
+    bizData = b;
+    bizSlug = b.slug;
+
+    // Update page meta
+    document.getElementById('page-title').textContent  = `${b.name} — MyLatinoList`;
+    document.getElementById('page-desc').content       = b.description || `${b.name} on MyLatinoList`;
+
+    // Hero avatar — real photo or emoji fallback
+    const avatarEl = document.getElementById('biz-avatar')
+    if (b.logo_url) {
+      avatarEl.innerHTML = `<img src="${b.logo_url}" alt="${b.name}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`
+      avatarEl.style.background = 'transparent'
+      avatarEl.style.padding = '0'
+    } else {
+      avatarEl.style.background = b.bg_color || '#EBF2FF'
+      avatarEl.textContent = b.emoji || '🏢'
+    }
+    document.getElementById('biz-name').textContent         = b.name;
+    document.getElementById('biz-cat').textContent          = b.category || '';
+    document.getElementById('biz-location').textContent     = `${b.city}, ${b.state}`;
+    document.getElementById('biz-stars').textContent        = starsHtml(b.rating || 0);
+    document.getElementById('biz-rating').textContent       = b.rating ? Number(b.rating).toFixed(1) : 'No reviews yet';
+    document.getElementById('biz-review-count').textContent = b.review_count ? `(${b.review_count} reviews)` : '';
+
+    // Call/website buttons
+    const callBtn = document.getElementById('btn-call');
+    callBtn.href = b.phone ? `tel:${b.phone}` : '#';
+    callBtn.textContent = b.phone ? `📞 ${b.phone}` : '📞 No phone listed';
+
+    const webBtn = document.getElementById('btn-website');
+    if (b.website) { webBtn.href = normalizeUrl(b.website); webBtn.textContent = '🌐 Visit website'; }
+    else { webBtn.style.display = 'none'; }
+
+    // QR button
+    document.getElementById('get-qr-btn').href = `biz-qr.html?id=${b.slug}`;
+
+    // Description
+    document.getElementById('biz-desc').textContent = b.description || 'No description provided.';
+
+    // Tags
+    const tagsWrap = document.getElementById('biz-tags');
+    if (b.tags?.length) {
+      tagsWrap.innerHTML = b.tags.map(t => `<span class="biz-tag">${t}</span>`).join('');
+    }
+
+    // Contact sidebar
+    const phone = document.getElementById('cc-phone');
+    phone.textContent = b.phone || 'Not listed'; if(b.phone) phone.href = `tel:${b.phone}`;
+
+    const email = document.getElementById('cc-email');
+    email.textContent = b.email || 'Not listed'; if(b.email) email.href = `mailto:${b.email}`;
+
+    const web = document.getElementById('cc-website');
+    if (b.website) { const wu = normalizeUrl(b.website); web.textContent = wu.replace('https://','').replace('http://',''); web.href = wu; }
+    else { web.textContent = 'No website — this page is their home!'; web.href = '#'; }
+
+    document.getElementById('cc-address').textContent = [b.address, b.city, b.state, b.zip].filter(Boolean).join(', ') || `${b.city}, ${b.state}`;
+
+    // Map embed
+    const mapPlaceholder = document.getElementById('map-placeholder');
+    const mapDirections  = document.getElementById('map-directions');
+    if (b.city || b.state) {
+      const q = encodeURIComponent([b.city, b.state].filter(Boolean).join(', '));
+      mapPlaceholder.innerHTML = `<iframe src="https://maps.google.com/maps?q=${q}&output=embed&z=13" width="100%" height="200" style="border:0;border-radius:8px;" allowfullscreen loading="lazy"></iframe>`;
+      mapDirections.style.display = 'block';
+      mapDirections.innerHTML = `<a href="https://www.google.com/maps/search/${q}" target="_blank" rel="noopener" style="font-size:12px;color:var(--coral);text-decoration:none;">📍 Get directions →</a>`;
+    } else {
+      mapPlaceholder.innerHTML = '<div style="height:80px;background:var(--surface-2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink-muted);border:1px solid var(--border);">Location not specified</div>';
+    }
+
+    // JSON-LD + dynamic meta tags
+    injectJsonLd(b)
+
+    // No website card
+    const bizPageUrl = `https://mylatinolist.io/biz/${b.slug}`;
+    document.getElementById('biz-url-display').textContent = bizPageUrl;
+    if (!b.website) {
+      document.getElementById('no-website-card').style.display = 'block';
+    }
+
+    // Share links
+    const shareUrl  = encodeURIComponent(bizPageUrl);
+    const shareTxt  = encodeURIComponent(`Check out ${b.name} on MyLatinoList!`);
+    document.getElementById('share-whatsapp').href = `https://wa.me/?text=${shareTxt}%20${shareUrl}`;
+    document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+
+    // Hours
+    if (b.hours) {
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      const keys = ['mon','tue','wed','thu','fri','sat','sun'];
+      const today = ['sun','mon','tue','wed','thu','fri','sat'][new Date().getDay()];
+      const grid  = document.getElementById('hours-grid');
+      grid.innerHTML = days.map((d,i) => {
+        const k   = keys[i];
+        const val = b.hours[k] || 'Closed';
+        const isTd= k === today;
+        return `<div class="hours-day${isTd?' hours-today':''}">${d}${isTd?' (today)':''}</div><div class="hours-time${isTd?' hours-today':''}">${val}</div>`;
+      }).join('');
+    }
+
+    // Load products
+    loadProducts(b.id);
+    // Load reviews
+    loadReviews(b.id, b.review_count);
+
+  } catch(err) {
+    document.getElementById('biz-name').textContent = 'Could not load business';
+  }
+}
+
+async function loadProducts(bizId) {
+  try {
+    const res  = await fetch(`${API}/api/marketplace`);
+    const data = await res.json();
+    const prods = (data.products||[]).filter(p => p.business_id === bizId);
+    if (!prods.length) return;
+
+    document.getElementById('products-preview').style.display = 'block';
+    const miniHtml = prods.slice(0,3).map(p => `
+      <div class="product-card">
+        <div class="product-img" style="background:${p.bg_color||'#EBF2FF'}"><span style="font-size:32px;">${p.emoji||'📦'}</span></div>
+        <div class="product-body">
+          <div class="product-name">${p.name}</div>
+          <div class="product-bottom"><span class="product-price">$${Number(p.price).toFixed(2)}</span><span class="product-rating">★${p.rating}</span></div>
+        </div>
+      </div>`).join('');
+    document.getElementById('products-mini').innerHTML = miniHtml;
+    document.getElementById('products-full').innerHTML = prods.map(p => `
+      <div class="product-card">
+        <div class="product-img" style="background:${p.bg_color||'#EBF2FF'}"><span style="font-size:32px;">${p.emoji||'📦'}</span></div>
+        <div class="product-body">
+          <div class="product-name">${p.name}</div>
+          <div class="product-bottom"><span class="product-price">$${Number(p.price).toFixed(2)}</span><span class="product-rating">★${p.rating}</span></div>
+        </div>
+      </div>`).join('');
+  } catch {}
+}
+
+async function loadReviews(bizId, count) {
+  document.getElementById('review-count-label').textContent = count ? `(${count})` : '';
+  const list = document.getElementById('review-list');
+  list.innerHTML = '<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">Loading reviews...</div>';
+
+  try {
+    const res  = await fetch(`${API}/api/reviews?business_id=${bizId}`);
+    const data = await res.json();
+    const reviews = data.reviews || [];
+
+    if (!reviews.length) {
+      list.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:12px 0;">No reviews yet. Be the first to leave one!</div>`;
+      return;
+    }
+
+    list.innerHTML = reviews.map(r => {
+      const initials = r.reviewer_name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+      const stars    = '★'.repeat(r.rating) + '☆'.repeat(5-r.rating);
+      const date     = new Date(r.created_at).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+      return `
+        <div class="review-item">
+          <div class="review-header">
+            <div class="review-avatar">${initials}</div>
+            <div>
+              <div class="review-name">${r.reviewer_name}</div>
+              <div class="review-date">${date}</div>
+            </div>
+          </div>
+          <div class="review-stars">${stars}</div>
+          <div class="review-text">${r.body}</div>
+        </div>`;
+    }).join('');
+  } catch {
+    list.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">Could not load reviews.</div>`;
+  }
+}
+
+async function submitReview() {
+  if (!selectedRating) { document.getElementById('rf-msg').textContent = 'Please select a star rating.'; return; }
+  const name  = document.getElementById('rf-name').value.trim();
+  const email = document.getElementById('rf-email').value.trim();
+  const text  = document.getElementById('rf-text').value.trim();
+  if (!name) { document.getElementById('rf-msg').textContent = 'Please enter your name.'; return; }
+  if (!text) { document.getElementById('rf-msg').textContent = 'Please write your review.'; return; }
+
+  const btn = document.querySelector('.rf-submit');
+  const msg = document.getElementById('rf-msg');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+  msg.textContent = ''; msg.style.color = '';
+
+  try {
+    const res = await fetch(`${API}/api/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        business_id:    bizData?.id,
+        reviewer_name:  name,
+        reviewer_email: email || null,
+        rating:         selectedRating,
+        body:           text,
+      })
+    });
+    const data = await res.json();
+    btn.textContent = 'Submit review'; btn.disabled = false;
+
+    if (res.ok) {
+      msg.style.color = 'var(--teal-dark)';
+      msg.textContent = '✓ Review submitted — thank you!';
+      document.getElementById('rf-name').value  = '';
+      document.getElementById('rf-email').value = '';
+      document.getElementById('rf-text').value  = '';
+      setRating(0);
+      // Reload reviews to show the new one
+      setTimeout(() => loadReviews(bizData?.id, null), 500);
+    } else {
+      msg.style.color = 'var(--coral)';
+      msg.textContent = data.error || 'Could not submit. Please try again.';
+    }
+  } catch {
+    btn.textContent = 'Submit review'; btn.disabled = false;
+    msg.style.color = 'var(--coral)';
+    msg.textContent = 'Network error. Please try again.';
+  }
+}
+
+function copyBizUrl() {
+  const url = `https://mylatinolist.io/biz/${bizSlug}`;
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Link copied! Share it anywhere.');
+  }).catch(() => { prompt('Copy this link:', url); });
+}
+
+function nativeShare() {
+  const url = `https://mylatinolist.io/biz/${bizSlug}`;
+  if (navigator.share) {
+    navigator.share({ title: bizData?.name, text: `Check out ${bizData?.name} on MyLatinoList!`, url });
+  } else { copyBizUrl(); }
+}
+
+loadBusiness();
+
+function injectJsonLd(b) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: b.name,
+    description: b.description || '',
+    url: `https://mylatinolist.io/pages/business.html?id=${b.slug}`,
+    telephone: b.phone || undefined,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: b.city || '',
+      addressRegion: b.state || '',
+      postalCode: b.zip || '',
+      addressCountry: 'US',
+    },
+    ...(b.logo_url ? { image: b.logo_url } : {}),
+    ...(b.website  ? { sameAs: [b.website] } : {}),
+    ...(b.review_count > 0 ? {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: b.average_rating || 5,
+        reviewCount: b.review_count,
+      }
+    } : {}),
+  }
+  const s = document.createElement('script')
+  s.type = 'application/ld+json'
+  s.textContent = JSON.stringify(schema)
+  document.head.appendChild(s)
+
+  // Also update dynamic meta tags
+  document.getElementById('page-title').textContent = `${b.name} — MyLatinoList`
+  document.getElementById('page-desc').setAttribute('content',
+    b.description
+      ? b.description.slice(0, 155)
+      : `${b.name} — Latino-owned business in ${b.city}, ${b.state} on MyLatinoList`)
+
+  // OG tags
+  const setMeta = (prop, val, attr = 'property') => {
+    let el = document.querySelector(`meta[${attr}="${prop}"]`)
+    if (!el) { el = document.createElement('meta'); el.setAttribute(attr, prop); document.head.appendChild(el) }
+    el.setAttribute('content', val)
+  }
+  const pageUrl = `https://mylatinolist.io/pages/business.html?id=${b.slug}`
+  setMeta('og:title',       `${b.name} — MyLatinoList`)
+  setMeta('og:description', b.description?.slice(0, 155) || `${b.name} on MyLatinoList`)
+  setMeta('og:url',         pageUrl)
+  setMeta('og:type',        'business.business')
+  setMeta('og:image',       b.logo_url || 'https://mylatinolist.io/og-default.png')
+  setMeta('twitter:card',   'summary_large_image', 'name')
+}
+</script>
+  <script src="/js/nav.js"></script>
+</body>
+</html>

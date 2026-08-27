@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Voz Latino — MyLatinoList</title>
+  <meta name="description" content="Bilingual resources, grants, loans, legal aid, and licensing guides for Latino entrepreneurs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body { background: var(--surface-2); padding-top: var(--nav-h); }
+    .voz-hero { background: linear-gradient(135deg, #534AB7 0%, #3730A3 100%); padding: 64px 0 48px; text-align: center; color: #fff; }
+    .voz-hero-stats { display: flex; align-items: center; justify-content: center; gap: 40px; margin-top: 32px; flex-wrap: wrap; }
+    .voz-stat { text-align: center; }
+    .voz-stat-n { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: #fff; }
+    .voz-stat-l { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+    .filter-strip { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 0; position: sticky; top: var(--nav-h); z-index: 50; }
+    .filter-inner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .filter-btn { font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--border-mid); background: #fff; color: var(--ink-soft); cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
+    .filter-btn:hover { border-color: var(--purple); color: var(--purple); }
+    .filter-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+    .filter-search { flex: 1; max-width: 280px; padding: 8px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-mid); font-family: var(--font-body); font-size: 13px; outline: none; }
+    .filter-search:focus { border-color: var(--purple); }
+    .filter-count { font-size: 13px; color: var(--ink-muted); margin-left: auto; }
+    .res-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; padding: 36px 0 80px; }
+    .res-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; transition: all 0.2s; cursor: pointer; }
+    .res-card:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(0,0,0,0.07); border-color: var(--purple); }
+    .rc-icon { width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 12px; }
+    .rc-title { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 6px; }
+    .rc-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.55; margin-bottom: 12px; }
+    .rc-footer { display: flex; align-items: center; justify-content: space-between; }
+    .rc-tag { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; display: inline-block; }
+    .rc-bilingual { font-size: 10px; color: var(--teal-dark); background: var(--teal-light); padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+    .skeleton { background: var(--surface-3); border-radius: var(--radius-md); animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .skel-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; }
+    .empty-state { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--ink-muted); }
+    .enroll-banner { background: linear-gradient(135deg, #534AB7, #3730A3); border-radius: var(--radius-xl); padding: 40px; text-align: center; margin-bottom: 40px; }
+    @media(max-width:768px) { .res-grid { grid-template-columns: 1fr; } .voz-hero-stats { gap: 24px; } }
+    @media(max-width:1024px) { .res-grid { grid-template-columns: repeat(2,1fr); } }
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav scrolled has-mobile" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div class="nav-links">
+        <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+        <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+        <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+        <a href="voz.html" style="color:var(--coral);font-weight:500;">La Voz Latino</a>
+        <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+        <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+        <a href="enroll.html" class="btn-cta" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+      </div>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+      <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+      <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+      <a href="voz.html" style="color:var(--coral);font-weight:500;">La Voz Latino</a>
+      <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+      <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
+      <div class="lang-toggle" style="margin:4px 12px 8px;">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <a href="login.html" style="color:var(--coral);font-weight:500;" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+      <a href="enroll.html" class="btn-cta" style="margin-top:8px;text-align:center;" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="voz-hero">
+    <div class="container">
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:12px;">La Voz Latino</div>
+      <h1 data-en="Your voice. Your resources." data-es="Tu voz. Tus recursos." style="font-family:var(--font-display);font-size:clamp(32px,5vw,52px);font-weight:700;color:#fff;letter-spacing:-0.02em;margin-bottom:14px;">Your voice. Your resources.</h1>
+      <p data-en="Bilingual guides, grants, loans, legal aid, and licensing resources — all curated for Latino entrepreneurs." data-es="Guías bilingües, subvenciones, préstamos, ayuda legal y recursos de licencias — todo seleccionado para emprendedores latinos." style="font-size:16px;color:rgba(255,255,255,0.65);max-width:500px;margin:0 auto;font-weight:300;">Bilingual guides, grants, loans, legal aid, and licensing resources — all curated for Latino entrepreneurs.</p>
+      <div class="voz-hero-stats">
+        <div class="voz-stat"><div class="voz-stat-n" id="stat-resources">—</div><div class="voz-stat-l" data-en="Resources available" data-es="Recursos disponibles">Resources available</div></div>
+        <div class="voz-stat"><div class="voz-stat-n">100%</div><div class="voz-stat-l" data-en="Bilingual EN / ES" data-es="Bilingüe EN / ES">Bilingual EN / ES</div></div>
+        <div class="voz-stat"><div class="voz-stat-n" data-en="Free" data-es="Gratis">Free</div><div class="voz-stat-l" data-en="Always free to access" data-es="Siempre gratis">Always free to access</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER STRIP -->
+  <div class="filter-strip">
+    <div class="container filter-inner">
+      <button class="filter-btn active" data-cat="" onclick="setFilter(this,'')" data-en="All" data-es="Todos">All</button>
+      <button class="filter-btn" data-cat="finance" onclick="setFilter(this,'finance')" data-en="💰 Finance" data-es="💰 Finanzas">💰 Finance</button>
+      <button class="filter-btn" data-cat="grants" onclick="setFilter(this,'grants')" data-en="🤝 Grants" data-es="🤝 Subvenciones">🤝 Grants</button>
+      <button class="filter-btn" data-cat="legal" onclick="setFilter(this,'legal')" data-en="⚖️ Legal" data-es="⚖️ Legal">⚖️ Legal</button>
+      <button class="filter-btn" data-cat="tax" onclick="setFilter(this,'tax')" data-en="🧾 Tax" data-es="🧾 Impuestos">🧾 Tax</button>
+      <button class="filter-btn" data-cat="immigration" onclick="setFilter(this,'immigration')" data-en="🛂 Immigration" data-es="🛂 Inmigración">🛂 Immigration</button>
+      <button class="filter-btn" data-cat="licensing" onclick="setFilter(this,'licensing')" data-en="📋 Licensing" data-es="📋 Licencias">📋 Licensing</button>
+      <input class="filter-search" type="text" placeholder="Search resources..." data-en-ph="Search resources..." data-es-ph="Busca recursos..." id="res-search" oninput="renderResources()">
+      <span class="filter-count" id="res-count"></span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="res-grid" id="res-grid"></div>
+
+    <!-- Enroll banner -->
+    <div class="enroll-banner">
+      <h2 data-en="Ready to grow your business?" data-es="¿Listo para hacer crecer tu negocio?" style="font-family:var(--font-display);font-size:28px;font-weight:700;color:#fff;letter-spacing:-0.02em;margin-bottom:10px;">Ready to grow your business?</h2>
+      <p data-en="List your business on MyLatinoList — free directory listing, marketplace access, and all these resources in one place." data-es="Registra tu negocio en MyLatinoList — listado gratis en el directorio, acceso al mercado y todos estos recursos en un solo lugar." style="font-size:15px;color:rgba(255,255,255,0.75);margin-bottom:24px;font-weight:300;">List your business on MyLatinoList — free directory listing, marketplace access, and all these resources in one place.</p>
+      <a href="enroll.html" style="font-size:14px;font-weight:500;padding:12px 28px;background:#fff;color:#534AB7;border-radius:var(--radius-md);display:inline-block;transition:all 0.15s;" data-en="Enroll your business — it's free →" data-es="Registra tu negocio — es gratis →">Enroll your business — it's free →</a>
+    </div>
+  </div>
+
+<script>
+const API = window.MLL_CONFIG.API_URL;
+let allResources = [];
+let activeCategory = '';
+
+function skelCards() {
+  return Array(6).fill(`
+    <div class="skel-card">
+      <div class="skeleton" style="width:44px;height:44px;border-radius:8px;margin-bottom:12px;"></div>
+      <div class="skeleton" style="height:15px;width:70%;border-radius:4px;margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:12px;width:95%;border-radius:4px;margin-bottom:6px;"></div>
+      <div class="skeleton" style="height:12px;width:80%;border-radius:4px;"></div>
+    </div>`).join('');
+}
+
+function setFilter(el, cat) {
+  activeCategory = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderResources();
+}
+
+function renderResources() {
+  const q    = document.getElementById('res-search').value.trim().toLowerCase();
+  const grid = document.getElementById('res-grid');
+
+  let filtered = allResources.filter(r => {
+    if (activeCategory && r.category !== activeCategory) return false;
+    if (q && !r.title.toLowerCase().includes(q) && !r.description.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  document.getElementById('res-count').textContent = filtered.length ? t('{n} resources', {n: filtered.length}) : '';
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">🔍</div><p style="font-size:15px;">${t('No resources found. Try a different filter.')}</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(r => `
+    <div class="res-card">
+      <div class="rc-icon" style="background:${r.bg_color || '#EEF0FE'}">${r.icon || '📄'}</div>
+      <div class="rc-title">${r.title}</div>
+      <div class="rc-desc">${r.description}</div>
+      <div class="rc-footer">
+        <span class="rc-tag" style="background:${r.tag_bg || '#EEF0FE'};color:${r.tag_color || '#3C3489'}">${r.tag || r.category}</span>
+        ${r.is_bilingual ? '<span class="rc-bilingual">EN / ES</span>' : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function loadResources() {
+  const grid = document.getElementById('res-grid');
+  grid.innerHTML = skelCards();
+
+  try {
+    const res  = await fetch(`${API}/api/resources`);
+    const data = await res.json();
+    allResources = data.resources || [];
+
+    document.getElementById('stat-resources').textContent = allResources.length + '+';
+    renderResources();
+  } catch(err) {
+    grid.innerHTML = `<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">⚠️</div><p style="font-size:15px;">${t('Could not load resources. Please try again.')}</p></div>`;
+  }
+}
+
+// Re-render from the cached resources when the language toggles (no re-fetch).
+document.addEventListener('mll:langswitch', renderResources);
+
+loadResources();
+</script>
+  <script src="/js/nav.js"></script>
+</body>
+</html>

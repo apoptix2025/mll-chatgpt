@@ -1,0 +1,12 @@
+-- Email drip campaign tracking
+ALTER TABLE businesses
+  ADD COLUMN IF NOT EXISTS notified_day3  BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS notified_day7  BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS notified_day14 BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS notified_day30 BOOLEAN DEFAULT FALSE;
+
+-- Referral program
+ALTER TABLE businesses
+  ADD COLUMN IF NOT EXISTS referral_code    TEXT UNIQUE,
+  ADD COLUMN IF NOT EXISTS referred_by      TEXT,
+  ADD COLUMN IF NOT EXISTS referral_credits INTEGER DEFAULT 0;

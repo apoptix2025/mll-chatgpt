@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);min-height:100vh;display:flex;flex-direction:column;}
+    .login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 16px;}
+    .login-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);padding:40px 44px;width:100%;max-width:440px;}
+    .login-logo{text-align:center;margin-bottom:28px;}
+    .login-h{font-family:var(--font-display);font-size:26px;font-weight:500;color:var(--ink);margin-bottom:6px;text-align:center;letter-spacing:-0.02em;}
+    .login-sub{font-size:14px;color:var(--ink-muted);text-align:center;margin-bottom:28px;font-weight:300;}
+    .field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+    label{font-size:12px;font-weight:500;color:var(--ink-soft);}
+    input{padding:11px 14px;border-radius:var(--radius-md);border:1px solid var(--border-mid);background:var(--surface);font-family:var(--font-body);font-size:14px;color:var(--ink);outline:none;width:100%;transition:border-color 0.15s;}
+    input:focus{border-color:var(--coral);}
+    .login-btn{width:100%;padding:12px;border-radius:var(--radius-md);background:var(--coral);color:#fff;font-size:14px;font-weight:500;border:none;cursor:pointer;font-family:var(--font-body);transition:background 0.15s;margin-top:4px;}
+    .login-btn:hover{background:var(--coral-dark);}
+    .login-btn:disabled{opacity:0.5;cursor:default;}
+    .error-box{background:#FCEBEB;color:#791F1F;border-radius:var(--radius-md);padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;}
+    .login-footer{text-align:center;font-size:13px;color:var(--ink-muted);margin-top:20px;}
+    .login-footer a{color:var(--coral);}
+    .divider{display:flex;align-items:center;gap:12px;margin:18px 0;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+    .divider span{font-size:12px;color:var(--ink-muted);}
+    .forgot{font-size:12px;color:var(--coral);text-align:right;display:block;margin-top:-8px;margin-bottom:14px;cursor:pointer;}
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav scrolled">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div class="nav-actions" style="margin-left:auto;">
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+        </div>
+        <a href="/index.html" class="btn-ghost" data-en="← Back to home" data-es="← Volver al inicio">← Back to home</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <div style="width:48px;height:48px;background:var(--coral);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <svg width="24" height="24" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg>
+        </div>
+      </div>
+      <div class="login-h" data-en="Welcome back" data-es="Qué bueno verte de nuevo">Welcome back</div>
+      <div class="login-sub" data-en="Sign in to your mylatinolist business account" data-es="Inicia sesión en tu cuenta de negocio de mylatinolist">Sign in to your mylatinolist business account</div>
+
+      <div class="error-box" id="error-box"></div>
+
+      <div class="field"><label data-en="Email address" data-es="Correo electrónico">Email address</label><input id="l-email" type="email" placeholder="you@yourbusiness.com" data-en-ph="you@yourbusiness.com" data-es-ph="tu@tunegocio.com" autocomplete="email"></div>
+      <div class="field"><label data-en="Password" data-es="Contraseña">Password</label><input id="l-pw" type="password" placeholder="Your password" data-en-ph="Your password" data-es-ph="Tu contraseña" autocomplete="current-password"></div>
+      <a class="forgot" onclick="handleForgot()" data-en="Forgot your password?" data-es="¿Olvidaste tu contraseña?">Forgot your password?</a>
+      <button class="login-btn" id="login-btn" onclick="handleLogin()">Sign in →</button>
+
+      <div class="divider"><span data-en="or" data-es="o">or</span></div>
+      <div class="login-footer">
+        <span data-en="Don't have an account?" data-es="¿No tienes una cuenta?">Don't have an account?</span> <a href="enroll.html" data-en="Enroll your business — it's free" data-es="Registra tu negocio — es gratis">Enroll your business — it's free</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+const API = window.MLL_CONFIG.API_URL;
+
+// If already logged in go to dashboard
+if (sessionStorage.getItem('mll_token')) window.location.href = 'dashboard.html';
+
+document.getElementById('l-pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+
+function showError(msg) {
+  const el = document.getElementById('error-box');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function handleLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pw    = document.getElementById('l-pw').value;
+  const btn   = document.getElementById('login-btn');
+
+  if (!email || !pw) { showError('Please enter your email and password.'); return; }
+
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+  document.getElementById('error-box').style.display = 'none';
+
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pw }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      btn.textContent = 'Sign in →'; btn.disabled = false;
+      showError(data.error || 'Invalid email or password. Please try again.');
+      return;
+    }
+
+    sessionStorage.setItem('mll_token', data.access_token);
+    if (data.user?.id) sessionStorage.setItem('mll_user_id', data.user.id);
+    window.location.href = 'dashboard.html';
+
+  } catch {
+    btn.textContent = 'Sign in →'; btn.disabled = false;
+    showError('Network error — please check your connection and try again.');
+  }
+}
+
+async function handleForgot() {
+  const email = document.getElementById('l-email').value.trim();
+  if (!email) { showError('Enter your email address above first.'); return; }
+  await fetch(`${API}/api/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  document.getElementById('error-box').style.cssText = 'background:#E1F5EE;color:#085041;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:block;';
+  document.getElementById('error-box').textContent = 'If this email exists, a reset link has been sent.';
+}
+</script>
+  <script src="/js/nav.js"></script>
+</body></html>

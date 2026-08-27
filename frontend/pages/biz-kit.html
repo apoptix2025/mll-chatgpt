@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketing Kit — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .kit-page{max-width:760px;margin:0 auto;padding:48px 16px 100px;}
+    .kit-header{text-align:center;margin-bottom:36px;}
+    .kit-section{background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;margin-bottom:16px;}
+    .ks-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+    .ks-title{font-size:16px;font-weight:500;color:var(--ink);}
+    .ks-badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--teal-light);color:var(--teal-dark);}
+    /* Sticker preview */
+    .sticker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+    .sticker-wrap{text-align:center;}
+    .sticker-label{font-size:11px;color:var(--ink-muted);margin-bottom:8px;}
+    .sticker{border-radius:12px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:transform 0.15s;border:2px solid transparent;}
+    .sticker:hover{transform:scale(1.03);}
+    .sticker.coral{background:var(--coral);border-color:var(--coral-dark);}
+    .sticker.dark{background:#1a1714;border-color:#333;}
+    .sticker.white{background:#fff;border-color:var(--border-mid);}
+    .sticker-logo{font-size:11px;font-weight:500;}
+    .sticker-qr-box{background:#fff;border-radius:6px;padding:4px;}
+    .sticker-bizname{font-size:9px;font-weight:600;text-align:center;line-height:1.3;}
+    .sticker-tagline{font-size:8px;opacity:0.75;text-align:center;}
+    .dl-btn{font-size:13px;font-weight:500;padding:10px 20px;background:var(--coral);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;display:inline-block;text-decoration:none;}
+    .dl-btn:hover{background:var(--coral-dark);}
+    .dl-btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--border-mid);}
+    .dl-btn-ghost:hover{background:var(--surface-2);}
+    /* Social caption cards */
+    .caption-card{background:var(--surface-2);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:10px;position:relative;}
+    .caption-lang{font-size:10px;font-weight:500;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+    .caption-text{font-size:13px;color:var(--ink);line-height:1.6;padding-right:60px;}
+    .caption-copy{position:absolute;top:12px;right:12px;font-size:11px;font-weight:500;padding:5px 10px;background:#fff;border:1px solid var(--border-mid);border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;}
+    .caption-copy:hover{background:var(--coral);color:#fff;border-color:var(--coral);}
+    /* Badge */
+    .badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+    .badge-item{border-radius:var(--radius-md);padding:12px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;border:2px solid transparent;transition:all 0.15s;}
+    .badge-item:hover{transform:scale(1.02);}
+    .badge-item.coral{background:var(--coral);}
+    .badge-item.dark{background:#1a1714;}
+    .badge-item.teal{background:var(--teal);}
+    .badge-icon-wrap{width:28px;height:28px;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .badge-txt{display:flex;flex-direction:column;}
+    .badge-main{font-size:10px;font-weight:600;}
+    .badge-sub{font-size:8px;opacity:0.8;}
+    /* Checklist */
+    .checklist{display:flex;flex-direction:column;gap:8px;}
+    .cl-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface-2);border-radius:var(--radius-md);}
+    .cl-check{width:20px;height:20px;border-radius:50%;background:var(--teal-light);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+    .cl-text{font-size:13px;color:var(--ink);}
+    .cl-status{margin-left:auto;font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px;}
+    .cl-done{background:var(--teal-light);color:var(--teal-dark);}
+    .cl-todo{background:var(--surface-3);color:var(--ink-muted);}
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav scrolled">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div class="nav-actions" style="margin-left:auto;">
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+        </div>
+        <a href="login.html" class="btn-ghost">Sign in</a>
+        <a href="enroll.html" class="btn-cta">List your business</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="kit-page">
+    <div class="kit-header">
+      <div class="section-label">Marketing kit</div>
+      <h1 style="font-family:var(--font-display);font-size:clamp(26px,4vw,40px);font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:8px;" id="kit-biz-name">Your marketing kit</h1>
+      <p style="font-size:14px;color:var(--ink-soft);font-weight:300;max-width:500px;margin:0 auto;">Everything you need to promote your business — print-ready stickers, social captions, badges, and your QR code. All free.</p>
+    </div>
+
+    <!-- LAUNCH CHECKLIST -->
+    <div class="kit-section">
+      <div class="ks-head">
+        <div class="ks-title">🚀 Launch checklist</div>
+        <span class="ks-badge" id="checklist-progress">0 / 6 done</span>
+      </div>
+      <div class="checklist">
+        <div class="cl-item"><div class="cl-check">✓</div><div class="cl-text">Business enrolled on MyLatinoList</div><span class="cl-status cl-done">Done</span></div>
+        <div class="cl-item"><div class="cl-check">📸</div><div class="cl-text">Add profile photo or logo</div><span class="cl-status cl-todo" id="cl-photo">Pending</span></div>
+        <div class="cl-item"><div class="cl-check">🕐</div><div class="cl-text">Set your business hours</div><span class="cl-status cl-todo" id="cl-hours">Pending</span></div>
+        <div class="cl-item"><div class="cl-check">📱</div><div class="cl-text">Download &amp; print your QR code</div><span class="cl-status cl-todo" id="cl-qr">Pending</span></div>
+        <div class="cl-item"><div class="cl-check">📣</div><div class="cl-text">Share your listing on social media</div><span class="cl-status cl-todo" id="cl-social">Pending</span></div>
+        <div class="cl-item"><div class="cl-check">⭐</div><div class="cl-text">Ask your first customer for a review</div><span class="cl-status cl-todo" id="cl-review">Pending</span></div>
+      </div>
+    </div>
+
+    <!-- WINDOW STICKERS -->
+    <div class="kit-section">
+      <div class="ks-head">
+        <div class="ks-title">🏷️ Window &amp; door stickers</div>
+        <span class="ks-badge">Print ready</span>
+      </div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:16px;">Click any sticker to download as PNG. Print at any copy shop — recommended size: 3×3 inches.</p>
+      <div class="sticker-grid">
+        <div class="sticker-wrap">
+          <div class="sticker-label">Coral (default)</div>
+          <div class="sticker coral" onclick="downloadSticker('coral')" id="sticker-coral">
+            <div class="sticker-logo" style="color:#fff;">my<strong>latino</strong>list</div>
+            <div class="sticker-qr-box"><canvas id="sticker-qr-coral" width="60" height="60"></canvas></div>
+            <div class="sticker-bizname" id="sn-coral" style="color:#fff;"></div>
+            <div class="sticker-tagline" style="color:rgba(255,255,255,0.8);">Find us on mylatinolist.io</div>
+          </div>
+        </div>
+        <div class="sticker-wrap">
+          <div class="sticker-label">Dark</div>
+          <div class="sticker dark" onclick="downloadSticker('dark')" id="sticker-dark">
+            <div class="sticker-logo" style="color:#fff;">my<strong>latino</strong>list</div>
+            <div class="sticker-qr-box"><canvas id="sticker-qr-dark" width="60" height="60"></canvas></div>
+            <div class="sticker-bizname" id="sn-dark" style="color:#fff;"></div>
+            <div class="sticker-tagline" style="color:rgba(255,255,255,0.7);">Find us on mylatinolist.io</div>
+          </div>
+        </div>
+        <div class="sticker-wrap">
+          <div class="sticker-label">White</div>
+          <div class="sticker white" onclick="downloadSticker('white')" id="sticker-white">
+            <div class="sticker-logo" style="color:var(--coral);">my<strong>latino</strong>list</div>
+            <div class="sticker-qr-box" style="background:var(--surface-2);"><canvas id="sticker-qr-white" width="60" height="60"></canvas></div>
+            <div class="sticker-bizname" id="sn-white" style="color:var(--ink);"></div>
+            <div class="sticker-tagline" style="color:var(--ink-muted);">Find us on mylatinolist.io</div>
+          </div>
+        </div>
+      </div>
+      <a href="biz-qr.html" id="qr-page-link" class="dl-btn">📱 Download full-size QR code →</a>
+    </div>
+
+    <!-- SOCIAL MEDIA CAPTIONS -->
+    <div class="kit-section">
+      <div class="ks-head">
+        <div class="ks-title">📣 Social media captions</div>
+        <span class="ks-badge">Copy &amp; paste</span>
+      </div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:16px;">Use these captions on Instagram, Facebook, or WhatsApp to announce your listing.</p>
+      <div class="caption-card">
+        <div class="caption-lang">English — Instagram / Facebook</div>
+        <div class="caption-text" id="cap-en-1"></div>
+        <button class="caption-copy" onclick="copyCaption('cap-en-1')">Copy</button>
+      </div>
+      <div class="caption-card">
+        <div class="caption-lang">Español — Instagram / Facebook</div>
+        <div class="caption-text" id="cap-es-1"></div>
+        <button class="caption-copy" onclick="copyCaption('cap-es-1')">Copiar</button>
+      </div>
+      <div class="caption-card">
+        <div class="caption-lang">English — WhatsApp (short)</div>
+        <div class="caption-text" id="cap-en-2"></div>
+        <button class="caption-copy" onclick="copyCaption('cap-en-2')">Copy</button>
+      </div>
+      <div class="caption-card">
+        <div class="caption-lang">Español — WhatsApp (corto)</div>
+        <div class="caption-text" id="cap-es-2"></div>
+        <button class="caption-copy" onclick="copyCaption('cap-es-2')">Copiar</button>
+      </div>
+    </div>
+
+    <!-- LISTING BADGE -->
+    <div class="kit-section">
+      <div class="ks-head">
+        <div class="ks-title">🏅 "Listed on MyLatinoList" badge</div>
+        <span class="ks-badge">For your website or bio</span>
+      </div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:16px;">Add this badge to your website, email signature, or social media bio.</p>
+      <div class="badge-grid">
+        <div class="badge-item coral" onclick="copyBadgeCode('coral')">
+          <div class="badge-icon-wrap"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="var(--coral)"/></svg></div>
+          <div class="badge-txt"><div class="badge-main" style="color:#fff;">Listed on</div><div class="badge-sub" style="color:rgba(255,255,255,0.85);">MyLatinoList</div></div>
+        </div>
+        <div class="badge-item dark" onclick="copyBadgeCode('dark')">
+          <div class="badge-icon-wrap"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="#1a1714"/></svg></div>
+          <div class="badge-txt"><div class="badge-main" style="color:#fff;">Listed on</div><div class="badge-sub" style="color:rgba(255,255,255,0.75);">MyLatinoList</div></div>
+        </div>
+        <div class="badge-item teal" onclick="copyBadgeCode('teal')">
+          <div class="badge-icon-wrap"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="var(--teal)"/></svg></div>
+          <div class="badge-txt"><div class="badge-main" style="color:#fff;">Listed on</div><div class="badge-sub" style="color:rgba(255,255,255,0.85);">MyLatinoList</div></div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--ink-muted);">Click any badge to copy the embed code for your website.</p>
+    </div>
+
+    <!-- QUICK LINKS -->
+    <div class="kit-section">
+      <div class="ks-head"><div class="ks-title">🔗 Your quick links</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-2);border-radius:var(--radius-md);">
+          <div><div style="font-size:12px;font-weight:500;color:var(--ink);">Your listing page</div><div style="font-size:11px;color:var(--ink-muted);" id="ql-listing">—</div></div>
+          <button onclick="copyText(document.getElementById('ql-listing').textContent)" style="font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border-mid);background:#fff;cursor:pointer;font-family:var(--font-body);">Copy</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-2);border-radius:var(--radius-md);">
+          <div><div style="font-size:12px;font-weight:500;color:var(--ink);">QR code link (tracked)</div><div style="font-size:11px;color:var(--ink-muted);" id="ql-qr">—</div></div>
+          <button onclick="copyText(document.getElementById('ql-qr').textContent)" style="font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border-mid);background:#fff;cursor:pointer;font-family:var(--font-body);">Copy</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-2);border-radius:var(--radius-md);">
+          <div><div style="font-size:12px;font-weight:500;color:var(--ink);">WhatsApp share link</div><div style="font-size:11px;color:var(--ink-muted);" id="ql-wa">—</div></div>
+          <a id="ql-wa-link" href="#" target="_blank" style="font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border-mid);background:#fff;cursor:pointer;font-family:var(--font-body);text-decoration:none;color:var(--ink);">Open</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const API  = window.MLL_CONFIG.API_URL;
+const slug = new URLSearchParams(window.location.search).get('id') || '';
+let bizData = null;
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => alert('Copied!')).catch(() => prompt('Copy:', text));
+}
+
+function copyCaption(id) {
+  copyText(document.getElementById(id).textContent);
+}
+
+function copyBadgeCode(color) {
+  const url = `https://mylatinolist.io/biz/${slug}`;
+  const colors = { coral:'#D85A30', dark:'#1a1714', teal:'#1D9E75' };
+  const code = `<a href="${url}" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:${colors[color]};padding:8px 14px;border-radius:8px;text-decoration:none;font-family:sans-serif;"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg><span style="color:#fff;font-size:12px;font-weight:600;">Listed on MyLatinoList</span></a>`;
+  copyText(code);
+  alert('Badge HTML copied! Paste it into your website.');
+}
+
+async function loadKit() {
+  if (!slug) return;
+  try {
+    const res  = await fetch(`${API}/api/businesses/${slug}`);
+    const data = await res.json();
+    const b    = data.business;
+    if (!b) return;
+    bizData = b;
+
+    document.getElementById('kit-biz-name').textContent = `${b.name} — Marketing Kit`;
+    document.getElementById('qr-page-link').href = `biz-qr.html?id=${b.slug}`;
+
+    // Set sticker business names
+    ['coral','dark','white'].forEach(c => {
+      const el = document.getElementById('sn-'+c);
+      if (el) el.textContent = b.name;
+    });
+
+    // URLs
+    const listingUrl = `https://mylatinolist.io/biz/${b.slug}`;
+    const qrUrl      = `${listingUrl}?src=qr`;
+    const waUrl      = `https://wa.me/?text=${encodeURIComponent('Check out ' + b.name + ' on MyLatinoList! ' + listingUrl)}`;
+
+    document.getElementById('ql-listing').textContent = listingUrl;
+    document.getElementById('ql-qr').textContent      = qrUrl;
+    document.getElementById('ql-wa').textContent      = waUrl;
+    document.getElementById('ql-wa-link').href        = waUrl;
+
+    // Social captions
+    document.getElementById('cap-en-1').textContent =
+      `🎉 Exciting news! ${b.name} is now listed on MyLatinoList — the Latino business platform. Find us, read reviews, and connect with us online!\n\n🔗 ${listingUrl}\n\n#LatinoBusinesses #MyLatinoList #${b.city?.replace(/\s/g,'')} #LatinoOwned`;
+    document.getElementById('cap-es-1').textContent =
+      `🎉 ¡Grandes noticias! ${b.name} ya está en MyLatinoList — la plataforma de negocios latinos. ¡Encuéntranos, lee reseñas y conéctate con nosotros!\n\n🔗 ${listingUrl}\n\n#NegociosLatinos #MyLatinoList #LatinoOwned`;
+    document.getElementById('cap-en-2').textContent =
+      `Hey! We're now on MyLatinoList 🙌 Find ${b.name} here: ${listingUrl}`;
+    document.getElementById('cap-es-2').textContent =
+      `¡Hola! Ya estamos en MyLatinoList 🙌 Encuéntranos aquí: ${listingUrl}`;
+
+    // Generate mini QR codes for stickers
+    ['coral','dark','white'].forEach(c => {
+      const canvas = document.getElementById('sticker-qr-'+c);
+      const div    = document.createElement('div');
+      new QRCode(div, { text: qrUrl, width: 60, height: 60, colorDark: c === 'white' ? '#1a1714' : '#ffffff', colorLight: c === 'white' ? '#ffffff' : (c === 'dark' ? '#1a1714' : '#D85A30'), correctLevel: QRCode.CorrectLevel.H });
+      setTimeout(() => {
+        const img = div.querySelector('img') || div.querySelector('canvas');
+        if (img && canvas) {
+          const ctx = canvas.getContext('2d');
+          const tmp = new Image();
+          tmp.onload = () => ctx.drawImage(tmp, 0, 0, 60, 60);
+          tmp.src = img.src || img.toDataURL?.();
+        }
+      }, 150);
+    });
+
+    // Checklist status based on business data
+    if (b.logo_url)  { markDone('cl-photo'); }
+    if (b.hours)     { markDone('cl-hours'); }
+    updateChecklistCount();
+
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+function markDone(id) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = 'Done'; el.className = 'cl-status cl-done'; }
+}
+
+function updateChecklistCount() {
+  const done  = document.querySelectorAll('.cl-done').length;
+  const total = document.querySelectorAll('.cl-status').length;
+  document.getElementById('checklist-progress').textContent = `${done} / ${total} done`;
+}
+
+function downloadSticker(color) {
+  const bgColors = { coral:'#D85A30', dark:'#1a1714', white:'#ffffff' };
+  const txtColor = color === 'white' ? '#1a1714' : '#ffffff';
+  const out  = document.createElement('canvas');
+  out.width  = 300; out.height = 300;
+  const ctx  = out.getContext('2d');
+  ctx.fillStyle = bgColors[color];
+  ctx.beginPath();
+  ctx.roundRect(0, 0, 300, 300, 24);
+  ctx.fill();
+  // Business name
+  ctx.fillStyle = txtColor;
+  ctx.font = 'bold 14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(bizData?.name || '', 150, 260);
+  ctx.font = '11px sans-serif';
+  ctx.fillStyle = color === 'white' ? '#6b6760' : 'rgba(255,255,255,0.75)';
+  ctx.fillText('Find us on mylatinolist.io', 150, 278);
+  // Draw QR from sticker canvas
+  const qrCanvas = document.getElementById('sticker-qr-'+color);
+  if (qrCanvas) ctx.drawImage(qrCanvas, 120, 80, 60, 60);
+  const link = document.createElement('a');
+  link.download = `${slug}-sticker-${color}.png`;
+  link.href = out.toDataURL('image/png');
+  link.click();
+}
+
+loadKit();
+</script>
+  <script src="/js/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Partners — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .page-hero{padding:64px 0 16px;text-align:center;}
+    .page-intro{font-size:16px;color:var(--ink-soft);max-width:480px;margin:0 auto 36px;font-weight:300;}
+    .spotlight-card{display:block;text-decoration:none;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);padding:36px;transition:border-color 0.15s,transform 0.15s,box-shadow 0.15s;}
+    .spotlight-card:hover{border-color:var(--border-mid);transform:translateY(-2px);box-shadow:0 12px 32px rgba(26,86,219,0.08);}
+    .sp-top{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+    .sp-mark{width:56px;height:56px;border-radius:var(--radius-md);background:var(--coral);color:#fff;font-family:var(--font-display);font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .sp-name-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .sp-name{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-0.01em;}
+    .sp-verified{font-size:11px;font-weight:600;color:var(--coral);background:var(--coral-light);border-radius:20px;padding:3px 10px;display:inline-flex;align-items:center;gap:4px;}
+    .sp-cat{font-size:12px;font-weight:500;color:var(--ink-muted);margin-top:4px;}
+    .sp-headline{font-family:var(--font-display);font-size:clamp(22px,3vw,30px);font-weight:500;color:var(--ink);letter-spacing:-0.02em;margin-bottom:12px;}
+    .sp-desc{font-size:15px;color:var(--ink-soft);font-weight:300;line-height:1.7;margin-bottom:24px;}
+    .sp-features{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:14px 28px;margin:0 0 28px;padding:0;}
+    .sp-features li{display:flex;gap:10px;font-size:14px;color:var(--ink-soft);line-height:1.5;}
+    .sp-features .ck{color:var(--coral);font-weight:700;flex-shrink:0;}
+    .sp-features b{color:var(--ink);font-weight:500;}
+    .sp-visit{font-size:14px;font-weight:500;padding:12px 28px;background:var(--coral);color:#fff;border-radius:var(--radius-md);display:inline-block;transition:background 0.15s;}
+    .spotlight-card:hover .sp-visit{background:var(--coral-dark);}
+    @media(max-width:768px){.sp-features{grid-template-columns:1fr;}.spotlight-card{padding:24px;}}
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav scrolled has-mobile" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div class="nav-links">
+        <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+        <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+        <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+        <a href="voz.html">La Voz Latino</a>
+        <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+        <a href="/pages/partners.html" style="color:var(--coral);font-weight:500;" data-en="Partners" data-es="Socios">Partners</a>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+        <a href="enroll.html" class="btn-cta" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+      </div>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+      <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+      <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+      <a href="voz.html">La Voz Latino</a>
+      <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+      <a href="/pages/partners.html" style="color:var(--coral);font-weight:500;" data-en="Partners" data-es="Socios">Partners</a>
+      <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
+      <div class="lang-toggle" style="margin:4px 12px 8px;">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      </div>
+      <a href="login.html" style="color:var(--coral);font-weight:500;" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+      <a href="enroll.html" class="btn-cta" style="margin-top:8px;text-align:center;" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="page-hero">
+      <div class="section-label" data-en="Featured partner" data-es="Socio destacado">Featured partner</div>
+      <h1 data-en="Partners we trust" data-es="Socios en los que confiamos" style="font-family:var(--font-display);font-size:clamp(32px,5vw,52px);font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:12px;">Partners we trust</h1>
+      <p class="page-intro" data-en="Vetted tools and services to help you run and grow your business." data-es="Herramientas y servicios confiables para manejar y hacer crecer tu negocio.">Vetted tools and services to help you run and grow your business.</p>
+    </div>
+
+    <a class="spotlight-card" href="https://www.peblla.com/" target="_blank" rel="noopener">
+      <div class="sp-top">
+        <div class="sp-mark">P</div>
+        <div>
+          <div class="sp-name-row">
+            <span class="sp-name">Peblla</span>
+            <span class="sp-verified" data-en="✓ Verified partner" data-es="✓ Socio verificado">✓ Verified partner</span>
+          </div>
+          <div class="sp-cat" data-en="Restaurant growth platform" data-es="Plataforma de crecimiento para restaurantes">Restaurant growth platform</div>
+        </div>
+      </div>
+      <h2 class="sp-headline" data-en="Turn first-time diners into a loyal fan community" data-es="Convierte a quienes te visitan por primera vez en una comunidad de fans leales">Turn first-time diners into a loyal fan community</h2>
+      <p class="sp-desc" data-en="A turnkey marketing and sales toolkit built for independent restaurants: branded app, online ordering, loyalty programs, in-store POS, and social marketing, ready on day one." data-es="Un kit completo de marketing y ventas hecho para restaurantes independientes: app con tu marca, pedidos en línea, programas de lealtad, punto de venta (POS) en el local y marketing en redes, listo desde el primer día.">A turnkey marketing and sales toolkit built for independent restaurants: branded app, online ordering, loyalty programs, in-store POS, and social marketing, ready on day one.</p>
+      <ul class="sp-features">
+        <li><span class="ck">✓</span><span data-en="<b>Win new customers</b> — referrals, local influencers, customer-made content" data-es="<b>Consigue nuevos clientes</b> — referidos, influencers locales y contenido hecho por tus clientes"><b>Win new customers</b> — referrals, local influencers, customer-made content</span></li>
+        <li><span class="ck">✓</span><span data-en="<b>Sell more to regulars</b> — loyalty programs and social engagement" data-es="<b>Vende más a tus clientes frecuentes</b> — programas de lealtad y conexión en redes"><b>Sell more to regulars</b> — loyalty programs and social engagement</span></li>
+        <li><span class="ck">✓</span><span data-en="<b>All-in-one, day one</b> — branded app, ordering site, POS, delivery integrations" data-es="<b>Todo en uno, desde el primer día</b> — app con tu marca, sitio de pedidos, punto de venta (POS) e integraciones de entrega"><b>All-in-one, day one</b> — branded app, ordering site, POS, delivery integrations</span></li>
+        <li><span class="ck">✓</span><span data-en="<b>No agency needed</b> — built for busy owners" data-es="<b>Sin necesidad de una agencia</b> — hecho para dueños ocupados"><b>No agency needed</b> — built for busy owners</span></li>
+        <li><span class="ck">✓</span><span data-en="<b>Your data stays yours</b> — keep your customer list, no lock-in" data-es="<b>Tus datos son tuyos</b> — te quedas con tu lista de clientes, sin ataduras"><b>Your data stays yours</b> — keep your customer list, no lock-in</span></li>
+      </ul>
+      <span class="sp-visit" data-en="Visit Peblla →" data-es="Visita Peblla →">Visit Peblla →</span>
+    </a>
+
+    <div id="partner" style="background:var(--coral);border-radius:var(--radius-xl);padding:48px;text-align:center;margin:40px 0 80px;">
+      <h2 data-en="Want to become a partner?" data-es="¿Quieres ser socio?" style="font-family:var(--font-display);font-size:32px;font-weight:500;color:#fff;letter-spacing:-0.02em;margin-bottom:10px;">Want to become a partner?</h2>
+      <p data-en="Reach thousands of Latino business owners and consumers. Tell us about your product or service." data-es="Llega a miles de dueños de negocios latinos y consumidores. Cuéntanos sobre tu producto o servicio." style="font-size:15px;color:rgba(255,255,255,0.75);margin-bottom:24px;font-weight:300;">Reach thousands of Latino business owners and consumers. Tell us about your product or service.</p>
+      <a href="mailto:partners@mylatinolist.io" style="font-size:14px;font-weight:500;padding:12px 28px;background:#fff;color:var(--coral);border-radius:var(--radius-md);display:inline-block;" data-en="Contact our partnerships team →" data-es="Contacta a nuestro equipo de alianzas →">Contact our partnerships team →</a>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="/" class="logo footer-logo">
+            <span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span>
+            <span class="logo-text">my<strong>latino</strong>list</span>
+          </a>
+          <p class="footer-tagline" data-en="The all-in-one platform for Latino businesses to grow, connect, and thrive." data-es="La plataforma todo en uno para negocios latinos para crecer, conectar y prosperar.">The all-in-one platform for Latino businesses to grow, connect, and thrive.</p>
+          <div class="footer-lang">
+            <button class="lang-btn" data-lang="en" onclick="switchLang('en')">🌍 English</button>
+            <span>|</span>
+            <button class="lang-btn" data-lang="es" onclick="switchLang('es')">🌍 Español</button>
+          </div>
+          <div class="footer-social">
+            <a href="https://www.facebook.com/mylatinolist.io" target="_blank" class="fsoc-btn" aria-label="Facebook">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/mylatinolist.io" target="_blank" class="fsoc-btn" aria-label="Instagram">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+            <a href="https://www.tiktok.com/@mylatinolist.io" target="_blank" class="fsoc-btn" aria-label="TikTok">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.95a8.17 8.17 0 004.77 1.52V7.02a4.85 4.85 0 01-1-.33z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col">
+            <div class="fc-title" data-en="Platform" data-es="Plataforma">Platform</div>
+            <a href="/index.html#directory" data-en="Business directory" data-es="Directorio de negocios">Business directory</a>
+            <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+            <a href="jobs.html" data-en="Jobs board" data-es="Bolsa de trabajo">Jobs board</a>
+            <a href="voz.html">La Voz Latino</a>
+            <a href="affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+            <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+          </div>
+          <div class="footer-col">
+            <div class="fc-title" data-en="For businesses" data-es="Para negocios">For businesses</div>
+            <a href="enroll.html" data-en="Enroll free" data-es="Regístrate gratis">Enroll free</a>
+            <a href="enroll.html#pricing" data-en="Pricing" data-es="Precios">Pricing</a>
+            <a href="dashboard.html" data-en="Dashboard" data-es="Panel">Dashboard</a>
+            <a href="#" data-en="Advertise" data-es="Publicidad">Advertise</a>
+            <a href="/pages/partners.html" data-en="Partner program" data-es="Programa de socios">Partner program</a>
+          </div>
+          <div class="footer-col">
+            <div class="fc-title" data-en="Company" data-es="Empresa">Company</div>
+            <a href="#" data-en="About us" data-es="Acerca de nosotros">About us</a>
+            <a href="#">Blog</a>
+            <a href="#" data-en="Press" data-es="Prensa">Press</a>
+            <a href="#" data-en="Contact" data-es="Contacto">Contact</a>
+            <a href="#" data-en="Careers" data-es="Empleos">Careers</a>
+          </div>
+          <div class="footer-col">
+            <div class="fc-title" data-en="Legal" data-es="Legal">Legal</div>
+            <a href="#" data-en="Privacy policy" data-es="Política de privacidad">Privacy policy</a>
+            <a href="#" data-en="Terms of service" data-es="Términos de servicio">Terms of service</a>
+            <a href="#" data-en="Cookie policy" data-es="Política de cookies">Cookie policy</a>
+            <a href="#" data-en="Accessibility" data-es="Accesibilidad">Accessibility</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 AP Optix LLC DBA MyLatinoList · Powered by Cloudflare · <a href="tel:+12028237929" style="color:inherit;text-decoration:none;">(202) 823-7929</a></span>
+
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/nav.js"></script>
+</body></html>
