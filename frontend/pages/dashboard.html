@@ -222,6 +222,13 @@
         </div>
       </div>
 
+      <div class="dash-card" style="margin-bottom:20px;">
+        <div class="dc-head">
+          <div class="dc-title" data-en="Your next best actions" data-es="Tus próximas mejores acciones">Your next best actions</div>
+        </div>
+        <div class="mll-next-actions" id="next-actions"></div>
+      </div>
+
       <div class="profile-bar">
         <div class="pb-left">
           <div>
@@ -251,9 +258,9 @@
           <div class="kpi-trend kpi-up">Total earned</div>
         </div>
         <div class="kpi">
-          <div class="kpi-lbl">Affiliate earned</div>
-          <div class="kpi-num" id="kpi-affiliate" style="color:var(--amber);">$0</div>
-          <div class="kpi-trend kpi-nt" id="kpi-affiliate-trend">Loading...</div>
+          <div class="kpi-lbl">Rating</div>
+          <div class="kpi-num" id="kpi-rating" style="color:var(--coral);">—</div>
+          <div class="kpi-trend kpi-nt" id="kpi-rating-trend">From published reviews</div>
         </div>
       </div>
 
@@ -379,11 +386,12 @@ if (!token) {
   window.location.href = 'login.html';
 }
 
-function greet() {
+function greet(lang) {
   const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  return 'Good evening';
+  const es = lang === 'es';
+  if (h < 12) return es ? 'Buenos días' : 'Hello';
+  if (h < 17) return es ? 'Buenas tardes' : 'Hello';
+  return es ? 'Buenas noches' : 'Hello';
 }
 
 function timeAgo(d) {
@@ -521,7 +529,8 @@ async function loadDashboard() {
   }
 
   // Update header
-  document.getElementById('dash-greeting').textContent = `${greet()}, ${fname}`;
+  const lang = (function () { try { return localStorage.getItem('mll_lang') || 'en'; } catch (e) { return 'en'; } })();
+  document.getElementById('dash-greeting').textContent = `${greet(lang)}, ${fname}`;
   document.getElementById('dash-sub').textContent =
     `${bizName} · ${bizCity}${bizState ? ', '+bizState : ''} · ${isAdmin ? 'Admin' : bizPlan.charAt(0).toUpperCase()+bizPlan.slice(1)+' plan'} · Listing live`;
 
@@ -619,8 +628,26 @@ async function loadDashboard() {
   }
   document.getElementById('kpi-views').textContent    = '—';
   document.getElementById('kpi-views-trend').textContent = 'Analytics coming soon';
-  document.getElementById('kpi-affiliate').textContent   = '$0';
-  document.getElementById('kpi-affiliate-trend').textContent = affData?.affiliates?.length + ' programs available';
+  const ratingEl = document.getElementById('kpi-rating');
+  const ratingTrend = document.getElementById('kpi-rating-trend');
+  if (ratingEl) ratingEl.textContent = biz?.rating ? Number(biz.rating).toFixed(1) : '—';
+  if (ratingTrend) ratingTrend.textContent = `${biz?.review_count || 0} reviews`;
+
+  const nextEl = document.getElementById('next-actions');
+  if (nextEl) {
+    const items = [
+      { done: completion >= 90, href: 'listing.html', label: 'Complete business profile', es: 'Completa el perfil del negocio' },
+      { done: !!biz?.logo_url, href: 'listing.html', label: 'Add photos', es: 'Agregar fotos' },
+      { done: (biz?.review_count || 0) > 0, href: 'listing.html', label: 'Respond to reviews', es: 'Responder reseñas' },
+      { done: myProducts.length > 0, href: 'marketplace.html', label: 'Add marketplace product', es: 'Agregar producto' },
+      { done: myJobs.length > 0, href: 'jobs.html', label: 'Post a job', es: 'Publicar un empleo' },
+      { done: bizPlan !== 'free', href: 'billing.html', label: 'Promote your business', es: 'Promociona tu negocio' },
+    ];
+    nextEl.innerHTML = items.map(function (item) {
+      const text = lang === 'es' ? item.es : item.label;
+      return '<a class="mll-next-item' + (item.done ? ' done' : '') + '" href="' + item.href + '"><span class="dot"></span><span>' + text + '</span><span class="go">' + (item.done ? '✓' : '→') + '</span></a>';
+    }).join('');
+  }
 
   // 7. Load activity feed from reviews + leads
   loadActivity(biz?.id);
