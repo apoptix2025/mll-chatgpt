@@ -130,7 +130,7 @@
   <div class="wrap">
     <div class="page-h">System Health</div>
     <div class="page-sub">
-      <span>MyLatinoList production · api.mylatinolist.io</span>
+      <span id="health-env-label">MyLatinoList</span>
       <span id="last-checked" style="color:var(--ink-muted);"></span>
     </div>
 
@@ -276,6 +276,12 @@
 const API   = window.MLL_CONFIG.API_URL;
 const token = sessionStorage.getItem('mll_token');
 const ADMIN_EMAILS = ['info@apoptix.io'];
+(function () {
+  const el = document.getElementById('health-env-label');
+  if (el && window.MLL_CONFIG) {
+    el.textContent = 'MyLatinoList ' + window.MLL_CONFIG.ENVIRONMENT + ' · ' + window.MLL_CONFIG.API_URL.replace(/^https?:\/\//, '');
+  }
+})();
 
 let countdown = 60;
 let timer;
