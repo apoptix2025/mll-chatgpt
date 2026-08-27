@@ -1,7 +1,8 @@
 -- ============================================================
--- MYLATINOLIST — SEED DATA
--- Run AFTER 001_initial_schema.sql
--- Paste into Supabase SQL Editor to populate dev data
+-- MYLATINOLIST — LEGACY SEED (DO NOT RUN ON mll-dev)
+-- These inserts omit businesses.owner_id, which is UUID NOT NULL
+-- REFERENCES auth.users(id). They will fail on the current schema.
+-- Use supabase/seed/seed-dev.mjs + seed_dev.sql instead.
 -- ============================================================
 
 -- ── AFFILIATE PROGRAMS ────────────────────────────────────────

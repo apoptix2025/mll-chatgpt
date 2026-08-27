@@ -1,7 +1,7 @@
 -- ============================================================
--- MYLATINOLIST — ADDITIONAL SEED BUSINESSES v2
--- Run in Supabase SQL Editor AFTER initial seed
--- Adds 15 more businesses across all categories
+-- MYLATINOLIST — LEGACY SEED v2 (DO NOT RUN ON mll-dev)
+-- These inserts omit businesses.owner_id (NOT NULL → auth.users).
+-- Use supabase/seed/seed-dev.mjs + seed_dev.sql instead.
 -- ============================================================
 
 INSERT INTO businesses (name, slug, category, phone, email, website, description, city, state, zip, emoji, bg_color, tags, plan, is_featured, rating, review_count, profile_completion, status) VALUES
