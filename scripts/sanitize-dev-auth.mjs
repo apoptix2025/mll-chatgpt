@@ -12,12 +12,15 @@
  *   SUPABASE_URL          https://bjtfrmkhishoadjtpzgg.supabase.co
  *   SUPABASE_SERVICE_KEY  mll-dev service role (never commit)
  *
- * Optional:
- *   AUTH_SANITIZE_LIMIT   max users to update (default: all)
+ * After the list pass, also sanitizes the cloned owner UUID
+ * 00000000-0000-0000-0000-000000000001 by Admin GET/PUT by id.
+ * Does not delete that user, change its UUID, or create an identity.
  */
 
 const PROD_REF = 'jhjdhmjkcnjtbojocjam';
 const STAGING_REF = 'bjtfrmkhishoadjtpzgg';
+const SPECIAL_OWNER_ID = '00000000-0000-0000-0000-000000000001';
+const SPECIAL_OWNER_EMAIL = 'dev+owner-00000001@example.test';
 
 const url = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
 const serviceKey = process.env.SUPABASE_SERVICE_KEY || '';
@@ -74,6 +77,42 @@ async function api(path, options = {}) {
   return json;
 }
 
+async function getUserById(id) {
+  try {
+    const json = await api(`/auth/v1/admin/users/${id}`);
+    return json?.user || json || null;
+  } catch (err) {
+    const msg = String(err.message || '');
+    if (msg.includes(' → 404:') || msg.includes(' → 404 ')) return null;
+    throw err;
+  }
+}
+
+async function updateUserEmail(id, email) {
+  await api(`/auth/v1/admin/users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      email,
+      email_confirm: true,
+    }),
+  });
+}
+
+async function sanitizeSpecialOwner() {
+  const user = await getUserById(SPECIAL_OWNER_ID);
+  if (!user?.id) {
+    console.log('  special owner: not found via Admin API by id');
+    return 'missing';
+  }
+  if (String(user.email || '').toLowerCase() === SPECIAL_OWNER_EMAIL) {
+    console.log('  special owner: already synthetic (uuid preserved)');
+    return 'skipped';
+  }
+  await updateUserEmail(SPECIAL_OWNER_ID, SPECIAL_OWNER_EMAIL);
+  console.log('  special owner: email sanitized (uuid preserved, original email not printed)');
+  return 'updated';
+}
+
 async function listUsers() {
   const users = [];
   let page = 1;
@@ -105,20 +144,17 @@ async function main() {
       skipped += 1;
       continue;
     }
+    if (user.id === SPECIAL_OWNER_ID) {
+      skipped += 1;
+      continue;
+    }
     if (alreadySynthetic(user.email)) {
       skipped += 1;
       continue;
     }
     const email = syntheticEmail(user.id);
     try {
-      await api(`/auth/v1/admin/users/${user.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          email,
-          email_confirm: true,
-          ban_duration: 'none',
-        }),
-      });
+      await updateUserEmail(user.id, email);
       updated += 1;
     } catch (err) {
       failed += 1;
@@ -130,6 +166,15 @@ async function main() {
   console.log(`  emails updated: ${updated}`);
   console.log(`  already synthetic / skipped: ${skipped}`);
   console.log(`  failed: ${failed}`);
+
+  let specialStatus = 'error';
+  try {
+    specialStatus = await sanitizeSpecialOwner();
+  } catch (err) {
+    failed += 1;
+    console.error(`  special owner failed: ${err.message}`);
+  }
+
   if (failed) process.exit(1);
 }
 
