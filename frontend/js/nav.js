@@ -95,7 +95,7 @@
     nav.setAttribute('aria-label', 'Mobile');
     nav.innerHTML =
       '<a class="' + (active('home') ? 'is-active' : '') + '" href="' + home + '"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 01-1 1h-5v-6H10v6H5a1 1 0 01-1-1v-9.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-en="Home" data-es="Inicio">Home</span></a>' +
-      '<a class="' + (active('explore') ? 'is-active' : '') + '" href="' + p + 'directory.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span data-en="Explore" data-es="Explorar">Explore</span></a>' +
+      '<a class="' + (active('explore') ? 'is-active' : '') + '" href="' + p + 'directory.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span data-en="Search" data-es="Buscar">Search</span></a>' +
       '<button type="button" class="mll-add" id="mll-add-btn" aria-label="Add">+</button>' +
       '<a href="' + p + 'directory.html#saved"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 4h10a1 1 0 011 1v16l-6-3.5L6 21V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-en="Saved" data-es="Guardados">Saved</span></a>' +
       '<a class="' + (active('profile') ? 'is-active' : '') + '" href="' + profileHref + '"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.7"/><path d="M5 19c1.5-3 4-4.5 7-4.5s5.5 1.5 7 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span data-en="Profile" data-es="Perfil">Profile</span></a>';
@@ -107,9 +107,8 @@
       '<div class="mll-sheet" role="dialog" aria-label="Create">' +
         '<h3 data-en="Add to My Latino List" data-es="Agregar a My Latino List">Add to My Latino List</h3>' +
         '<a href="' + p + 'enroll.html"><span>🏪</span><span data-en="List my business" data-es="Registrar mi negocio">List my business</span></a>' +
-        '<a href="' + p + 'marketplace.html"><span>🛍️</span><span data-en="Sell a product" data-es="Vender un producto">Sell a product</span></a>' +
-        '<a href="' + p + 'jobs.html"><span>💼</span><span data-en="Post a job" data-es="Publicar un empleo">Post a job</span></a>' +
-        '<a href="' + p + 'voz.html"><span>📚</span><span data-en="Share a resource" data-es="Compartir un recurso">Share a resource</span></a>' +
+        '<a href="' + p + 'marketplace.html"><span>🛍️</span><span data-en="Add product" data-es="Agregar producto">Add product</span></a>' +
+        '<a href="' + p + 'jobs.html"><span>💼</span><span data-en="Post job" data-es="Publicar empleo">Post job</span></a>' +
       '</div>';
     document.body.appendChild(backdrop);
     document.getElementById('mll-add-btn').addEventListener('click', function () {

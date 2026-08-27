@@ -7,13 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- NAV SCROLL ---
   const nav = document.getElementById('nav');
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 20);
-  });
+  if (nav) {
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+  }
 
-  // (Hamburger + mobile-menu close handled centrally in js/nav.js)
-
-  // Show dashboard or sign in based on auth state
   const isLoggedIn = !!sessionStorage.getItem('mll_token');
   const mobSignin   = document.getElementById('mob-signin');
   const mobDash     = document.getElementById('mob-dashboard');
@@ -22,16 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
     mobDash.style.display    = isLoggedIn ? 'block' : 'none';
   }
 
-  // Also update desktop nav Sign in → Dashboard when logged in
   if (isLoggedIn) {
-    const signinBtn = document.querySelector('.nav-actions .btn-ghost');
+    const signinBtn = document.getElementById('nav-signin') || document.querySelector('.nav-actions .btn-ghost');
     if (signinBtn) {
       signinBtn.textContent = 'My dashboard';
       signinBtn.href = 'pages/dashboard.html';
     }
   }
 
-  // --- REVEAL ON SCROLL ---
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
   }, { threshold: 0.12 });
@@ -44,22 +41,98 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   observeReveal();
 
-  setTimeout(() => {
-    document.querySelectorAll('.hero .reveal').forEach(el => el.classList.add('visible'));
-  }, 80);
+  function skeletonCard() {
+    return '<article class="v2-card" style="pointer-events:none;"><div class="v2-card-media" style="background:var(--surface-3);"></div><div class="v2-card-body"><div style="height:16px;background:var(--surface-3);border-radius:8px;margin-bottom:10px;width:70%;"></div><div style="height:12px;background:var(--surface-3);border-radius:8px;width:50%;"></div></div></article>';
+  }
 
-  // --- SKELETON LOADER ---
-  function skeletonCard(type = 'biz') {
-    if (type === 'biz') return `
-      <div class="biz-card" style="pointer-events:none;">
-        <div class="biz-header" style="background:var(--surface-3);"></div>
-        <div class="biz-body">
-          <div style="height:16px;background:var(--surface-3);border-radius:4px;margin-bottom:8px;width:70%;"></div>
-          <div style="height:12px;background:var(--surface-3);border-radius:4px;margin-bottom:6px;width:45%;"></div>
-          <div style="height:12px;background:var(--surface-3);border-radius:4px;width:90%;"></div>
-        </div>
-      </div>`;
-    if (type === 'product') return `
+  function pickBySlug(list, slugs) {
+    const found = [];
+    slugs.forEach(slug => {
+      const hit = list.find(b => b.slug === slug);
+      if (hit) found.push(hit);
+    });
+    list.forEach(b => {
+      if (found.length >= 4) return;
+      if (!found.some(x => x.slug === b.slug)) found.push(b);
+    });
+    return found.slice(0, 4);
+  }
+
+  function renderCards(el, businesses, limit) {
+    if (!el) return;
+    if (!businesses || !businesses.length) {
+      el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-muted);">No businesses found.</div>';
+      return;
+    }
+    const media = window.MLL_MEDIA;
+    el.innerHTML = businesses.slice(0, limit || businesses.length).map(b =>
+      media ? media.cardHTML(b, { cta: 'View profile →' }) : ''
+    ).join('');
+  }
+
+  const popularGrid  = document.getElementById('popular-grid');
+  const featuredGrid = document.getElementById('featured-grid');
+  const collage      = document.getElementById('hero-collage');
+  const bizGrid      = document.getElementById('biz-grid');
+
+  if (popularGrid) popularGrid.innerHTML = Array(4).fill(skeletonCard()).join('');
+  if (featuredGrid) featuredGrid.innerHTML = Array(4).fill(skeletonCard()).join('');
+
+  MLL.getBusinesses().then(data => {
+    const businesses = (data && data.businesses) || [];
+    const collageSlugs = [
+      'la-cocina-de-maryland',
+      'flores-beauty-studio',
+      'mendez-remodeling-co',
+      'vega-immigration-law'
+    ];
+    const collageBiz = pickBySlug(businesses, collageSlugs);
+    if (collage && window.MLL_MEDIA) {
+      const blobs = collage.querySelectorAll('.v2-blob');
+      collage.innerHTML = '';
+      blobs.forEach(b => collage.appendChild(b));
+      collageBiz.forEach((biz, i) => {
+        collage.insertAdjacentHTML('beforeend', window.MLL_MEDIA.collageCard(biz, 'v2-cc-' + (i + 1)));
+      });
+    }
+
+    renderCards(popularGrid, businesses, 4);
+
+    const featured = businesses.filter(b => b.is_featured);
+    const featuredFill = featured.length ? featured : businesses.slice().sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    renderCards(featuredGrid, featuredFill, 4);
+
+    if (bizGrid && !popularGrid) renderCards(bizGrid, businesses, 6);
+  });
+
+  fetch((window.MLL_CONFIG && window.MLL_CONFIG.API_URL) + '/api/stats')
+    .then(r => r.ok ? r.json() : null)
+    .then(stats => {
+      if (!stats) return;
+      const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && val != null) el.textContent = Number(val).toLocaleString();
+      };
+      set('community-biz-count', stats.businesses);
+      set('community-state-count', stats.states || stats.cities);
+    })
+    .catch(() => {});
+
+  MLL.getJobs().then(data => {
+    const el = document.getElementById('community-job-count');
+    if (el && data && data.jobs) el.textContent = String(data.jobs.length);
+  });
+
+  fetch((window.MLL_CONFIG && window.MLL_CONFIG.API_URL) + '/api/resources')
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      const el = document.getElementById('community-res-count');
+      if (el && data && data.resources) el.textContent = String(data.resources.length);
+    })
+    .catch(() => {});
+
+  function skeletonProduct() {
+    return `
       <div class="product-card" style="pointer-events:none;">
         <div class="product-img" style="background:var(--surface-3);"></div>
         <div class="product-body">
@@ -67,7 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="height:12px;background:var(--surface-3);border-radius:4px;width:55%;"></div>
         </div>
       </div>`;
-    if (type === 'job') return `
+  }
+  function skeletonJob() {
+    return `
       <div class="job-item" style="pointer-events:none;">
         <div style="width:44px;height:44px;border-radius:10px;background:var(--surface-3);flex-shrink:0;"></div>
         <div style="flex:1;">
@@ -75,45 +150,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="height:12px;background:var(--surface-3);border-radius:4px;width:40%;"></div>
         </div>
       </div>`;
-    return '';
   }
 
-  // --- RENDER BUSINESSES ---
-  const bizGrid = document.getElementById('biz-grid');
-  if (bizGrid) {
-    bizGrid.innerHTML = Array(6).fill(skeletonCard('biz')).join('');
-    MLL.getBusinesses().then(data => {
-      if (!data || !data.businesses?.length) {
-        bizGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-muted);">No businesses found.</div>`;
-        return;
-      }
-      bizGrid.innerHTML = data.businesses.map(b => `
-        <div class="biz-card reveal" onclick="window.location='pages/business.html?id=${b.slug}'">
-          <div class="biz-header" style="background:${b.bg_color || '#EBF2FF'};">
-            <span style="font-size:40px;">${b.emoji || '🏢'}</span>
-            ${b.is_featured ? '<span class="biz-featured-tag">Featured</span>' : ''}
-          </div>
-          <div class="biz-body">
-            <div class="biz-name">${b.name}</div>
-            <div class="biz-cat">${b.category} · ${b.city}, ${b.state}</div>
-            <div class="biz-desc">${b.description || ''}</div>
-            <div class="biz-tags">${(b.tags || []).map(t => `<span class="biz-tag">${t}</span>`).join('')}</div>
-          </div>
-          <div class="biz-footer">
-            <span class="biz-rating">★ ${b.rating} <span style="color:var(--ink-muted);font-weight:400;">(${b.review_count})</span></span>
-            <span class="biz-city">${b.city}, ${b.state}</span>
-            <span style="font-size:12px;font-weight:600;color:var(--coral);">View →</span>
-          </div>
-        </div>
-      `).join('');
-      observeReveal();
-    });
-  }
-
-  // --- RENDER PRODUCTS ---
   const productGrid = document.getElementById('product-grid');
   if (productGrid) {
-    productGrid.innerHTML = Array(4).fill(skeletonCard('product')).join('');
+    productGrid.innerHTML = Array(4).fill(skeletonProduct()).join('');
     MLL.getProducts().then(data => {
       if (!data || !data.products?.length) {
         productGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-muted);">No products yet.</div>`;
@@ -138,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- RENDER AFFILIATES ---
   const affGrid = document.getElementById('aff-grid');
   if (affGrid) {
     MLL.getAffiliates().then(data => {
@@ -163,10 +203,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- RENDER JOBS ---
   const jobsList = document.getElementById('jobs-list');
   if (jobsList) {
-    jobsList.innerHTML = Array(3).fill(skeletonCard('job')).join('');
+    jobsList.innerHTML = Array(3).fill(skeletonJob()).join('');
     MLL.getJobs().then(data => {
       if (!data || !data.jobs?.length) {
         jobsList.innerHTML = `<div style="text-align:center;padding:40px;color:var(--ink-muted);">No jobs posted yet.</div>`;
@@ -193,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- SEARCH ---
   window.handleSearch = () => {
     const q    = document.getElementById('search-input')?.value?.trim();
     const cat  = document.getElementById('search-cat')?.value;
@@ -213,7 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') window.handleSearch();
   });
 
-  // --- HELPERS ---
   function timeAgo(dateStr) {
     if (!dateStr) return '';
     const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
@@ -224,4 +261,3 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
-

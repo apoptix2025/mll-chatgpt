@@ -6,11 +6,11 @@
   <title>Dashboard — MyLatinoList</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
   <style>
-    body { background: var(--surface-2); padding-top: var(--nav-h); }
-    .dash-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - var(--nav-h)); }
+    body { background: var(--surface-soft, var(--surface-2)); padding-top: var(--nav-h); }
+    .dash-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - var(--nav-h)); }
     .sidebar { background: #fff; border-right: 1px solid var(--border); padding: 24px 0; position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto; }
     .sb-biz { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
     .sb-avatar { width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--coral-light); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 8px; }
@@ -24,7 +24,7 @@
     .sb-badge { margin-left: auto; font-size: 10px; background: var(--amber-light); color: #633806; padding: 1px 7px; border-radius: 10px; font-weight: 500; }
     .main { padding: 32px 32px 60px; }
     .dash-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
-    .dash-greeting { font-family: var(--font-display); font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.02em; }
+    .dash-greeting { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--navy-900, var(--ink)); letter-spacing: -0.03em; }
     .dash-sub { font-size: 13px; color: var(--ink-muted); margin-top: 3px; }
     .hdr-btns { display: flex; gap: 8px; }
     .btn-sm { font-size: 12px; padding: 8px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-mid); background: #fff; color: var(--ink-soft); cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
@@ -43,14 +43,14 @@
     .pb-step.done { background: var(--teal-light); color: var(--teal-dark); }
     .pb-step.todo { background: var(--surface-3); color: var(--ink-muted); }
     .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
-    .kpi { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
-    .kpi-lbl { font-size: 12px; color: var(--ink-muted); margin-bottom: 6px; }
-    .kpi-num { font-family: var(--font-display); font-size: 28px; font-weight: 500; color: var(--ink); line-height: 1; }
+    .kpi { background: #fff; border: 1px solid var(--border-line, var(--border)); border-radius: 20px; padding: 20px; box-shadow: 0 8px 24px rgba(16,33,58,0.06); }
+    .kpi-lbl { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-secondary, var(--ink-muted)); margin-bottom: 8px; }
+    .kpi-num { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--navy-900, var(--ink)); line-height: 1; }
     .kpi-trend { font-size: 12px; margin-top: 5px; }
     .kpi-up { color: var(--teal-dark); }
     .kpi-nt { color: var(--ink-muted); }
     .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    .dash-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
+    .dash-card { background: #fff; border: 1px solid var(--border-line, var(--border)); border-radius: 20px; padding: 20px 22px; box-shadow: 0 8px 24px rgba(16,33,58,0.06); }
     .dc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .dc-title { font-size: 14px; font-weight: 500; color: var(--ink); }
     .dc-link { font-size: 12px; color: var(--coral); cursor: pointer; }
@@ -110,7 +110,7 @@
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
 </head>
-<body>
+<body class="v2-dash">
 
   <nav class="nav scrolled" id="nav">
     <div class="nav-inner">
@@ -222,11 +222,50 @@
         </div>
       </div>
 
-      <div class="dash-card" style="margin-bottom:20px;">
-        <div class="dc-head">
-          <div class="dc-title" data-en="Your next best actions" data-es="Tus próximas mejores acciones">Your next best actions</div>
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-lbl" data-en="Profile Views" data-es="Vistas del perfil">Profile Views</div>
+          <div class="kpi-num" id="kpi-views" style="color:var(--coral);">—</div>
+          <div class="kpi-trend kpi-nt" id="kpi-views-trend">Loading...</div>
         </div>
-        <div class="mll-next-actions" id="next-actions"></div>
+        <div class="kpi">
+          <div class="kpi-lbl" data-en="New Leads" data-es="Nuevos contactos">New Leads</div>
+          <div class="kpi-num" id="kpi-leads" style="color:var(--blue);">—</div>
+          <div class="kpi-trend kpi-up" id="kpi-leads-trend">Loading...</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl" data-en="Marketplace Sales" data-es="Ventas del mercado">Marketplace Sales</div>
+          <div class="kpi-num" id="kpi-sales" style="color:var(--teal);">$0</div>
+          <div class="kpi-trend kpi-up">From listed products</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl" data-en="Average Rating" data-es="Calificación promedio">Average Rating</div>
+          <div class="kpi-num" id="kpi-rating" style="color:var(--coral);">—</div>
+          <div class="kpi-trend kpi-nt" id="kpi-rating-trend">From published reviews</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dc-head">
+            <div class="dc-title" data-en="Your Next Best Actions" data-es="Tus próximas mejores acciones">Your Next Best Actions</div>
+          </div>
+          <div class="mll-next-actions" id="next-actions"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-head"><span class="dc-title" data-en="Recent Activity" data-es="Actividad reciente">Recent Activity</span></div>
+          <div class="act-list" id="act-list">
+            <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">Loading activity...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="v2-promote" style="margin: 4px 0 20px;">
+        <div>
+          <h3 data-en="Get more leads &amp; visibility" data-es="Consigue más contactos y visibilidad">Get more leads &amp; visibility</h3>
+          <p data-en="Featured placement helps customers find you first." data-es="La posición destacada ayuda a que te encuentren primero.">Featured placement helps customers find you first.</p>
+        </div>
+        <a href="billing.html" data-en="Promote My Business" data-es="Promocionar mi negocio">Promote My Business</a>
       </div>
 
       <div class="profile-bar">
@@ -239,52 +278,6 @@
           <div class="pb-pct" id="pb-pct">0%</div>
         </div>
         <div class="pb-steps" id="pb-steps"></div>
-      </div>
-
-      <div class="kpi-row">
-        <div class="kpi">
-          <div class="kpi-lbl">Profile views this week</div>
-          <div class="kpi-num" id="kpi-views" style="color:var(--coral);">—</div>
-          <div class="kpi-trend kpi-nt" id="kpi-views-trend">Loading...</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-lbl">Customer leads</div>
-          <div class="kpi-num" id="kpi-leads" style="color:var(--blue);">—</div>
-          <div class="kpi-trend kpi-up" id="kpi-leads-trend">Loading...</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-lbl">Marketplace sales</div>
-          <div class="kpi-num" id="kpi-sales" style="color:var(--teal);">$0</div>
-          <div class="kpi-trend kpi-up">Total earned</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-lbl">Rating</div>
-          <div class="kpi-num" id="kpi-rating" style="color:var(--coral);">—</div>
-          <div class="kpi-trend kpi-nt" id="kpi-rating-trend">From published reviews</div>
-        </div>
-      </div>
-
-      <div class="dash-grid">
-        <div class="dash-card">
-          <div class="dc-head"><span class="dc-title">Views this month</span><span class="dc-link">View analytics →</span></div>
-          <div class="bar-chart">
-            <div class="bc-bar" style="height:38%;background:#F5C4B3"></div>
-            <div class="bc-bar" style="height:52%;background:var(--coral-mid)"></div>
-            <div class="bc-bar" style="height:45%;background:#F5C4B3"></div>
-            <div class="bc-bar" style="height:68%;background:var(--coral)"></div>
-            <div class="bc-bar" style="height:55%;background:var(--coral-mid)"></div>
-            <div class="bc-bar" style="height:78%;background:var(--coral)"></div>
-            <div class="bc-bar" style="height:72%;background:var(--coral-mid)"></div>
-            <div class="bc-bar" style="height:96%;background:var(--coral-dark)"></div>
-          </div>
-          <div class="bc-labels" id="bc-labels"></div>
-        </div>
-        <div class="dash-card">
-          <div class="dc-head"><span class="dc-title">Recent activity</span><span class="dc-link">All activity →</span></div>
-          <div class="act-list" id="act-list">
-            <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">Loading activity...</div>
-          </div>
-        </div>
       </div>
 
       <div class="dash-grid">

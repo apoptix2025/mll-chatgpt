@@ -17,7 +17,7 @@
   <meta name="twitter:image" content="https://mylatinolist.io/og-default.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
@@ -30,11 +30,11 @@
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
 </head>
-<body>
+<body class="v2-home">
 
   <!-- NAV -->
-  <nav class="nav has-mobile" id="nav">
-    <div class="nav-inner">
+  <nav class="v2-topnav has-mobile" id="nav">
+    <div class="v2-topnav-inner">
       <a href="/" class="logo">
         <span class="logo-mark">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -43,32 +43,35 @@
         </span>
         <span class="logo-text">my<strong>latino</strong>list</span>
       </a>
-      <div class="nav-links">
-        <a href="#directory" data-en="Directory" data-es="Directorio">Directory</a>
+      <div class="v2-links">
+        <a href="pages/directory.html" data-en="Discover" data-es="Descubrir">Discover</a>
         <a href="pages/marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
         <a href="pages/jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
         <a href="pages/voz.html">La Voz Latino</a>
-        <a href="pages/affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
-        <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+        <a href="pages/enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>
       </div>
-      <div class="lang-toggle">
-        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
-        <span>|</span>
-        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+      <div class="v2-top-actions">
+        <a class="v2-icon-btn" href="pages/directory.html" aria-label="Search">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </a>
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+        </div>
+        <a href="pages/login.html" class="v2-btn-ghost" id="nav-signin" data-en="Sign In" data-es="Iniciar sesión">Sign In</a>
+        <a href="pages/enroll.html" class="v2-btn-primary" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>
       </div>
-      <div class="nav-actions">
-        <a href="pages/login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
-        <a href="pages/enroll.html" class="btn-cta" data-en="List your business" data-es="Registra tu negocio">List your business</a>
-      </div>
-      <button class="hamburger" id="hamburger" aria-label="Menu">
+      <button class="v2-hamburger hamburger" id="hamburger" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
     </div>
     <div class="nav-mobile" id="nav-mobile">
-      <a href="#directory" onclick="document.getElementById('nav-mobile').classList.remove('open')" data-en="Directory" data-es="Directorio">Directory</a>
+      <a href="pages/directory.html" data-en="Discover" data-es="Descubrir">Discover</a>
       <a href="pages/marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
       <a href="pages/jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
       <a href="pages/voz.html">La Voz Latino</a>
+      <a href="pages/enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>
       <a href="pages/affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
       <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
       <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
@@ -79,28 +82,44 @@
       </div>
       <a href="pages/login.html" id="mob-signin" style="color:var(--coral);font-weight:500;" data-en="Sign in to dashboard" data-es="Acceder al panel">Sign in to dashboard</a>
       <a href="pages/dashboard.html" id="mob-dashboard" style="display:none;color:var(--coral);font-weight:500;" data-en="My dashboard →" data-es="Mi panel →">My dashboard →</a>
-      <a href="pages/enroll.html" class="btn-cta" style="margin-top:8px;text-align:center;" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+      <a href="pages/enroll.html" class="v2-btn-primary" style="margin-top:8px;text-align:center;" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>
     </div>
   </nav>
 
   <!-- HERO -->
-  <section class="mll-hero">
-    <div class="container mll-hero-inner">
-      <div class="mll-kicker">
-        <span class="logo-mark" style="width:22px;height:22px;border-radius:6px;">
-          <svg width="12" height="12" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg>
-        </span>
-        My Latino List
+  <section class="v2-hero">
+    <div class="v2-hero-grid">
+      <div>
+        <div class="v2-kicker" data-en="The Latino Business Community" data-es="La comunidad de negocios latinos">The Latino Business Community</div>
+        <h1 data-en="Grow your business.<em>Discover your community.</em>" data-es="Haz crecer tu negocio.<em>Descubre tu comunidad.</em>">
+          Grow your business.
+          <em>Discover your community.</em>
+        </h1>
+        <p class="v2-hero-copy" data-en="Discover Latino-owned businesses, products, jobs, resources, and opportunities — all in one community." data-es="Descubre negocios, productos, empleos, recursos y oportunidades de dueños latinos — todo en una comunidad.">Discover Latino-owned businesses, products, jobs, resources, and opportunities — all in one community.</p>
+        <div class="v2-hero-ctas">
+          <a href="pages/directory.html" class="v2-btn-primary" data-en="Explore Businesses" data-es="Explorar negocios">Explore Businesses</a>
+          <a href="pages/enroll.html" class="v2-btn-secondary" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>
+        </div>
+        <div class="v2-proof">
+          <div class="v2-avatars" aria-hidden="true"><span>🌮</span><span>💇</span><span>🏗️</span><span>⚖️</span></div>
+          <span data-en="Join thousands of people supporting Latino-owned businesses." data-es="Únete a miles de personas que apoyan negocios de dueños latinos.">Join thousands of people supporting Latino-owned businesses.</span>
+        </div>
       </div>
-      <h1 data-en="Grow your business.<em>Discover your community.</em>" data-es="Haz crecer tu negocio.<em>Descubre tu comunidad.</em>">
-        Grow your business.
-        <em>Discover your community.</em>
-      </h1>
-      <p class="lead" data-en="The all-in-one Latino business community." data-es="La comunidad de negocios latinos, todo en uno.">The all-in-one Latino business community.</p>
+      <div class="v2-collage" id="hero-collage" aria-label="Featured businesses">
+        <div class="v2-blob v2-blob-a"></div>
+        <div class="v2-blob v2-blob-b"></div>
+      </div>
+    </div>
+  </section>
 
-      <form class="mll-search" action="pages/directory.html" method="get" onsubmit="handleSearch(); return false;">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <input type="text" id="search-input" placeholder="Search restaurants, contractors, lawyers, salons, jobs..." data-en-ph="Search restaurants, contractors, lawyers, salons, jobs..." data-es-ph="Busca restaurantes, contratistas, abogados, salones, empleos..." autocomplete="off">
+  <div class="v2-search-wrap">
+    <form class="v2-search" action="pages/directory.html" method="get" onsubmit="handleSearch(); return false;">
+      <label>
+        <span data-en="Search" data-es="Buscar">Search</span>
+        <input type="text" id="search-input" placeholder="Search businesses, jobs, products..." data-en-ph="Search businesses, jobs, products..." data-es-ph="Busca negocios, empleos, productos..." autocomplete="off">
+      </label>
+      <label>
+        <span data-en="Location" data-es="Ubicación">Location</span>
         <select id="search-city" aria-label="Location">
           <option value="" data-en="Near you" data-es="Cerca de ti">Near you</option>
           <option>Silver Spring, MD</option>
@@ -112,30 +131,108 @@
           <option>Alexandria, VA</option>
           <option>Washington, DC</option>
         </select>
-        <button type="submit" data-en="Search" data-es="Buscar">Search</button>
-      </form>
+      </label>
+      <button type="submit" data-en="Search" data-es="Buscar">Search</button>
+    </form>
+    <div class="v2-pills-row">
+      <a class="mll-pill" href="pages/directory.html?category=Food%20%26%20Dining"><span data-en="Restaurants" data-es="Restaurantes">Restaurants</span></a>
+      <a class="mll-pill" href="pages/directory.html?category=Construction"><span data-en="Home Services" data-es="Hogar">Home Services</span></a>
+      <a class="mll-pill" href="pages/directory.html?category=Beauty%20%26%20Salon"><span data-en="Beauty" data-es="Belleza">Beauty</span></a>
+      <a class="mll-pill" href="pages/directory.html?category=Legal%20Services"><span data-en="Legal" data-es="Legal">Legal</span></a>
+      <a class="mll-pill" href="pages/marketplace.html"><span data-en="Shopping" data-es="Compras">Shopping</span></a>
+      <a class="mll-pill" href="pages/jobs.html"><span data-en="Jobs" data-es="Empleos">Jobs</span></a>
+      <a class="mll-pill" href="pages/directory.html?category=Health%20%26%20Wellness"><span data-en="Health" data-es="Salud">Health</span></a>
+      <a class="mll-pill" href="pages/directory.html"><span data-en="More" data-es="Más">More</span></a>
+    </div>
+  </div>
 
-      <div class="mll-pills" style="margin-top:18px;">
-        <a class="mll-pill" href="pages/directory.html?category=Food%20%26%20Dining">🍽️ <span data-en="Restaurants" data-es="Restaurantes">Restaurants</span></a>
-        <a class="mll-pill" href="pages/directory.html?category=Construction">🛠️ <span data-en="Home Services" data-es="Hogar">Home Services</span></a>
-        <a class="mll-pill" href="pages/directory.html?category=Beauty%20%26%20Salon">💇 <span data-en="Beauty" data-es="Belleza">Beauty</span></a>
-        <a class="mll-pill" href="pages/directory.html?category=Legal%20Services">⚖️ <span data-en="Legal" data-es="Legal">Legal</span></a>
-        <a class="mll-pill" href="pages/marketplace.html">🛍️ <span data-en="Shopping" data-es="Compras">Shopping</span></a>
-        <a class="mll-pill" href="pages/jobs.html">💼 <span data-en="Jobs" data-es="Empleos">Jobs</span></a>
-        <a class="mll-pill" href="pages/directory.html">⋯ <span data-en="More" data-es="Más">More</span></a>
+  <section class="v2-section v2-section-white" id="directory">
+    <div class="v2-wrap">
+      <div class="v2-head">
+        <div>
+          <div class="v2-eyebrow" data-en="Discovery" data-es="Descubrimiento">Discovery</div>
+          <h2 data-en="Popular near you" data-es="Populares cerca de ti">Popular near you</h2>
+        </div>
+        <a href="pages/directory.html" class="section-link" data-en="View all →" data-es="Ver todos →">View all →</a>
+      </div>
+      <div class="v2-grid-4" id="popular-grid"></div>
+    </div>
+  </section>
+
+  <section class="v2-section v2-section-soft">
+    <div class="v2-wrap">
+      <div class="v2-head">
+        <div>
+          <div class="v2-eyebrow" data-en="Start here" data-es="Empieza aquí">Start here</div>
+          <h2 data-en="What would you like to do?" data-es="¿Qué te gustaría hacer?">What would you like to do?</h2>
+        </div>
+      </div>
+      <div class="v2-actions">
+        <a class="v2-action v2-a1" href="pages/directory.html">
+          <div class="v2-action-ic">🔎</div>
+          <div>
+            <strong data-en="Find a Business" data-es="Buscar un negocio">Find a Business</strong>
+            <em data-en="Discover Latino-owned shops near you" data-es="Descubre negocios latinos cerca de ti">Discover Latino-owned shops near you</em>
+          </div>
+          <span class="arr">→</span>
+        </a>
+        <a class="v2-action v2-a2" href="pages/marketplace.html">
+          <div class="v2-action-ic">🛍️</div>
+          <div>
+            <strong data-en="Shop Latino" data-es="Compra latino">Shop Latino</strong>
+            <em data-en="Products and services from our community" data-es="Productos y servicios de nuestra comunidad">Products and services from our community</em>
+          </div>
+          <span class="arr">→</span>
+        </a>
+        <a class="v2-action v2-a3" href="pages/jobs.html">
+          <div class="v2-action-ic">💼</div>
+          <div>
+            <strong data-en="Find Jobs" data-es="Buscar empleos">Find Jobs</strong>
+            <em data-en="Bilingual roles from local employers" data-es="Empleos bilingües de empleadores locales">Bilingual roles from local employers</em>
+          </div>
+          <span class="arr">→</span>
+        </a>
+        <a class="v2-action v2-a4" href="pages/voz.html">
+          <div class="v2-action-ic">📚</div>
+          <div>
+            <strong data-en="Explore Resources" data-es="Explorar recursos">Explore Resources</strong>
+            <em data-en="Guides, grants, and La Voz Latino" data-es="Guías, subvenciones y La Voz Latino">Guides, grants, and La Voz Latino</em>
+          </div>
+          <span class="arr">→</span>
+        </a>
+        <a class="v2-action v2-a5" href="pages/enroll.html">
+          <div class="v2-action-ic">🚀</div>
+          <div>
+            <strong data-en="Grow My Business" data-es="Hacer crecer mi negocio">Grow My Business</strong>
+            <em data-en="List your business and get discovered" data-es="Registra tu negocio y que te encuentren">List your business and get discovered</em>
+          </div>
+          <span class="arr">→</span>
+        </a>
+        <a class="v2-action v2-a6" href="pages/affiliates.html">
+          <div class="v2-action-ic">🤝</div>
+          <div>
+            <strong data-en="Earn With MLL" data-es="Gana con MLL">Earn With MLL</strong>
+            <em data-en="Partner programs for community growth" data-es="Programas de socios para crecer juntos">Partner programs for community growth</em>
+          </div>
+          <span class="arr">→</span>
+        </a>
       </div>
     </div>
   </section>
 
-  <section class="mll-section-pad">
-    <div class="container">
-      <div class="mll-actions">
-        <a class="mll-action" href="pages/directory.html"><div class="mll-action-icon">🔎</div><strong data-en="Find a Business" data-es="Buscar un negocio">Find a Business</strong><span data-en="Directory near you" data-es="Directorio cerca de ti">Directory near you</span></a>
-        <a class="mll-action" href="pages/marketplace.html"><div class="mll-action-icon">🛍️</div><strong data-en="Shop Latino" data-es="Compra latino">Shop Latino</strong><span data-en="Products &amp; services" data-es="Productos y servicios">Products &amp; services</span></a>
-        <a class="mll-action" href="pages/jobs.html"><div class="mll-action-icon">💼</div><strong data-en="Find Jobs" data-es="Buscar empleos">Find Jobs</strong><span data-en="Hire bilingual talent" data-es="Contrata talento bilingüe">Hire bilingual talent</span></a>
-        <a class="mll-action" href="pages/voz.html"><div class="mll-action-icon">📚</div><strong data-en="Resources" data-es="Recursos">Resources</strong><span>La Voz Latino</span></a>
-        <a class="mll-action" href="pages/enroll.html"><div class="mll-action-icon">🚀</div><strong data-en="Grow My Business" data-es="Hacer crecer mi negocio">Grow My Business</strong><span data-en="List for free" data-es="Regístrate gratis">List for free</span></a>
-        <a class="mll-action" href="pages/affiliates.html"><div class="mll-action-icon">🤝</div><strong data-en="Earn With MLL" data-es="Gana con MLL">Earn With MLL</strong><span data-en="Affiliate partners" data-es="Socios afiliados">Affiliate partners</span></a>
+  <section class="v2-section v2-section-white">
+    <div class="v2-wrap v2-community">
+      <img src="/assets/businesses/community.jpg" alt="Community gathering">
+      <div>
+        <div class="v2-eyebrow" data-en="Community" data-es="Comunidad">Community</div>
+        <h2 data-en="Built for our community.<br>By our community." data-es="Hecho para nuestra comunidad.<br>Por nuestra comunidad.">Built for our community.<br>By our community.</h2>
+        <p class="v2-hero-copy" style="margin-top:16px;" data-en="My Latino List brings owners, customers, and opportunity together — a marketplace, directory, and resource hub in one place." data-es="My Latino List une a dueños, clientes y oportunidades — un mercado, directorio y portal de recursos en un solo lugar.">My Latino List brings owners, customers, and opportunity together — a marketplace, directory, and resource hub in one place.</p>
+        <div class="v2-stats">
+          <div class="v2-stat"><b id="community-biz-count">—</b><span data-en="Latino-owned businesses" data-es="Negocios de dueños latinos">Latino-owned businesses</span></div>
+          <div class="v2-stat"><b id="community-state-count">—</b><span data-en="Cities &amp; regions" data-es="Ciudades y regiones">Cities &amp; regions</span></div>
+          <div class="v2-stat"><b id="community-job-count">—</b><span data-en="Open jobs" data-es="Empleos abiertos">Open jobs</span></div>
+          <div class="v2-stat"><b id="community-res-count">—</b><span data-en="Community resources" data-es="Recursos comunitarios">Community resources</span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -520,18 +617,16 @@
   </section>
 
   <!-- FEATURED BUSINESSES -->
-  <section class="featured-section" id="directory">
-    <div class="container">
-      <div class="section-header">
+  <section class="v2-section v2-section-soft" id="featured">
+    <div class="v2-wrap">
+      <div class="v2-head">
         <div>
-          <div class="section-label" data-en="Popular near you" data-es="Populares cerca de ti">Popular near you</div>
-          <h2 class="section-title" data-en="Latino-owned businesses in the DMV" data-es="Negocios latinos en el DMV">Latino-owned businesses in the DMV</h2>
+          <div class="v2-eyebrow" data-en="Featured" data-es="Destacados">Featured</div>
+          <h2 data-en="Businesses to watch" data-es="Negocios para descubrir">Businesses to watch</h2>
         </div>
-        <a href="pages/directory.html" class="section-link" data-en="View all <span>→</span>" data-es="Ver todos <span>→</span>">View all <span>→</span></a>
+        <a href="pages/directory.html" class="section-link" data-en="View directory →" data-es="Ver directorio →">View directory →</a>
       </div>
-      <div class="biz-grid" id="biz-grid">
-        <!-- Populated by JS -->
-      </div>
+      <div class="v2-featured-row" id="featured-grid"></div>
     </div>
   </section>
 
@@ -909,6 +1004,7 @@
   </footer>
 
   <script src="js/data.js"></script>
+  <script src="js/media.js"></script>
   <script src="js/main.js"></script>
   <script src="/js/nav.js"></script>
   <style>
@@ -1249,10 +1345,10 @@
       const res = await fetch(window.MLL_CONFIG.API_URL + '/api/stats');
       if (!res.ok) return;
       const { businesses, states } = await res.json();
-      const bizEl   = document.getElementById('stat-businesses');
-      const stateEl = document.getElementById('stat-states');
-      if (bizEl)   bizEl.textContent   = Math.max(businesses, 21).toLocaleString() + '+';
-      if (stateEl) stateEl.textContent = Math.max(states, 12) + '+';
+      const bizEl   = document.getElementById('community-biz-count');
+      const stateEl = document.getElementById('community-state-count');
+      if (bizEl && businesses != null) bizEl.textContent = Number(businesses).toLocaleString();
+      if (stateEl && states != null) stateEl.textContent = Number(states).toLocaleString();
     } catch { /* fall back to hardcoded values silently */ }
   })();
 

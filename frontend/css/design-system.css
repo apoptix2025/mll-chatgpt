@@ -7,20 +7,29 @@
    ============================================================ */
 
 :root {
+  --blue-600:        #0866FF;
+  --blue-700:        #0057E7;
+  --blue-50:         #F4F8FF;
+  --navy-900:        #10213A;
+  --text-secondary:  #627084;
+  --surface:         #FFFFFF;
+  --surface-soft:    #F6F9FF;
+  --border-line:     #DCE7F7;
+
   --mll-blue:        #0866FF;
-  --mll-blue-dark:   #0654D4;
+  --mll-blue-dark:   #0057E7;
   --mll-blue-deep:   #0446B3;
   --mll-blue-mid:    #3B8AFF;
   --mll-blue-soft:   #E8F1FF;
   --mll-blue-wash:   #F4F8FF;
-  --mll-navy:        #0F1C2E;
+  --mll-navy:        #10213A;
   --mll-charcoal:    #1C2430;
-  --mll-ink:         #1C2430;
-  --mll-ink-soft:    #4B5568;
-  --mll-ink-muted:   #6B7A90;
+  --mll-ink:         #10213A;
+  --mll-ink-soft:    #627084;
+  --mll-ink-muted:   #627084;
   --mll-white:       #FFFFFF;
-  --mll-shadow:      0 8px 28px rgba(8, 102, 255, 0.08);
-  --mll-shadow-hover:0 14px 40px rgba(8, 102, 255, 0.14);
+  --mll-shadow:      0 8px 24px rgba(16, 33, 58, 0.06);
+  --mll-shadow-hover:0 18px 50px rgba(16, 33, 58, 0.10);
   --mll-radius-sm:   12px;
   --mll-radius-md:   16px;
   --mll-radius-lg:   20px;

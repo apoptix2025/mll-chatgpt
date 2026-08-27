@@ -186,16 +186,18 @@
 }
 .mll-bottom-nav a.is-active { color: var(--mll-blue); }
 .mll-bottom-nav .mll-add {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: var(--mll-blue);
+  background: var(--blue-600, var(--mll-blue));
   color: #fff;
   justify-content: center;
-  margin-top: -22px;
-  box-shadow: 0 8px 20px rgba(8, 102, 255, 0.3);
-  font-size: 22px;
+  margin-top: -26px;
+  box-shadow: 0 10px 24px rgba(8, 102, 255, 0.32);
+  font-size: 28px;
+  font-weight: 500;
   padding: 0;
+  line-height: 1;
 }
 .mll-bottom-nav .mll-add span { display: none; }
 
