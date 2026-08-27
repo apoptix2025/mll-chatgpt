@@ -84,194 +84,58 @@
   </nav>
 
   <!-- HERO -->
-  <section class="hero">
-    <div class="hero-bg-grid"></div>
-    <div class="hero-accent-ring"></div>
-    <div class="container hero-inner">
-      <div class="hero-eyebrow reveal">
-        <span class="eyebrow-dot"></span>
-        <span data-en="The Latino business platform" data-es="La plataforma del negocio latino">The Latino business platform</span>
+  <section class="mll-hero">
+    <div class="container mll-hero-inner">
+      <div class="mll-kicker">
+        <span class="logo-mark" style="width:22px;height:22px;border-radius:6px;">
+          <svg width="12" height="12" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg>
+        </span>
+        My Latino List
       </div>
-      <h1 class="hero-h1 reveal reveal-d1" data-en="Grow, sell &amp; connect<br><em>with your community</em>" data-es="Crece, vende y conecta<br><em>con tu comunidad</em>">
-        Grow, sell &amp; connect<br>
-        <em>with your community</em>
+      <h1 data-en="Grow your business.<em>Discover your community.</em>" data-es="Haz crecer tu negocio.<em>Descubre tu comunidad.</em>">
+        Grow your business.
+        <em>Discover your community.</em>
       </h1>
-      <p class="hero-sub reveal reveal-d2" data-en="The all-in-one hub for Latino businesses — list your business, sell products, access bilingual resources, find talent, and amplify your brand nationwide." data-es="La plataforma todo en uno para negocios latinos — lista tu negocio, vende productos, accede a recursos bilingües, encuentra talento y amplía tu marca a nivel nacional.">
-        The all-in-one hub for Latino businesses — list your business, sell products, access bilingual resources, find talent, and amplify your brand nationwide.
-      </p>
-      <div class="hero-btns reveal reveal-d3">
-        <a href="pages/enroll.html" class="btn-hero-primary" data-en="Enroll your business — it's free" data-es="Registra tu negocio — es gratis">Enroll your business — it's free</a>
-        <a href="#directory" class="btn-hero-ghost" data-en="Browse the directory" data-es="Explorar el directorio">Browse the directory</a>
-      </div>
-      <div class="hero-stats reveal reveal-d4">
-        <div class="stat"><span class="stat-n" id="stat-businesses">4,200+</span><span class="stat-l" data-en="Latino businesses" data-es="Negocios latinos">Latino businesses</span></div>
-        <div class="stat-div"></div>
-        <div class="stat"><span class="stat-n" id="stat-states">38</span><span class="stat-l" data-en="States covered" data-es="Estados cubiertos">States covered</span></div>
-        <div class="stat-div"></div>
-        <div class="stat"><span class="stat-n">$2.1M</span><span class="stat-l" data-en="Marketplace sales" data-es="Ventas en el mercado">Marketplace sales</span></div>
-        <div class="stat-div"></div>
-        <div class="stat"><span class="stat-n">12K+</span><span class="stat-l" data-en="Monthly visitors" data-es="Visitantes mensuales">Monthly visitors</span></div>
+      <p class="lead" data-en="The all-in-one Latino business community." data-es="La comunidad de negocios latinos, todo en uno.">The all-in-one Latino business community.</p>
+
+      <form class="mll-search" action="pages/directory.html" method="get" onsubmit="handleSearch(); return false;">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" id="search-input" placeholder="Search restaurants, contractors, lawyers, salons, jobs..." data-en-ph="Search restaurants, contractors, lawyers, salons, jobs..." data-es-ph="Busca restaurantes, contratistas, abogados, salones, empleos..." autocomplete="off">
+        <select id="search-city" aria-label="Location">
+          <option value="" data-en="Near you" data-es="Cerca de ti">Near you</option>
+          <option>Silver Spring, MD</option>
+          <option>Bethesda, MD</option>
+          <option>Rockville, MD</option>
+          <option>Hyattsville, MD</option>
+          <option>Columbia, MD</option>
+          <option>Arlington, VA</option>
+          <option>Alexandria, VA</option>
+          <option>Washington, DC</option>
+        </select>
+        <button type="submit" data-en="Search" data-es="Buscar">Search</button>
+      </form>
+
+      <div class="mll-pills" style="margin-top:18px;">
+        <a class="mll-pill" href="pages/directory.html?category=Food%20%26%20Dining">🍽️ <span data-en="Restaurants" data-es="Restaurantes">Restaurants</span></a>
+        <a class="mll-pill" href="pages/directory.html?category=Construction">🛠️ <span data-en="Home Services" data-es="Hogar">Home Services</span></a>
+        <a class="mll-pill" href="pages/directory.html?category=Beauty%20%26%20Salon">💇 <span data-en="Beauty" data-es="Belleza">Beauty</span></a>
+        <a class="mll-pill" href="pages/directory.html?category=Legal%20Services">⚖️ <span data-en="Legal" data-es="Legal">Legal</span></a>
+        <a class="mll-pill" href="pages/marketplace.html">🛍️ <span data-en="Shopping" data-es="Compras">Shopping</span></a>
+        <a class="mll-pill" href="pages/jobs.html">💼 <span data-en="Jobs" data-es="Empleos">Jobs</span></a>
+        <a class="mll-pill" href="pages/directory.html">⋯ <span data-en="More" data-es="Más">More</span></a>
       </div>
     </div>
   </section>
 
-  <!-- SEARCH BAR -->
-  <section class="search-strip">
+  <section class="mll-section-pad">
     <div class="container">
-      <div class="search-box">
-        <div class="search-icon">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <input type="text" id="search-input" placeholder="Search restaurants, lawyers, salons, contractors..." data-placeholder-en="Search restaurants, lawyers, salons, contractors..." data-placeholder-es="Busca restaurantes, abogados, salones, contratistas..." autocomplete="off">
-        <select id="search-cat" class="search-select">
-          <option value="" data-en="All categories" data-es="Todas las categorías">All categories</option>
-          <option>Food &amp; dining</option>
-          <option>Legal services</option>
-          <option>Health &amp; wellness</option>
-          <option>Beauty &amp; salon</option>
-          <option>Auto &amp; repair</option>
-          <option>Finance</option>
-          <option>Construction</option>
-          <option>Real estate</option>
-          <option>Education</option>
-          <option>Retail</option>
-          <option>Tech</option>
-          <option>Events</option>
-          <option>Other</option>
-        </select>
-        <select id="search-city" class="search-select">
-          <option value="" data-en="All states &amp; cities" data-es="Todos los estados y ciudades">All states &amp; cities</option>
-          <optgroup label="Popular cities">
-            <option>Miami, FL</option>
-            <option>Los Angeles, CA</option>
-            <option>Houston, TX</option>
-            <option>Chicago, IL</option>
-            <option>New York, NY</option>
-            <option>San Antonio, TX</option>
-            <option>Phoenix, AZ</option>
-            <option>Dallas, TX</option>
-            <option>San Diego, CA</option>
-            <option>El Paso, TX</option>
-            <option>McAllen, TX</option>
-            <option>Orlando, FL</option>
-            <option>Tampa, FL</option>
-            <option>Las Vegas, NV</option>
-            <option>Denver, CO</option>
-          </optgroup>
-          <optgroup label="Search by state">
-            <option>Alabama</option>
-            <option>Alaska</option>
-            <option>Arizona</option>
-            <option>Arkansas</option>
-            <option>California</option>
-            <option>Colorado</option>
-            <option>Connecticut</option>
-            <option>Delaware</option>
-            <option>Florida</option>
-            <option>Georgia</option>
-            <option>Hawaii</option>
-            <option>Idaho</option>
-            <option>Illinois</option>
-            <option>Indiana</option>
-            <option>Iowa</option>
-            <option>Kansas</option>
-            <option>Kentucky</option>
-            <option>Louisiana</option>
-            <option>Maine</option>
-            <option>Maryland</option>
-            <option>Massachusetts</option>
-            <option>Michigan</option>
-            <option>Minnesota</option>
-            <option>Mississippi</option>
-            <option>Missouri</option>
-            <option>Montana</option>
-            <option>Nebraska</option>
-            <option>Nevada</option>
-            <option>New Hampshire</option>
-            <option>New Jersey</option>
-            <option>New Mexico</option>
-            <option>New York</option>
-            <option>North Carolina</option>
-            <option>North Dakota</option>
-            <option>Ohio</option>
-            <option>Oklahoma</option>
-            <option>Oregon</option>
-            <option>Pennsylvania</option>
-            <option>Rhode Island</option>
-            <option>South Carolina</option>
-            <option>South Dakota</option>
-            <option>Tennessee</option>
-            <option>Texas</option>
-            <option>Utah</option>
-            <option>Vermont</option>
-            <option>Virginia</option>
-            <option>Washington</option>
-            <option>West Virginia</option>
-            <option>Wisconsin</option>
-            <option>Wyoming</option>
-            <option>District of Columbia</option>
-            <option>Puerto Rico</option>
-            <option>Guam</option>
-            <option>U.S. Virgin Islands</option>
-            <option>American Samoa</option>
-            <option>Northern Mariana Islands</option>
-          </optgroup>
-        </select>
-        <button class="search-btn" onclick="handleSearch()" data-en="Search" data-es="Buscar">Search</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- PLATFORM MODULES -->
-  <section class="modules-section">
-    <div class="container">
-      <div class="section-label" data-en="Platform modules" data-es="Módulos de la plataforma">Platform modules</div>
-      <div class="modules-grid">
-        <a href="#directory" class="module-card module-active">
-          <div class="module-icon" style="background:#EBF2FF;">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" fill="var(--coral)"/><rect x="11" y="2" width="7" height="7" rx="1.5" fill="var(--coral)" opacity="0.5"/><rect x="2" y="11" width="7" height="7" rx="1.5" fill="var(--coral)" opacity="0.5"/><rect x="11" y="11" width="7" height="7" rx="1.5" fill="var(--coral)" opacity="0.5"/></svg>
-          </div>
-          <div class="module-label" data-en="Business directory" data-es="Directorio de negocios">Business directory</div>
-          <div class="module-desc" data-en="Find &amp; get found" data-es="Encuentra y sé encontrado">Find &amp; get found</div>
-        </a>
-        <a href="pages/marketplace.html" class="module-card">
-          <div class="module-icon" style="background:#E8F8F1;">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 6h14M3 10h10M3 14h7" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </div>
-          <div class="module-label" data-en="Marketplace" data-es="Mercado">Marketplace</div>
-          <div class="module-desc" data-en="Sell your products" data-es="Vende tus productos">Sell your products</div>
-        </a>
-        <a href="pages/voz.html" class="module-card">
-          <div class="module-icon" style="background:#EEF0FE;">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="#534AB7" stroke-width="1.5"/><path d="M3 17c0-3.87 3.13-7 7-7s7 3.13 7 7" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </div>
-          <div class="module-label">La Voz Latino</div>
-          <div class="module-desc" data-en="Resources &amp; grants" data-es="Recursos y subvenciones">Resources &amp; grants</div>
-        </a>
-        <a href="pages/jobs.html" class="module-card">
-          <div class="module-icon" style="background:#E8F3FD;">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="6" width="14" height="11" rx="2" stroke="#378ADD" stroke-width="1.5"/><path d="M7 6V5a3 3 0 016 0v1" stroke="#378ADD" stroke-width="1.5"/></svg>
-          </div>
-          <div class="module-label" data-en="Jobs board" data-es="Bolsa de trabajo">Jobs board</div>
-          <div class="module-desc" data-en="Hire Latino talent" data-es="Contrata talento latino">Hire Latino talent</div>
-        </a>
-        <a href="pages/affiliates.html" class="module-card">
-          <div class="module-icon" style="background:#EDF7E4;">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 14l5-5 3.5 3.5L17 5" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="module-label" data-en="Affiliates" data-es="Afiliados">Affiliates</div>
-          <div class="module-desc" data-en="Earn commissions" data-es="Gana comisiones">Earn commissions</div>
-        </a>
-        <a href="pages/enroll.html" class="module-card module-cta-card">
-          <div class="module-icon" style="background:rgba(255,255,255,0.15);">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </div>
-          <div class="module-label" style="color:#fff;" data-en="Enroll free" data-es="Regístrate gratis">Enroll free</div>
-          <div class="module-desc" style="color:rgba(255,255,255,0.75);" data-en="Get started today" data-es="Comienza hoy">Get started today</div>
-        </a>
+      <div class="mll-actions">
+        <a class="mll-action" href="pages/directory.html"><div class="mll-action-icon">🔎</div><strong data-en="Find a Business" data-es="Buscar un negocio">Find a Business</strong><span data-en="Directory near you" data-es="Directorio cerca de ti">Directory near you</span></a>
+        <a class="mll-action" href="pages/marketplace.html"><div class="mll-action-icon">🛍️</div><strong data-en="Shop Latino" data-es="Compra latino">Shop Latino</strong><span data-en="Products &amp; services" data-es="Productos y servicios">Products &amp; services</span></a>
+        <a class="mll-action" href="pages/jobs.html"><div class="mll-action-icon">💼</div><strong data-en="Find Jobs" data-es="Buscar empleos">Find Jobs</strong><span data-en="Hire bilingual talent" data-es="Contrata talento bilingüe">Hire bilingual talent</span></a>
+        <a class="mll-action" href="pages/voz.html"><div class="mll-action-icon">📚</div><strong data-en="Resources" data-es="Recursos">Resources</strong><span>La Voz Latino</span></a>
+        <a class="mll-action" href="pages/enroll.html"><div class="mll-action-icon">🚀</div><strong data-en="Grow My Business" data-es="Hacer crecer mi negocio">Grow My Business</strong><span data-en="List for free" data-es="Regístrate gratis">List for free</span></a>
+        <a class="mll-action" href="pages/affiliates.html"><div class="mll-action-icon">🤝</div><strong data-en="Earn With MLL" data-es="Gana con MLL">Earn With MLL</strong><span data-en="Affiliate partners" data-es="Socios afiliados">Affiliate partners</span></a>
       </div>
     </div>
   </section>
@@ -660,8 +524,8 @@
     <div class="container">
       <div class="section-header">
         <div>
-          <div class="section-label" data-en="Featured businesses" data-es="Negocios destacados">Featured businesses</div>
-          <h2 class="section-title" data-en="Discover Latino-owned businesses near you" data-es="Descubre negocios latinos cerca de ti">Discover Latino-owned businesses near you</h2>
+          <div class="section-label" data-en="Popular near you" data-es="Populares cerca de ti">Popular near you</div>
+          <h2 class="section-title" data-en="Latino-owned businesses in the DMV" data-es="Negocios latinos en el DMV">Latino-owned businesses in the DMV</h2>
         </div>
         <a href="pages/directory.html" class="section-link" data-en="View all <span>→</span>" data-es="Ver todos <span>→</span>">View all <span>→</span></a>
       </div>

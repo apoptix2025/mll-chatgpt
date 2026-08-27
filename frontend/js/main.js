@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="biz-footer">
             <span class="biz-rating">★ ${b.rating} <span style="color:var(--ink-muted);font-weight:400;">(${b.review_count})</span></span>
             <span class="biz-city">${b.city}, ${b.state}</span>
+            <span style="font-size:12px;font-weight:600;color:var(--coral);">View →</span>
           </div>
         </div>
       `).join('');
@@ -200,7 +201,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams();
     if (q)    params.set('q', q);
     if (cat)  params.set('category', cat);
-    if (city) params.set('city', city);
+    if (city) {
+      const map = { MD: 'Maryland', VA: 'Virginia', DC: 'District of Columbia' };
+      const m = city.match(/,\s*([A-Z]{2})$/);
+      params.set('city', (m && map[m[1]]) ? map[m[1]] : city);
+    }
     window.location.href = `pages/directory.html?${params.toString()}`;
   };
 
