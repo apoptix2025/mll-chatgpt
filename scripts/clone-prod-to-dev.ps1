@@ -9,8 +9,8 @@
   the mll-dev project ref. Restore is disabled unless -Execute is passed
   AND the operator types: CLONE PROD TO MLL-DEV
 
-  Dump/restore uses pg_dump and psql (data-only). Docker and Supabase CLI
-  are not required.
+  Dump/restore uses pg_dump and psql (data-only). Auth clone is limited to
+  auth.users and auth.identities. Docker and Supabase CLI are not required.
 
   Do not run this until the clone has been explicitly approved.
 
@@ -83,9 +83,9 @@ function Invoke-Checked([string]$File, [string[]]$ArgumentList) {
 function Invoke-PgDumpData {
   param(
     [Parameter(Mandatory = $true)][string]$DbUrl,
-    [Parameter(Mandatory = $true)][string]$Schema,
     [Parameter(Mandatory = $true)][string]$OutFile,
-    [string[]]$ExcludeTables = @()
+    [string]$Schema,
+    [string[]]$Tables = @()
   )
   $dumpArgs = New-Object System.Collections.Generic.List[string]
   $dumpArgs.Add("--dbname")
@@ -93,10 +93,15 @@ function Invoke-PgDumpData {
   $dumpArgs.Add("--data-only")
   $dumpArgs.Add("--no-owner")
   $dumpArgs.Add("--no-privileges")
-  $dumpArgs.Add("--schema=$Schema")
   $dumpArgs.Add("--file=$OutFile")
-  foreach ($table in $ExcludeTables) {
-    $dumpArgs.Add("--exclude-table=$table")
+  if ($Tables.Count -gt 0) {
+    foreach ($table in $Tables) {
+      $dumpArgs.Add("--table=$table")
+    }
+  } elseif (-not [string]::IsNullOrWhiteSpace($Schema)) {
+    $dumpArgs.Add("--schema=$Schema")
+  } else {
+    Write-Fail "pg_dump requires a schema or an explicit table list. Connection strings were not printed."
   }
   Invoke-Checked "pg_dump" $dumpArgs.ToArray()
 }
@@ -154,9 +159,10 @@ Write-Host "psql: available"
 Write-Host ""
 
 Write-Host "Plan:"
+Write-Host "  Auth clone: users + identities only; no sessions/tokens/MFA runtime state"
 Write-Host "  1. Create dated files under .local-backups/ (gitignored)"
-Write-Host "  2. pg_dump current mll-dev public data, then auth data (destination backup first)"
-Write-Host "  3. pg_dump production public data, then auth data (read-only on production)"
+Write-Host "  2. pg_dump current mll-dev public data, then auth.users + auth.identities (destination backup first)"
+Write-Host "  3. pg_dump production public data, then auth.users + auth.identities (read-only on production)"
 Write-Host "  4. Restore ONLY into mll-dev (truncate destination, then psql)"
 Write-Host "  5. Operator runs scripts/sanitize-dev.sql in the mll-dev SQL editor"
 Write-Host "  6. Operator runs: node scripts/sanitize-dev-auth.mjs"
@@ -201,24 +207,23 @@ $devPublicBackup = Join-Path $BackupRoot "mll-dev-public-$stamp.sql"
 $devAuthBackup = Join-Path $BackupRoot "mll-dev-auth-$stamp.sql"
 $prodPublicDump = Join-Path $BackupRoot "prod-public-$stamp.sql"
 $prodAuthDump = Join-Path $BackupRoot "prod-auth-$stamp.sql"
-$authExclude = @(
-  "auth.sessions",
-  "auth.refresh_tokens",
-  "auth.audit_log_entries"
+$authTables = @(
+  "auth.users",
+  "auth.identities"
 )
 
 Write-Host ""
 Write-Host "Backup destination (mll-dev) first..."
 Invoke-PgDumpData -DbUrl $devUrl -Schema "public" -OutFile $devPublicBackup
 Write-Host "  wrote $(Split-Path $devPublicBackup -Leaf)"
-Invoke-PgDumpData -DbUrl $devUrl -Schema "auth" -OutFile $devAuthBackup -ExcludeTables $authExclude
+Invoke-PgDumpData -DbUrl $devUrl -OutFile $devAuthBackup -Tables $authTables
 Write-Host "  wrote $(Split-Path $devAuthBackup -Leaf)"
 
 Write-Host ""
 Write-Host "Dump production (read-only)..."
 Invoke-PgDumpData -DbUrl $prodUrl -Schema "public" -OutFile $prodPublicDump
 Write-Host "  wrote $(Split-Path $prodPublicDump -Leaf)"
-Invoke-PgDumpData -DbUrl $prodUrl -Schema "auth" -OutFile $prodAuthDump -ExcludeTables $authExclude
+Invoke-PgDumpData -DbUrl $prodUrl -OutFile $prodAuthDump -Tables $authTables
 Write-Host "  wrote $(Split-Path $prodAuthDump -Leaf)"
 
 if ($SkipRestore) {
