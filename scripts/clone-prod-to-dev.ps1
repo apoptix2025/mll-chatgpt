@@ -9,6 +9,9 @@
   the mll-dev project ref. Restore is disabled unless -Execute is passed
   AND the operator types: CLONE PROD TO MLL-DEV
 
+  Dump/restore uses pg_dump and psql (data-only). Docker and Supabase CLI
+  are not required.
+
   Do not run this until the clone has been explicitly approved.
 
 .PARAMETER Execute
@@ -53,16 +56,18 @@ function Invoke-Checked([string]$File, [string[]]$ArgumentList) {
   $shownParts = New-Object System.Collections.Generic.List[string]
   for ($i = 0; $i -lt $ArgumentList.Count; $i++) {
     $arg = $ArgumentList[$i]
-    if ($arg -eq "--db-url" -and ($i + 1) -lt $ArgumentList.Count) {
-      $shownParts.Add("--db-url")
+    if ($arg -match "^postgres(ql)?://") {
+      $shownParts.Add("[REDACTED]")
+      continue
+    }
+    if (($arg -eq "--db-url" -or $arg -eq "--dbname" -or $arg -eq "-d") -and ($i + 1) -lt $ArgumentList.Count) {
+      $shownParts.Add($arg)
       $shownParts.Add("[REDACTED]")
       $i++
       continue
     }
-    if ($arg -eq "--dbname" -and ($i + 1) -lt $ArgumentList.Count) {
-      $shownParts.Add("--dbname")
-      $shownParts.Add("[REDACTED]")
-      $i++
+    if ($arg.StartsWith("--db-url=") -or $arg.StartsWith("--dbname=")) {
+      $shownParts.Add(($arg.Substring(0, $arg.IndexOf("=")) + "=[REDACTED]"))
       continue
     }
     $shownParts.Add($arg)
@@ -73,6 +78,27 @@ function Invoke-Checked([string]$File, [string[]]$ArgumentList) {
   if ($LASTEXITCODE -ne 0) {
     Write-Fail "$File failed with exit code $LASTEXITCODE. Connection strings were not printed."
   }
+}
+
+function Invoke-PgDumpData {
+  param(
+    [Parameter(Mandatory = $true)][string]$DbUrl,
+    [Parameter(Mandatory = $true)][string]$Schema,
+    [Parameter(Mandatory = $true)][string]$OutFile,
+    [string[]]$ExcludeTables = @()
+  )
+  $dumpArgs = New-Object System.Collections.Generic.List[string]
+  $dumpArgs.Add("--dbname")
+  $dumpArgs.Add($DbUrl)
+  $dumpArgs.Add("--data-only")
+  $dumpArgs.Add("--no-owner")
+  $dumpArgs.Add("--no-privileges")
+  $dumpArgs.Add("--schema=$Schema")
+  $dumpArgs.Add("--file=$OutFile")
+  foreach ($table in $ExcludeTables) {
+    $dumpArgs.Add("--exclude-table=$table")
+  }
+  Invoke-Checked "pg_dump" $dumpArgs.ToArray()
 }
 
 $prodUrl = $env:PROD_DB_URL
@@ -116,26 +142,21 @@ Write-Host "  PROD_DB_URL = SET"
 Write-Host "  DEV_DB_URL  = SET"
 Write-Host ""
 
-if (-not (Test-HasCommand "supabase")) {
-  Write-Fail "Supabase CLI is not installed. Install with: scoop install supabase   or   npm install -g supabase"
+if (-not (Test-HasCommand "pg_dump")) {
+  Write-Fail "pg_dump is required. Install PostgreSQL client tools (no Docker / no Supabase CLI dump)."
+}
+if (-not (Test-HasCommand "psql")) {
+  Write-Fail "psql is required. Install PostgreSQL client tools (no Docker / no Supabase CLI dump)."
 }
 
-$supabaseVersion = (& supabase --version 2>$null | Select-Object -First 1)
-Write-Host "Supabase CLI: $supabaseVersion"
-
-$psqlReady = Test-HasCommand "psql"
-if ($psqlReady) {
-  Write-Host "psql:          available"
-} else {
-  Write-Host "psql:          MISSING (required for restore)"
-  Write-Host "  Install: scoop install postgresql   OR  https://www.postgresql.org/download/windows/"
-}
-
+Write-Host "pg_dump: available"
+Write-Host "psql: available"
 Write-Host ""
+
 Write-Host "Plan:"
 Write-Host "  1. Create dated files under .local-backups/ (gitignored)"
-Write-Host "  2. Dump current mll-dev (public data + auth data) as a rollback copy"
-Write-Host "  3. Dump production public data and auth data (read-only on production)"
+Write-Host "  2. pg_dump current mll-dev public data, then auth data (destination backup first)"
+Write-Host "  3. pg_dump production public data, then auth data (read-only on production)"
 Write-Host "  4. Restore ONLY into mll-dev (truncate destination, then psql)"
 Write-Host "  5. Operator runs scripts/sanitize-dev.sql in the mll-dev SQL editor"
 Write-Host "  6. Operator runs: node scripts/sanitize-dev-auth.mjs"
@@ -148,6 +169,7 @@ Write-Host "  - copy R2 / Storage"
 Write-Host "  - enable Stripe live mode"
 Write-Host "  - send email"
 Write-Host "  - commit backup files"
+Write-Host "  - require Docker or supabase db dump"
 Write-Host ""
 
 if (-not $Execute) {
@@ -161,10 +183,6 @@ if (-not $Execute) {
   Write-Host "You will be required to type: $RequiredPhrase"
   Write-Host ""
   exit 0
-}
-
-if (-not $psqlReady -and -not $SkipRestore) {
-  Write-Fail "psql is required to restore into mll-dev. Install PostgreSQL client tools, or pass -SkipRestore to dump only."
 }
 
 $typed = $ConfirmPhrase
@@ -183,25 +201,24 @@ $devPublicBackup = Join-Path $BackupRoot "mll-dev-public-$stamp.sql"
 $devAuthBackup = Join-Path $BackupRoot "mll-dev-auth-$stamp.sql"
 $prodPublicDump = Join-Path $BackupRoot "prod-public-$stamp.sql"
 $prodAuthDump = Join-Path $BackupRoot "prod-auth-$stamp.sql"
-
-Write-Host ""
 $authExclude = @(
-  "-x", "auth.sessions",
-  "-x", "auth.refresh_tokens",
-  "-x", "auth.audit_log_entries"
+  "auth.sessions",
+  "auth.refresh_tokens",
+  "auth.audit_log_entries"
 )
 
+Write-Host ""
 Write-Host "Backup destination (mll-dev) first..."
-Invoke-Checked "supabase" @("db", "dump", "--db-url", $devUrl, "-f", $devPublicBackup, "--data-only", "--use-copy", "--schema", "public")
-Invoke-Checked "supabase" (@("db", "dump", "--db-url", $devUrl, "-f", $devAuthBackup, "--data-only", "--use-copy", "--schema", "auth") + $authExclude)
+Invoke-PgDumpData -DbUrl $devUrl -Schema "public" -OutFile $devPublicBackup
 Write-Host "  wrote $(Split-Path $devPublicBackup -Leaf)"
+Invoke-PgDumpData -DbUrl $devUrl -Schema "auth" -OutFile $devAuthBackup -ExcludeTables $authExclude
 Write-Host "  wrote $(Split-Path $devAuthBackup -Leaf)"
 
 Write-Host ""
 Write-Host "Dump production (read-only)..."
-Invoke-Checked "supabase" @("db", "dump", "--db-url", $prodUrl, "-f", $prodPublicDump, "--data-only", "--use-copy", "--schema", "public")
-Invoke-Checked "supabase" (@("db", "dump", "--db-url", $prodUrl, "-f", $prodAuthDump, "--data-only", "--use-copy", "--schema", "auth") + $authExclude)
+Invoke-PgDumpData -DbUrl $prodUrl -Schema "public" -OutFile $prodPublicDump
 Write-Host "  wrote $(Split-Path $prodPublicDump -Leaf)"
+Invoke-PgDumpData -DbUrl $prodUrl -Schema "auth" -OutFile $prodAuthDump -ExcludeTables $authExclude
 Write-Host "  wrote $(Split-Path $prodAuthDump -Leaf)"
 
 if ($SkipRestore) {
@@ -218,7 +235,6 @@ if (-not (Test-Path $truncateSql)) {
   Write-Fail "Missing $truncateSql"
 }
 
-$env:PGPASSWORD = $null
 $psqlCommon = @("--dbname", $devUrl, "--single-transaction", "--set=ON_ERROR_STOP=1")
 Invoke-Checked "psql" ($psqlCommon + @("-f", $truncateSql))
 Invoke-Checked "psql" ($psqlCommon + @("-f", $prodAuthDump))
