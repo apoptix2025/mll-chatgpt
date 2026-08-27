@@ -6,7 +6,7 @@
   <meta name="description" id="page-desc" content="Latino-owned business on MyLatinoList">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
   <style>
     body{background:var(--surface-2);padding-top:var(--nav-h);}
@@ -103,6 +103,7 @@
   </script>
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
+  <script src="/js/media.js"></script>
 </head>
 <body>
   <nav class="nav scrolled has-mobile" id="nav">
@@ -146,10 +147,11 @@
   </nav>
 
   <!-- HERO -->
+  <div class="prof-banner" id="prof-banner"></div>
   <div class="biz-hero" id="biz-hero">
     <div class="container">
-      <div class="biz-hero-inner">
-        <div class="biz-avatar" id="biz-avatar" style="background:#EBF2FF;">🏢</div>
+      <div class="prof-identity">
+        <div class="prof-avatar" id="biz-avatar"></div>
         <div class="biz-info">
           <h1 id="biz-name">Loading...</h1>
           <div class="biz-meta-row">
@@ -161,18 +163,23 @@
             <span class="biz-rating-num" id="biz-rating">—</span>
             <span class="biz-review-count" id="biz-review-count"></span>
           </div>
+          <div class="prof-actions">
+            <button type="button" class="prof-act" id="btn-save">♡ Save</button>
+            <a href="#" class="prof-act primary" id="btn-call">Call</a>
+            <a href="#" class="prof-act" id="btn-message">Message</a>
+            <a href="#" class="prof-act" id="btn-directions">Directions</a>
+          </div>
         </div>
         <div class="biz-actions">
-          <a href="#" class="btn-call" id="btn-call">📞 Call now</a>
-          <a href="#" class="btn-website" id="btn-website" target="_blank">🌐 Visit website</a>
-          <button class="btn-qr" onclick="window.location='biz-qr.html?id='+bizSlug" data-en="📱 Get QR code" data-es="📱 Obtener código QR">📱 Get QR code</button>
+          <a href="#" class="btn-website" id="btn-website" target="_blank">Visit website</a>
+          <button class="btn-qr" onclick="window.location='biz-qr.html?id='+bizSlug" data-en="Get QR code" data-es="Obtener código QR">Get QR code</button>
         </div>
       </div>
       <div class="biz-tabs">
-        <div class="biz-tab active" onclick="showTab('overview',this)" data-en="Overview" data-es="Resumen">Overview</div>
-        <div class="biz-tab" onclick="showTab('products',this)" data-en="Products" data-es="Productos">Products</div>
+        <div class="biz-tab active" onclick="showTab('overview',this)" data-en="About" data-es="Acerca de">About</div>
+        <div class="biz-tab" onclick="showTab('products',this)" data-en="Services" data-es="Servicios">Services</div>
+        <div class="biz-tab" onclick="showTab('photos',this)" data-en="Photos" data-es="Fotos">Photos</div>
         <div class="biz-tab" onclick="showTab('reviews',this)" data-en="Reviews" data-es="Reseñas">Reviews</div>
-        <div class="biz-tab" onclick="showTab('hours',this)" data-en="Hours" data-es="Horario">Hours</div>
       </div>
     </div>
   </div>
@@ -202,6 +209,14 @@
             <div class="bcs-title" data-en="Products &amp; services" data-es="Productos y servicios">Products &amp; services</div>
             <div class="product-grid-mini" id="products-full"></div>
             <div id="no-products" style="display:none;font-size:14px;color:var(--ink-muted);padding:20px 0;" data-en="No products listed yet." data-es="Todavía no hay productos.">No products listed yet.</div>
+          </div>
+        </div>
+
+        <!-- PHOTOS TAB -->
+        <div id="tab-photos" style="display:none;">
+          <div class="biz-card-section">
+            <div class="bcs-title" data-en="Photos" data-es="Fotos">Photos</div>
+            <div id="photo-gallery" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
           </div>
         </div>
 
@@ -303,8 +318,9 @@ let bizData = null;
 let selectedRating = 0;
 
 function showTab(name, el) {
-  ['overview','products','reviews','hours'].forEach(t => {
-    document.getElementById('tab-'+t).style.display = t===name?'block':'none';
+  ['overview','products','photos','reviews','hours'].forEach(t => {
+    const node = document.getElementById('tab-'+t);
+    if (node) node.style.display = t===name?'block':'none';
   });
   document.querySelectorAll('.biz-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
@@ -339,16 +355,13 @@ async function loadBusiness() {
     document.getElementById('page-title').textContent  = `${b.name} — MyLatinoList`;
     document.getElementById('page-desc').content       = b.description || `${b.name} on MyLatinoList`;
 
-    // Hero avatar — real photo or emoji fallback
+    const img = (window.MLL_MEDIA && window.MLL_MEDIA.imageUrl(b)) || b.logo_url || '/assets/businesses/community.jpg';
+    const banner = document.getElementById('prof-banner');
+    if (banner) banner.style.backgroundImage = 'url(' + img + ')';
     const avatarEl = document.getElementById('biz-avatar')
-    if (b.logo_url) {
-      avatarEl.innerHTML = `<img src="${b.logo_url}" alt="${b.name}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`
-      avatarEl.style.background = 'transparent'
-      avatarEl.style.padding = '0'
-    } else {
-      avatarEl.style.background = b.bg_color || '#EBF2FF'
-      avatarEl.textContent = b.emoji || '🏢'
-    }
+    avatarEl.innerHTML = `<img src="${img}" alt="${b.name}">`;
+    avatarEl.style.background = 'transparent'
+    avatarEl.style.padding = '0'
     document.getElementById('biz-name').textContent         = b.name;
     document.getElementById('biz-cat').textContent          = b.category || '';
     document.getElementById('biz-location').textContent     = `${b.city}, ${b.state}`;
@@ -359,7 +372,31 @@ async function loadBusiness() {
     // Call/website buttons
     const callBtn = document.getElementById('btn-call');
     callBtn.href = b.phone ? `tel:${b.phone}` : '#';
-    callBtn.textContent = b.phone ? `📞 ${b.phone}` : '📞 No phone listed';
+    callBtn.textContent = b.phone ? 'Call' : 'Call';
+
+    const msg = document.getElementById('btn-message');
+    if (msg) msg.href = b.email ? `mailto:${b.email}` : (b.phone ? `sms:${b.phone}` : '#');
+
+    const dirBtn = document.getElementById('btn-directions');
+    if (dirBtn) {
+      const q = encodeURIComponent([b.city, b.state].filter(Boolean).join(', '));
+      dirBtn.href = `https://www.google.com/maps/search/${q}`;
+      dirBtn.target = '_blank';
+    }
+
+    const saveBtn = document.getElementById('btn-save');
+    if (saveBtn && window.MLL_MEDIA) {
+      saveBtn.textContent = window.MLL_MEDIA.isSaved(b.slug) ? '♥ Saved' : '♡ Save';
+      saveBtn.onclick = function () {
+        const on = window.MLL_MEDIA.toggleSaved(b.slug);
+        saveBtn.textContent = on ? '♥ Saved' : '♡ Save';
+      };
+    }
+
+    const gallery = document.getElementById('photo-gallery');
+    if (gallery) {
+      gallery.innerHTML = `<img src="${img}" alt="${b.name}" style="width:100%;height:220px;object-fit:cover;border-radius:16px;grid-column:1/-1;">`;
+    }
 
     const webBtn = document.getElementById('btn-website');
     if (b.website) { webBtn.href = normalizeUrl(b.website); webBtn.textContent = '🌐 Visit website'; }

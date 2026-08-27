@@ -72,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const popularGrid  = document.getElementById('popular-grid');
   const featuredGrid = document.getElementById('featured-grid');
-  const collage      = document.getElementById('hero-collage');
   const bizGrid      = document.getElementById('biz-grid');
 
   if (popularGrid) popularGrid.innerHTML = Array(4).fill(skeletonCard()).join('');
@@ -80,23 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   MLL.getBusinesses().then(data => {
     const businesses = (data && data.businesses) || [];
-    const collageSlugs = [
-      'la-cocina-de-maryland',
-      'flores-beauty-studio',
-      'mendez-remodeling-co',
-      'vega-immigration-law'
-    ];
-    const collageBiz = pickBySlug(businesses, collageSlugs);
-    if (collage && window.MLL_MEDIA) {
-      const blobs = collage.querySelectorAll('.v2-blob');
-      collage.innerHTML = '';
-      blobs.forEach(b => collage.appendChild(b));
-      collageBiz.forEach((biz, i) => {
-        collage.insertAdjacentHTML('beforeend', window.MLL_MEDIA.collageCard(biz, 'v2-cc-' + (i + 1)));
-      });
-    }
-
-    renderCards(popularGrid, businesses, 4);
+    const preferred = ['la-cocina-de-maryland','mendez-remodeling-co','flores-beauty-studio','vega-immigration-law'];
+    const popular = pickBySlug(businesses, preferred);
+    renderCards(popularGrid, popular, 4);
 
     const featured = businesses.filter(b => b.is_featured);
     const featuredFill = featured.length ? featured : businesses.slice().sort((a, b) => (b.rating || 0) - (a.rating || 0));

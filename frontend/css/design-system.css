@@ -9,8 +9,9 @@
 :root {
   --blue-600:        #0866FF;
   --blue-700:        #0057E7;
-  --blue-50:         #F4F8FF;
+  --blue-50:         #EEF5FF;
   --navy-900:        #10213A;
+  --text-primary:    #10213A;
   --text-secondary:  #627084;
   --surface:         #FFFFFF;
   --surface-soft:    #F6F9FF;

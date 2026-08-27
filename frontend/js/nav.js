@@ -64,6 +64,7 @@
       });
     });
 
+    injectMarketingNav();
     injectMobileNav();
   });
 
@@ -72,6 +73,53 @@
   }
   function pagesPrefix() { return inPages() ? '' : 'pages/'; }
   function homeHref() { return inPages() ? '../index.html' : '/index.html'; }
+
+  function injectMarketingNav() {
+    var nav = document.querySelector('nav.nav.has-mobile');
+    if (!nav || nav.classList.contains('v2-topnav')) return;
+    var p = pagesPrefix();
+    var home = homeHref();
+    nav.className = 'v2-topnav has-mobile';
+    nav.innerHTML =
+      '<div class="v2-topnav-inner">' +
+        '<a href="' + home + '" class="logo"><span class="logo-mark"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>' +
+        '<div class="v2-links">' +
+          '<a href="' + p + 'directory.html" data-en="Discover" data-es="Descubrir">Discover</a>' +
+          '<a href="' + p + 'jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>' +
+          '<a href="' + p + 'marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>' +
+          '<a href="' + p + 'voz.html" data-en="Resources" data-es="Recursos">Resources</a>' +
+          '<a href="' + p + 'enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>' +
+        '</div>' +
+        '<div class="v2-top-actions">' +
+          '<div class="lang-toggle"><button class="lang-btn" data-lang="en" onclick="switchLang(\'en\')">EN</button><span>|</span><button class="lang-btn" data-lang="es" onclick="switchLang(\'es\')">ES</button></div>' +
+          '<a href="' + p + 'login.html" class="v2-btn-ghost" data-en="Sign In" data-es="Iniciar sesión">Sign In</a>' +
+          '<a href="' + p + 'enroll.html" class="v2-btn-primary" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>' +
+        '</div>' +
+        '<button class="v2-hamburger hamburger" aria-label="Menu"><span></span><span></span><span></span></button>' +
+      '</div>' +
+      '<div class="nav-mobile" id="nav-mobile">' +
+        '<a href="' + p + 'directory.html" data-en="Discover" data-es="Descubrir">Discover</a>' +
+        '<a href="' + p + 'jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>' +
+        '<a href="' + p + 'marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>' +
+        '<a href="' + p + 'voz.html" data-en="Resources" data-es="Recursos">Resources</a>' +
+        '<a href="' + p + 'enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>' +
+        '<a href="' + p + 'login.html" data-en="Sign In" data-es="Iniciar sesión">Sign In</a>' +
+        '<a href="' + p + 'enroll.html" class="v2-btn-primary" style="margin:8px 12px;text-align:center;" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>' +
+      '</div>';
+    applyLang(currentLang || 'en');
+    nav.querySelectorAll('.hamburger').forEach(function (h) {
+      h.addEventListener('click', function () {
+        var menu = nav.querySelector('.nav-mobile');
+        if (menu) menu.classList.toggle('open');
+      });
+    });
+    nav.querySelectorAll('.nav-mobile a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        var menu = a.closest('.nav-mobile');
+        if (menu) menu.classList.remove('open');
+      });
+    });
+  }
 
   function injectMobileNav() {
     if (document.querySelector('.mll-bottom-nav')) return;

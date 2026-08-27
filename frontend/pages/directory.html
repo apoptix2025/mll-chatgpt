@@ -6,7 +6,7 @@
   <meta name="description" content="Find Latino-owned businesses near you. Search by category, city, and state.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
   <style>
     body { background: var(--surface-2); padding-top: var(--nav-h); }
@@ -93,6 +93,7 @@
   </script>
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
+  <script src="/js/media.js"></script>
 </head>
 <body>
 
@@ -141,16 +142,40 @@
   </nav>
 
   <!-- HERO + SEARCH -->
-  <div class="dir-hero">
-    <div class="container dir-hero-inner">
-      <h1 data-en="Latino business directory" data-es="Directorio de negocios latinos">Latino business directory</h1>
-      <p data-en="Find trusted Latino-owned businesses near you — restaurants, lawyers, salons, contractors, and more." data-es="Encuentra negocios latinos de confianza cerca de ti — restaurantes, abogados, salones, contratistas y más.">Find trusted Latino-owned businesses near you — restaurants, lawyers, salons, contractors, and more.</p>
-      <div class="dir-search-bar">
-        <div class="dir-search-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/><path d="M10.5 10.5L13.5 13.5" stroke="rgba(255,255,255,0.7)" stroke-width="1.2" stroke-linecap="round"/></svg>
-        </div>
-        <input type="text" id="search-input" placeholder="Search businesses, services, keywords..." data-en-ph="Search businesses, services, keywords..." data-es-ph="Busca negocios, servicios, palabras clave..." autocomplete="off">
-        <button class="dir-search-btn" onclick="applyFilters()" data-en="Search" data-es="Buscar">Search</button>
+  <div class="dir-hero-v2">
+    <div class="container">
+      <h1 data-en="Browse &amp; Discover" data-es="Explorar y descubrir">Browse &amp; Discover</h1>
+      <p data-en="Find trusted Latino-owned businesses near you." data-es="Encuentra negocios latinos de confianza cerca de ti.">Find trusted Latino-owned businesses near you.</p>
+      <form class="v2-search" onsubmit="applyFilters(); return false;" style="margin-bottom:18px;">
+        <label>
+          <span data-en="Search" data-es="Buscar">Search</span>
+          <input type="text" id="search-input" placeholder="Search businesses, jobs, products..." data-en-ph="Search businesses, jobs, products..." data-es-ph="Busca negocios, empleos, productos..." autocomplete="off">
+        </label>
+        <label>
+          <span data-en="Location" data-es="Ubicación">Location</span>
+          <select id="search-city" aria-label="Location" onchange="syncCityToState()">
+            <option value="">All locations</option>
+            <option>Silver Spring, MD</option>
+            <option>Bethesda, MD</option>
+            <option>Rockville, MD</option>
+            <option>Hyattsville, MD</option>
+            <option>Columbia, MD</option>
+            <option>Arlington, VA</option>
+            <option>Alexandria, VA</option>
+            <option>Washington, DC</option>
+          </select>
+        </label>
+        <button type="submit" class="dir-search-btn" data-en="Search" data-es="Buscar">Search</button>
+      </form>
+      <div class="v2-pills-row" id="dir-pills">
+        <button type="button" class="mll-pill is-active" data-cat="" onclick="pillCat('')">All Categories</button>
+        <button type="button" class="mll-pill" data-cat="Food & Dining" onclick="pillCat('Food & Dining')">Restaurants</button>
+        <button type="button" class="mll-pill" data-cat="Construction" onclick="pillCat('Construction')">Home Services</button>
+        <button type="button" class="mll-pill" data-cat="Beauty & Salon" onclick="pillCat('Beauty & Salon')">Beauty</button>
+        <button type="button" class="mll-pill" data-cat="Legal Services" onclick="pillCat('Legal Services')">Legal</button>
+        <button type="button" class="mll-pill" data-cat="Retail" onclick="pillCat('Retail')">Shopping</button>
+        <button type="button" class="mll-pill" onclick="window.location='jobs.html'">Jobs</button>
+        <button type="button" class="mll-pill" data-cat="Events" onclick="pillCat('Events')">Events</button>
       </div>
     </div>
   </div>
@@ -238,6 +263,15 @@
           <div class="dsb-cat-item" data-cat="Other" onclick="setSidebarCat(this,'Other')"><span data-en="➕ Other" data-es="➕ Otros">➕ Other</span> <span class="dsb-cat-count" id="cnt-other">—</span></div>
         </div>
         <div class="dsb-section" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+          <div class="dsb-section-label" data-en="Popular categories" data-es="Categorías populares">Popular categories</div>
+          <div class="cat-tiles" style="grid-template-columns:1fr;gap:10px;margin-top:10px;">
+            <a class="cat-tile" href="#" onclick="pillCat('Food & Dining');return false;"><img src="/assets/businesses/restaurant.jpg" alt=""><span>Restaurants</span></a>
+            <a class="cat-tile" href="#" onclick="pillCat('Construction');return false;"><img src="/assets/businesses/remodeling.jpg" alt=""><span>Home Services</span></a>
+            <a class="cat-tile" href="#" onclick="pillCat('Beauty & Salon');return false;"><img src="/assets/businesses/beauty.jpg" alt=""><span>Beauty</span></a>
+            <a class="cat-tile" href="#" onclick="pillCat('Legal Services');return false;"><img src="/assets/businesses/legal.jpg" alt=""><span>Legal</span></a>
+          </div>
+        </div>
+        <div class="dsb-section" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
           <div class="dsb-section-label" data-en="Own a business?" data-es="¿Tienes un negocio?">Own a business?</div>
           <a href="enroll.html" class="btn-cta" style="display:block;text-align:center;font-size:12px;padding:9px 16px;" data-en="List your business free →" data-es="Registra tu negocio gratis →">List your business free →</a>
         </div>
@@ -245,7 +279,9 @@
 
       <!-- Grid -->
       <div>
-        <div class="dir-grid" id="dir-grid"></div>
+        <h2 style="font-size:28px;font-weight:800;letter-spacing:-0.03em;margin:0 0 8px;" data-en="Featured Businesses" data-es="Negocios destacados">Featured Businesses</h2>
+        <p style="color:var(--text-secondary);margin:0 0 18px;font-size:15px;" data-en="Image-first discovery from the live directory." data-es="Descubrimiento con fotos del directorio en vivo.">Image-first discovery from the live directory.</p>
+        <div class="dir-grid v2-grid-4" id="dir-grid" style="grid-template-columns:repeat(3,1fr);"></div>
         <div class="load-more-wrap" id="load-more-wrap" style="display:none;">
           <button class="load-more-btn" id="load-more-btn" onclick="loadMore()">Load more businesses</button>
         </div>
@@ -281,25 +317,24 @@ function skelGrid() {
 }
 
 function bizCard(b) {
-  return `
-    <div class="biz-card" onclick="window.location='business.html?id=${b.slug}'">
-      <div class="biz-header" style="background:${b.logo_url ? '#f8f8f8' : b.bg_color||'#EBF2FF'};">
-        ${b.logo_url
-          ? `<img src="${b.logo_url}" alt="${b.name}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,0.10);">`
-          : `<span style="font-size:40px;">${b.emoji||'🏢'}</span>`}
-        ${b.is_featured ? '<span class="biz-featured-tag">'+t('Featured')+'</span>' : ''}
-      </div>
-      <div class="biz-body">
-        <div class="biz-name">${b.name}</div>
-        <div class="biz-cat">${b.category} · ${b.city}, ${b.state}</div>
-        <div class="biz-desc">${b.description||''}</div>
-        <div class="biz-tags">${(b.tags||[]).map(t=>`<span class="biz-tag">${t}</span>`).join('')}</div>
-      </div>
-      <div class="biz-footer">
-        <span class="biz-rating">★ ${b.rating||'—'} <span style="color:var(--ink-muted);font-weight:400;">(${b.review_count||0})</span></span>
-        <span class="biz-city">${b.city}, ${b.state}</span>
-      </div>
-    </div>`;
+  if (window.MLL_MEDIA) return window.MLL_MEDIA.cardHTML(b, { prefix: '', cta: 'View profile →', showDesc: true });
+  return '<article class="v2-card"><div class="v2-card-media"></div><div class="v2-card-body"><h3>' + (b.name || '') + '</h3></div></article>';
+}
+
+function pillCat(cat) {
+  document.getElementById('cat-filter').value = cat || '';
+  document.querySelectorAll('#dir-pills .mll-pill').forEach(function (el) {
+    el.classList.toggle('is-active', (el.getAttribute('data-cat') || '') === (cat || '') && el.getAttribute('data-cat') !== null);
+  });
+  applyFilters();
+}
+
+function syncCityToState() {
+  var city = document.getElementById('search-city') && document.getElementById('search-city').value;
+  var map = { MD: 'Maryland', VA: 'Virginia', DC: 'District of Columbia' };
+  var m = city && city.match(/,\s*([A-Z]{2})$/);
+  if (m && map[m[1]]) document.getElementById('state-filter').value = map[m[1]];
+  applyFilters();
 }
 
 function renderGrid() {
@@ -367,6 +402,9 @@ function applyFilters() {
     el.classList.toggle('active', el.dataset.cat === cat);
   });
   if (cat) document.getElementById('cat-filter').value = cat;
+  document.querySelectorAll('#dir-pills .mll-pill[data-cat]').forEach(function (el) {
+    el.classList.toggle('is-active', (el.getAttribute('data-cat') || '') === (cat || ''));
+  });
 
   renderGrid();
 }

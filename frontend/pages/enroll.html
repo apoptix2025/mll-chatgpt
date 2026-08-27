@@ -6,7 +6,7 @@
   <title>Enroll Your Business — MyLatinoList</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
   <style>
     body { background: var(--surface-2); padding-top: var(--nav-h); }
@@ -153,6 +153,7 @@
   </nav>
 
   <div class="enroll-page">
+    <div class="wiz-layout">
     <div class="wizard">
       <div style="text-align:center;margin-bottom:24px;">
         <h1 data-en="Enroll your business" data-es="Registra tu negocio" style="font-family:var(--font-display);font-size:32px;font-weight:500;color:var(--ink);letter-spacing:-0.02em;margin-bottom:6px;">Enroll your business</h1>
@@ -181,6 +182,8 @@
         </div>
       </div>
     </div>
+    <aside class="wiz-preview" id="wiz-preview"></aside>
+    </div>
   </div>
 
 <script src="/js/data.js"></script>
@@ -192,7 +195,7 @@ let step = 1;
 let formData = {
   fname:'', lname:'', email:'', lang:'English',
   bname:'', phone:'', city:'', state:'Florida', zip:'', website:'', desc:'',
-  cats:[], mods:['directory'], plan:'pro', agreed:false
+  cats:[], mods:['directory'], plan:'pro', agreed:false, photo:'restaurant'
 };
 
 const cats = [
@@ -266,8 +269,8 @@ function updateDots(n) {
 function renderStep1() {
   document.getElementById('wiz-body').innerHTML = `
     <div class="wiz-body">
-      <div class="wiz-step-label">Step 1 of 4 — Account</div>
-      <div class="wiz-h">Create your owner account</div>
+      <div class="wiz-step-label">Step 1 of 4 — Business Info</div>
+      <div class="wiz-h">Tell us about your business</div>
       <div class="wiz-p">You'll use this to manage your listing, track leads, and access your dashboard.</div>
       <div class="f2">
         <div class="field"><label>First name</label><input id="f-fname" type="text" value="${formData.fname}" placeholder="Maria"></div>
@@ -297,8 +300,8 @@ function renderStep2() {
     </div>`).join('');
   document.getElementById('wiz-body').innerHTML = `
     <div class="wiz-body">
-      <div class="wiz-step-label">Step 2 of 4 — Business profile</div>
-      <div class="wiz-h">Tell us about your business</div>
+      <div class="wiz-step-label">Step 2 of 4 — Details</div>
+      <div class="wiz-h">Add the details customers need</div>
       <div class="wiz-p">This is how customers will find and contact you in the directory.</div>
       <div class="f2">
         <div class="field"><label>Business name</label><input id="f-bname" type="text" value="${formData.bname}" placeholder="La Cocina de Maria"></div>
@@ -320,7 +323,15 @@ function renderStep2() {
       formData.cats = [k];
       document.querySelectorAll('.cat-item').forEach(x => x.classList.remove('on'));
       el.classList.add('on');
+      const map = {food:'restaurant', construction:'remodeling', beauty:'beauty', legal:'legal', realestate:'real-estate', auto:'auto', finance:'accounting', health:'wellness'};
+      if (map[k]) formData.photo = map[k];
+      updatePreview();
     });
+  });
+  ['f-bname','f-city','f-desc','f-state'].forEach(function (id) {
+    const n = document.getElementById(id);
+    if (n) n.addEventListener('input', saveStep);
+    if (n) n.addEventListener('change', saveStep);
   });
 }
 
@@ -338,12 +349,27 @@ function renderStep3() {
   }).join('');
   document.getElementById('wiz-body').innerHTML = `
     <div class="wiz-body">
-      <div class="wiz-step-label">Step 3 of 4 — Modules</div>
-      <div class="wiz-h">Choose your platform modules</div>
-      <div class="wiz-p">Activate only what you need. You can turn modules on or off anytime from your dashboard.</div>
+      <div class="wiz-step-label">Step 3 of 4 — Photos</div>
+      <div class="wiz-h">Choose a listing photo</div>
+      <div class="wiz-p">Pick a category photo for your public listing. You can add more photos after you publish.</div>
+      <div class="photo-pick" id="photo-pick">
+        ${['restaurant','remodeling','beauty','legal','real-estate','auto','accounting','wellness'].map(k => `
+          <button type="button" class="${(formData.photo||'restaurant')===k?'on':''}" data-photo="${k}">
+            <img src="/assets/businesses/${k}.jpg" alt="${k}">
+          </button>`).join('')}
+      </div>
+      <div class="wiz-step-label" style="margin-top:28px;">Optional modules</div>
       <div class="mod-list">${modHTML}</div>
       <div class="tip-box"><div class="tip-icon"></div><p>All modules are free to activate. Some features are unlocked on paid plans.</p></div>
     </div>`;
+  document.querySelectorAll('#photo-pick button').forEach(el => {
+    el.addEventListener('click', () => {
+      formData.photo = el.dataset.photo;
+      document.querySelectorAll('#photo-pick button').forEach(x => x.classList.remove('on'));
+      el.classList.add('on');
+      updatePreview();
+    });
+  });
   document.querySelectorAll('.mod-item').forEach(el => {
     el.addEventListener('click', () => {
       const k = el.dataset.mod;
@@ -366,8 +392,8 @@ function renderStep4() {
     </div>`).join('');
   document.getElementById('wiz-body').innerHTML = `
     <div class="wiz-body">
-      <div class="wiz-step-label">Step 4 of 4 — Plan</div>
-      <div class="wiz-h">Choose your plan</div>
+      <div class="wiz-step-label">Step 4 of 4 — Review &amp; Publish</div>
+      <div class="wiz-h">Review &amp; publish</div>
       <div class="wiz-p">Start free and upgrade anytime. No contracts, cancel anytime.</div>
       <div class="plan-row">${planHTML}</div>
       <div class="review-box">
@@ -437,6 +463,7 @@ function saveStep() {
     formData.website = document.getElementById('f-web')?.value.trim()||'';
     formData.desc    = document.getElementById('f-desc')?.value.trim()||'';
   }
+  updatePreview();
 }
 
 function showError(msg) {
@@ -548,6 +575,27 @@ async function submitEnrollment() {
   }
 }
 
+function updatePreview() {
+  const el = document.getElementById('wiz-preview');
+  if (!el) return;
+  const cat = catDisplay();
+  const img = '/assets/businesses/' + (formData.photo || 'restaurant') + '.jpg';
+  el.innerHTML = `
+    <h4>Live listing preview</h4>
+    <article class="v2-card">
+      <div class="v2-card-media"><img src="${img}" alt=""></div>
+      <div class="v2-card-body">
+        <h3>${formData.bname || 'Your business name'}</h3>
+        <div class="v2-card-meta">
+          <span class="v2-stars">★ —</span>
+          <span>${formData.city || 'City'}${formData.state ? ', ' + formData.state : ''}</span>
+        </div>
+        <p class="v2-card-desc">${formData.desc || 'Your description will appear here as customers discover you.'}</p>
+        <div class="v2-chip" style="position:static;display:inline-block;margin-top:10px;">${cat === 'Not selected' ? 'Category' : cat}</div>
+      </div>
+    </article>`;
+}
+
 function goTo(n) {
   step = n;
   clearError();
@@ -556,6 +604,7 @@ function goTo(n) {
   else if (n===2) renderStep2();
   else if (n===3) renderStep3();
   else if (n===4) renderStep4();
+  updatePreview();
 }
 
 document.getElementById('btn-next').addEventListener('click', async () => {

@@ -2,14 +2,26 @@
 // Photos are generic Unsplash category images bundled locally — not third-party business photos.
 (function () {
   var BASE = '/assets/businesses/';
+  var BY_SLUG = {
+    'la-cocina-de-maryland': BASE + 'restaurant.jpg',
+    'mendez-remodeling-co': BASE + 'remodeling.jpg',
+    'flores-beauty-studio': BASE + 'beauty.jpg',
+    'vega-immigration-law': BASE + 'legal.jpg',
+    'herrera-homes': BASE + 'real-estate.jpg',
+    'herrera-homes-realty': BASE + 'real-estate.jpg',
+    'ortega-auto-care': BASE + 'auto.jpg',
+    'vargas-tax': BASE + 'accounting.jpg',
+    'vargas-tax-accounting': BASE + 'accounting.jpg',
+    'salud-latina-wellness': BASE + 'wellness.jpg'
+  };
   var BY_CATEGORY = {
     'Food & Dining': BASE + 'restaurant.jpg',
-    'Construction': BASE + 'construction.jpg',
+    'Construction': BASE + 'remodeling.jpg',
     'Beauty & Salon': BASE + 'beauty.jpg',
     'Legal Services': BASE + 'legal.jpg',
-    'Real Estate': BASE + 'realestate.jpg',
+    'Real Estate': BASE + 'real-estate.jpg',
     'Auto & Repair': BASE + 'auto.jpg',
-    'Finance': BASE + 'finance.jpg',
+    'Finance': BASE + 'accounting.jpg',
     'Health & Wellness': BASE + 'wellness.jpg'
   };
 
@@ -27,10 +39,12 @@
   }
 
   function imageUrl(biz) {
-    if (biz && biz.logo_url && /^https?:/.test(biz.logo_url) && biz.logo_url.indexOf('media.mylatinolist.io') === -1) {
+    if (!biz) return BASE + 'community.jpg';
+    if (biz.slug && BY_SLUG[biz.slug]) return BY_SLUG[biz.slug];
+    if (biz.logo_url && /^https?:/.test(biz.logo_url) && biz.logo_url.indexOf('media.mylatinolist.io') === -1) {
       return biz.logo_url;
     }
-    return (biz && BY_CATEGORY[biz.category]) || (BASE + 'community.jpg');
+    return BY_CATEGORY[biz.category] || (BASE + 'community.jpg');
   }
 
   function esc(s) {
@@ -44,6 +58,7 @@
     var saved = isSaved(biz.slug) ? ' is-saved' : '';
     var rating = biz.rating != null && biz.rating !== '' ? Number(biz.rating).toFixed(1) : '—';
     var reviews = biz.review_count != null ? biz.review_count : 0;
+    var loc = esc(biz.city || '') + (biz.state ? ', ' + esc(biz.state) : '');
     return (
       '<article class="v2-card">' +
         '<div class="v2-card-media">' +
@@ -59,26 +74,12 @@
             '<span class="v2-stars">★ ' + rating + '</span>' +
             '<span>(' + reviews + ')</span>' +
             '<span>·</span>' +
-            '<span>' + esc(biz.city || '') + (biz.state ? ', ' + esc(biz.state) : '') + '</span>' +
+            '<span>' + loc + '</span>' +
           '</div>' +
           (opts.showDesc && biz.description ? '<p class="v2-card-desc">' + esc(biz.description) + '</p>' : '') +
           '<a class="v2-card-cta" href="' + href + '">' + (opts.cta || 'View profile →') + '</a>' +
         '</div>' +
       '</article>'
-    );
-  }
-
-  function collageCard(biz, cls) {
-    var rating = biz.rating != null ? Number(biz.rating).toFixed(1) : '—';
-    return (
-      '<a class="v2-collage-card ' + (cls || '') + '" href="pages/business.html?id=' + encodeURIComponent(biz.slug) + '">' +
-        '<img src="' + esc(imageUrl(biz)) + '" alt="' + esc(biz.name) + '">' +
-        '<div class="v2-collage-meta">' +
-          '<strong>' + esc(biz.name) + '</strong>' +
-          '<span>' + esc(biz.category || '') + ' · ' + esc(biz.city || '') + '</span>' +
-          '<span class="v2-stars">★ ' + rating + '</span>' +
-        '</div>' +
-      '</a>'
     );
   }
 
@@ -94,8 +95,8 @@
   window.MLL_MEDIA = {
     imageUrl: imageUrl,
     cardHTML: cardHTML,
-    collageCard: collageCard,
     isSaved: isSaved,
-    toggleSaved: toggleSaved
+    toggleSaved: toggleSaved,
+    BY_CATEGORY: BY_CATEGORY
   };
 })();
