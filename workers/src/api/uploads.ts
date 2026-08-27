@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Env } from '../index'
+import { publicMediaUrl } from '../lib/media'
 
 export async function handleUploads(
   request: Request,
@@ -60,7 +61,7 @@ async function uploadBusinessPhoto(request: Request, env: Env, userId: string): 
     httpMetadata: { contentType: photo.type },
   })
 
-  const logoUrl = `https://media.mylatinolist.io/${key}`
+  const logoUrl = publicMediaUrl(env, key, request)
 
   const { error: updateError } = await supabase
     .from('businesses')

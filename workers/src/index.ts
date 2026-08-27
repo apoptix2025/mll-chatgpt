@@ -18,6 +18,7 @@ import { handleTestDrip } from './api/admin-test'
 import { withCors } from './middleware/cors'
 import { withAuth } from './middleware/auth'
 import { handleScheduled } from './cron'
+import { handlePublicMedia } from './lib/media'
 
 export interface Env {
   // KV
@@ -84,8 +85,9 @@ export default {
       else if (path.startsWith('/api/resources') && request.method === 'GET')
                                                   response = await handleResources(request, env)
       else if (path.startsWith('/api/reviews'))   response = await handleReviews(request, env, ctx)
-      else if (path.startsWith('/api/leads') && (request.method === 'GET' || request.method === 'POST'))
+      else if (path.startsWith('/api/leads') && request.method === 'POST')
                                                   response = await handleLeads(request, env)
+      else if (path.startsWith('/api/media/'))    response = await handlePublicMedia(request, env)
       else if (path === '/api/stats' && request.method === 'GET')
                                                   response = await handleStats(request, env)
       else if (path === '/api/contact' && request.method === 'POST')
@@ -111,6 +113,7 @@ export default {
         else if (path.startsWith('/api/jobs'))        response = await handleJobs(request, env, authResult.userId)
         else if (path.startsWith('/api/marketplace')) response = await handleMarketplace(request, env, authResult.userId)
         else if (path.startsWith('/api/affiliates'))  response = await handleAffiliates(request, env, authResult.userId)
+        else if (path.startsWith('/api/leads'))       response = await handleLeads(request, env, authResult.userId)
         else if (path.startsWith('/api/uploads'))     response = await handleUploads(request, env, authResult.userId, ctx)
         else if (path.startsWith('/api/stripe'))      response = await handleStripe(request, env, ctx, authResult.userId)
         else response = Response.json({ error: 'Not found' }, { status: 404 })

@@ -53,7 +53,7 @@ Health currently reports Resend and Stripe as **degraded** because keys are unse
 | --- | --- | --- |
 | Supabase Auth / DB | **enabled** (mll-dev) | After clone, sanitize emails before turning Resend on |
 | Cloudflare KV session cache | **enabled** (staging namespace) | Not production KV |
-| Cloudflare R2 | **enabled** (`mll-media-dev`) | Do not bind `mll-media` |
+| Cloudflare R2 | **enabled** (`mll-media-dev`) | No custom public domain. Staging upload URLs are `{Worker origin}/api/media/{key}` (`ENVIRONMENT=staging`). Production stays `https://media.mylatinolist.io` + `mll-media`. Do not bind `mll-media` here. |
 | Stripe Billing / Checkout | **disabled** until a **test** key is added | Never live mode |
 | Resend email | **disabled** (key unset) | Do not send to cloned production addresses |
 | Algolia | **disabled / unused** unless staging secrets are set | Do not write to the production index |
@@ -89,6 +89,7 @@ Do not email real production users from staging.
 - [ ] Resend still unset **or** test-only
 - [ ] Facebook / Algolia production tokens not copied to staging
 - [ ] R2 still `mll-media-dev`
+- [ ] Staging upload JSON `url` is `/api/media/...` on the staging Worker, never `media.mylatinolist.io`
 - [ ] Frontend still uses `window.MLL_CONFIG.API_URL` (staging Worker on Pages)
 
 ---

@@ -47,6 +47,7 @@ async function main() {
   if (bizId) {
     await del(`leads?business_id=eq.${bizId}&email=eq.${encodeURIComponent('qa.lead@example.test')}`);
     await del(`reviews?business_id=eq.${bizId}&reviewer_email=eq.${encodeURIComponent('qa.review@example.test')}`);
+    await del(`affiliate_enrollments?business_id=eq.${bizId}`);
   }
   console.log('  cleanup: synthetic product/job/lead/review rows removed (QA business kept)');
 }

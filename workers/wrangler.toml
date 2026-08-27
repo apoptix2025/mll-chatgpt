@@ -183,7 +183,11 @@ id = "878fc40235fe4681a940a82a72042481"
 
 # ── Staging R2 ──────────────────────────────────────────────
 #
-# Dedicated development media bucket.
+# Dedicated development media bucket (mll-media-dev).
+# There is no public custom domain on this bucket.
+# Staging uploads return {Worker origin}/api/media/{key} and the
+# Worker streams GET/HEAD from this binding. Production still uses
+# https://media.mylatinolist.io and bucket mll-media — do not change that.
 #
 
 [[env.staging.r2_buckets]]

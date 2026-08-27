@@ -110,13 +110,18 @@ function Invoke-Api {
   } catch {
     $code = Get-StatusCodeFromError $_
     $content = ''
-    try {
-      $stream = $_.Exception.Response.GetResponseStream()
-      if ($stream) {
-        $reader = New-Object System.IO.StreamReader($stream)
-        $content = $reader.ReadToEnd()
-      }
-    } catch {}
+    if ($_.ErrorDetails -and $_.ErrorDetails.Message) {
+      $content = [string]$_.ErrorDetails.Message
+    }
+    if ([string]::IsNullOrEmpty($content)) {
+      try {
+        $stream = $_.Exception.Response.GetResponseStream()
+        if ($stream) {
+          $reader = New-Object System.IO.StreamReader($stream)
+          $content = $reader.ReadToEnd()
+        }
+      } catch {}
+    }
     return @{
       Ok      = $false
       Status  = $code
@@ -175,6 +180,7 @@ Write-Host ""
 Write-Host "AUTH NEGATIVE (no token)"
 $negNoToken = @(
   @{ Method = 'GET'; Path = '/api/auth/me' },
+  @{ Method = 'GET'; Path = '/api/leads?business_id=00000000-0000-0000-0000-000000000099' },
   @{ Method = 'PUT'; Path = '/api/businesses/00000000-0000-0000-0000-000000000099' },
   @{ Method = 'POST'; Path = '/api/marketplace' },
   @{ Method = 'POST'; Path = '/api/jobs' },
@@ -195,6 +201,7 @@ Write-Host "AUTH NEGATIVE (invalid token)"
 $badHeaders = AuthHeaders 'not-a-valid-token'
 $negBad = @(
   @{ Method = 'GET'; Path = '/api/auth/me' },
+  @{ Method = 'GET'; Path = '/api/leads?business_id=00000000-0000-0000-0000-000000000099' },
   @{ Method = 'POST'; Path = '/api/jobs' }
 )
 foreach ($item in $negBad) {
@@ -248,10 +255,15 @@ if (-not $accessToken) {
   }
   if ($other.id) { $script:OtherBusinessId = $other.id }
 
+  if ($script:OtherBusinessId) {
+    $otherLeads = Invoke-Api -Method GET -Path "/api/leads?business_id=$($script:OtherBusinessId)" -Headers $h
+    Add-Result -Test 'RLS/OWNERSHIP' -Route 'GET /api/leads?business_id={other}' -Expected '403' -Actual "$($otherLeads.Status)" -Status $(if ($otherLeads.Status -eq 403) { 'PASS' } else { 'FAIL' })
+  }
+
   if ($script:QaBusinessId) {
-    $leads = Invoke-Api -Method GET -Path "/api/leads?business_id=$($script:QaBusinessId)"
+    $leads = Invoke-Api -Method GET -Path "/api/leads?business_id=$($script:QaBusinessId)" -Headers $h
     $ok = $leads.Status -eq 200
-    Add-Result -Test 'OWNER ACCESS' -Route 'GET /api/leads?business_id=QA' -Expected '200' -Actual "$($leads.Status)" -Status $(if ($ok) { 'PASS' } else { 'FAIL' }) -Notes 'Worker GET /api/leads is public; returns id/action/created_at only'
+    Add-Result -Test 'OWNER ACCESS' -Route 'GET /api/leads?business_id=QA' -Expected '200' -Actual "$($leads.Status)" -Status $(if ($ok) { 'PASS' } else { 'FAIL' }) -Notes 'Owner-only after auth'
     $reviews = Invoke-Api -Method GET -Path "/api/reviews?business_id=$($script:QaBusinessId)"
     Add-Result -Test 'OWNER ACCESS' -Route 'GET /api/reviews?business_id=QA' -Expected '200' -Actual "$($reviews.Status)" -Status $(if ($reviews.Status -eq 200) { 'PASS' } else { 'FAIL' })
   }
@@ -293,7 +305,7 @@ if (-not $accessToken) {
         message     = 'QA staging test inquiry'
       } | ConvertTo-Json -Compress
       $lead = Invoke-Api -Method POST -Path '/api/leads' -Body $leadBody
-      Add-Result -Test 'CRUD' -Route 'POST /api/leads' -Expected '201' -Actual "$($lead.Status)" -Status $(if ($lead.Status -eq 201) { 'PASS' } else { 'FAIL' })
+      Add-Result -Test 'CRUD' -Route 'POST /api/leads' -Expected '201' -Actual "$($lead.Status)" -Status $(if ($lead.Status -eq 201) { 'PASS' } else { 'FAIL' }) -Notes 'public inquiry; no token'
 
       $reviewBody = @{
         business_id    = $script:QaBusinessId
@@ -330,7 +342,28 @@ if (-not $accessToken) {
     }
     Add-Result -Test 'CRUD' -Route 'GET /api/marketplace after create' -Expected 'QA Test Product visible' -Actual $(if ($foundProduct) { 'found' } else { 'not found' }) -Status $(if ($foundProduct) { 'PASS' } else { 'FAIL' })
 
-    Add-Result -Test 'CRUD' -Route 'PATCH/DELETE product' -Expected 'owner update/delete' -Actual 'not implemented' -Status 'SKIPPED' -Notes 'Worker has POST create only'
+    $unknownId = '00000000-0000-0000-0000-000000000099'
+    $missProd = Invoke-Api -Method PATCH -Path "/api/marketplace/$unknownId" -Headers $h -Body '{"name":"qa-missing"}'
+    Add-Result -Test 'CRUD' -Route 'PATCH /api/marketplace/{unknown}' -Expected '404' -Actual "$($missProd.Status)" -Status $(if ($missProd.Status -eq 404) { 'PASS' } else { 'FAIL' })
+
+    $otherProd = $null
+    if ($pubProducts.Json -and $pubProducts.Json.PSObject.Properties['products'] -and $pubProducts.Json.products) {
+      $otherProd = @($pubProducts.Json.products) | Where-Object { $_.name -ne 'QA Test Product' } | Select-Object -First 1
+    }
+    if ($otherProd -and $otherProd.id) {
+      $denyProd = Invoke-Api -Method PATCH -Path "/api/marketplace/$($otherProd.id)" -Headers $h -Body '{"name":"qa-should-not-edit"}'
+      Add-Result -Test 'RLS/OWNERSHIP' -Route 'PATCH /api/marketplace/{other}' -Expected '403' -Actual "$($denyProd.Status)" -Status $(if ($denyProd.Status -eq 403) { 'PASS' } else { 'FAIL' })
+    } else {
+      Add-Result -Test 'RLS/OWNERSHIP' -Route 'PATCH /api/marketplace/{other}' -Expected '403' -Actual 'no other product' -Status 'SKIPPED'
+    }
+
+    if ($script:CreatedProductId) {
+      $updProd = Invoke-Api -Method PATCH -Path "/api/marketplace/$($script:CreatedProductId)" -Headers $h -Body '{"description":"qa-updated-product"}'
+      Add-Result -Test 'CRUD' -Route 'PATCH /api/marketplace/{qa}' -Expected '200' -Actual "$($updProd.Status)" -Status $(if ($updProd.Status -eq 200) { 'PASS' } else { 'FAIL' })
+      $delProd = Invoke-Api -Method DELETE -Path "/api/marketplace/$($script:CreatedProductId)" -Headers $h
+      $delOk = $delProd.Status -eq 200 -and $delProd.Json -and $delProd.Json.product -and $delProd.Json.product.status -eq 'inactive'
+      Add-Result -Test 'CRUD' -Route 'DELETE /api/marketplace/{qa}' -Expected '200 inactive' -Actual "$($delProd.Status)" -Status $(if ($delProd.Status -eq 200) { 'PASS' } else { 'FAIL' }) -Notes $(if ($delOk) { 'soft delete status=inactive' } else { 'soft delete' })
+    }
 
     $jobBody = @{
       title       = 'QA Test Job'
@@ -349,7 +382,27 @@ if (-not $accessToken) {
       $foundJob = @($pubJobs.Json.jobs) | Where-Object { $_.title -eq 'QA Test Job' } | Select-Object -First 1
     }
     Add-Result -Test 'CRUD' -Route 'GET /api/jobs after create' -Expected 'QA Test Job visible' -Actual $(if ($foundJob) { 'found' } else { 'not found' }) -Status $(if ($foundJob) { 'PASS' } else { 'FAIL' })
-    Add-Result -Test 'CRUD' -Route 'PATCH/DELETE job' -Expected 'owner update/close' -Actual 'not implemented' -Status 'SKIPPED' -Notes 'Worker has POST create only'
+
+    $missJob = Invoke-Api -Method PATCH -Path "/api/jobs/$unknownId" -Headers $h -Body '{"title":"qa-missing"}'
+    Add-Result -Test 'CRUD' -Route 'PATCH /api/jobs/{unknown}' -Expected '404' -Actual "$($missJob.Status)" -Status $(if ($missJob.Status -eq 404) { 'PASS' } else { 'FAIL' })
+
+    $otherJob = $null
+    if ($pubJobs.Json -and $pubJobs.Json.PSObject.Properties['jobs'] -and $pubJobs.Json.jobs) {
+      $otherJob = @($pubJobs.Json.jobs) | Where-Object { $_.title -ne 'QA Test Job' } | Select-Object -First 1
+    }
+    if ($otherJob -and $otherJob.id) {
+      $denyJob = Invoke-Api -Method PATCH -Path "/api/jobs/$($otherJob.id)" -Headers $h -Body '{"title":"qa-should-not-edit"}'
+      Add-Result -Test 'RLS/OWNERSHIP' -Route 'PATCH /api/jobs/{other}' -Expected '403' -Actual "$($denyJob.Status)" -Status $(if ($denyJob.Status -eq 403) { 'PASS' } else { 'FAIL' })
+    } else {
+      Add-Result -Test 'RLS/OWNERSHIP' -Route 'PATCH /api/jobs/{other}' -Expected '403' -Actual 'no other job' -Status 'SKIPPED'
+    }
+
+    if ($script:CreatedJobId) {
+      $updJob = Invoke-Api -Method PATCH -Path "/api/jobs/$($script:CreatedJobId)" -Headers $h -Body '{"description":"qa-updated-job"}'
+      Add-Result -Test 'CRUD' -Route 'PATCH /api/jobs/{qa}' -Expected '200' -Actual "$($updJob.Status)" -Status $(if ($updJob.Status -eq 200) { 'PASS' } else { 'FAIL' })
+      $closeJob = Invoke-Api -Method DELETE -Path "/api/jobs/$($script:CreatedJobId)" -Headers $h
+      Add-Result -Test 'CRUD' -Route 'DELETE /api/jobs/{qa}' -Expected '200 closed' -Actual "$($closeJob.Status)" -Status $(if ($closeJob.Status -eq 200) { 'PASS' } else { 'FAIL' }) -Notes 'sets status=closed'
+    }
 
     $affList = Invoke-Api -Method GET -Path '/api/affiliates'
     $programId = $null
@@ -357,10 +410,15 @@ if (-not $accessToken) {
       $programId = (@($affList.Json.affiliates) | Select-Object -First 1).id
     }
     if ($programId) {
-      $join = Invoke-Api -Method POST -Path '/api/affiliates/join' -Headers $h -Body (@{ program_id = $programId } | ConvertTo-Json -Compress)
-      $joinOk = $join.Status -eq 201 -or $join.Status -eq 200 -or $join.Status -eq 409
-      $joinStatus = if ($joinOk) { 'PASS' } elseif ($join.Status -eq 500) { 'SKIPPED' } else { 'FAIL' }
-      Add-Result -Test 'CRUD' -Route 'POST /api/affiliates/join' -Expected '201' -Actual "$($join.Status)" -Status $joinStatus -Notes $(if ($join.Status -eq 500) { 'repeat join hit unique constraint; first-run 201 already proven' } else { '' })
+      $join1 = Invoke-Api -Method POST -Path '/api/affiliates/join' -Headers $h -Body (@{ program_id = $programId } | ConvertTo-Json -Compress)
+      $join1Ok = $join1.Status -eq 201 -or $join1.Status -eq 409
+      Add-Result -Test 'CRUD' -Route 'POST /api/affiliates/join first' -Expected '201 or 409' -Actual "$($join1.Status)" -Status $(if ($join1Ok) { 'PASS' } else { 'FAIL' }) -Notes $(if ($join1.Status -eq 409) { 'already enrolled from prior QA' } else { '' })
+      $join2 = Invoke-Api -Method POST -Path '/api/affiliates/join' -Headers $h -Body (@{ program_id = $programId } | ConvertTo-Json -Compress)
+      $dupMsg = $false
+      if ($join2.Json -and $join2.Json.PSObject.Properties['error']) {
+        $dupMsg = [string]$join2.Json.error -eq 'Already enrolled'
+      }
+      Add-Result -Test 'CRUD' -Route 'POST /api/affiliates/join repeat' -Expected '409 Already enrolled' -Actual "$($join2.Status)" -Status $(if ($join2.Status -eq 409 -and $dupMsg) { 'PASS' } else { 'FAIL' })
     } else {
       Add-Result -Test 'CRUD' -Route 'POST /api/affiliates/join' -Expected '201' -Actual 'no programs' -Status 'SKIPPED'
     }
@@ -384,7 +442,20 @@ if (-not $accessToken) {
         $code = 0
         [void][int]::TryParse($codeText, [ref]$code)
         $ok = $code -ge 200 -and $code -lt 300
-        Add-Result -Test 'UPLOADS' -Route 'POST /api/uploads/business-photo' -Expected '2xx to mll-media-dev' -Actual "$code" -Status $(if ($ok) { 'PASS' } else { 'FAIL' }) -Notes 'Worker binds staging R2 mll-media-dev; no delete route for cleanup'
+        $urlNote = 'staging media URL'
+        $urlOk = $ok
+        if ($ok -and (Test-Path $outFile)) {
+          try {
+            $uploadJson = Get-Content -Raw $outFile | ConvertFrom-Json
+            $returnedUrl = [string]$uploadJson.url
+            $urlOk = $returnedUrl -and ($returnedUrl -notmatch 'media\.mylatinolist\.io') -and ($returnedUrl -match '/api/media/')
+            $urlNote = if ($urlOk) { 'staging /api/media/ URL; not production host' } else { 'unexpected media host' }
+          } catch {
+            $urlOk = $false
+            $urlNote = 'could not parse upload JSON'
+          }
+        }
+        Add-Result -Test 'UPLOADS' -Route 'POST /api/uploads/business-photo' -Expected '2xx staging media URL' -Actual "$code" -Status $(if ($urlOk) { 'PASS' } else { 'FAIL' }) -Notes $urlNote
       } else {
         Add-Result -Test 'UPLOADS' -Route 'POST /api/uploads/business-photo' -Expected '2xx' -Actual 'curl.exe missing' -Status 'SKIPPED'
       }
