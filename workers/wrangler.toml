@@ -7,86 +7,181 @@ compatibility_flags = ["nodejs_compat"]
 # MY LATINO LIST - CLOUDFLARE WORKER CONFIGURATION
 # ============================================================
 #
-# Production stays untouched.
-# Staging is isolated for MLL 2.0 development.
+# PRODUCTION
+#   Frontend:  https://mylatinolist.io
+#   API:       https://api.mylatinolist.io
+#   Worker:    mll-api-production
+#   Supabase:  Production
+#   KV:        Production
+#   R2:        mll-media
+#
+# STAGING / MLL 2.0
+#   Frontend:  https://staging.mylatinolist.pages.dev
+#   Worker:    mll-api-staging
+#   Supabase:  mll-dev
+#   KV:        Dedicated staging namespace
+#   R2:        mll-media-dev
+#
+# IMPORTANT:
+# Never place Supabase secret/service keys in this file.
+# Store secrets using Wrangler.
 # ============================================================
 
-# ── Default / Production KV ─────────────────────────────────
+
+# ============================================================
+# DEFAULT / PRODUCTION RESOURCES
+# ============================================================
+
+# ── Production KV ───────────────────────────────────────────
+
 [[kv_namespaces]]
 binding = "SESSION_CACHE"
 id = "8934635b28204b7eb3b58566bd97af43"
 preview_id = "c2e71408090c483091c3fc07a2c4501f"
 
-# ── Default / Production R2 ─────────────────────────────────
+
+# ── Production R2 ───────────────────────────────────────────
+
 [[r2_buckets]]
 binding = "MEDIA"
 bucket_name = "mll-media"
 preview_bucket_name = "mll-media-dev"
 
-# ── Default / Production Variables ─────────────────────────
+
+# ── Default Production Variables ────────────────────────────
+
 [vars]
 ENVIRONMENT = "production"
 FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
 
-# ── Production Secrets ─────────────────────────────────────
-# SUPABASE_ANON_KEY
-# SUPABASE_SERVICE_KEY
-# STRIPE_SECRET_KEY
-# STRIPE_WEBHOOK_SECRET
-# RESEND_API_KEY
-# ALGOLIA_APP_ID
-# ALGOLIA_ADMIN_KEY
-# FB_PAGE_ACCESS_TOKEN
-# ADMIN_TEST_TOKEN
 
-# ── Cron Triggers ──────────────────────────────────────────
+# ============================================================
+# SECRETS
+# ============================================================
+#
+# Secrets are NOT stored in wrangler.toml.
+#
+# Production examples:
+#
+# npx wrangler secret put SUPABASE_ANON_KEY --env production
+# npx wrangler secret put SUPABASE_SERVICE_KEY --env production
+# npx wrangler secret put STRIPE_SECRET_KEY --env production
+# npx wrangler secret put STRIPE_WEBHOOK_SECRET --env production
+# npx wrangler secret put RESEND_API_KEY --env production
+# npx wrangler secret put ALGOLIA_APP_ID --env production
+# npx wrangler secret put ALGOLIA_ADMIN_KEY --env production
+# npx wrangler secret put FB_PAGE_ACCESS_TOKEN --env production
+# npx wrangler secret put ADMIN_TEST_TOKEN --env production
+#
+#
+# Staging examples:
+#
+# npx wrangler secret put SUPABASE_ANON_KEY --env staging
+# npx wrangler secret put SUPABASE_SERVICE_KEY --env staging
+#
+# Additional staging secrets should use TEST/DEV credentials:
+#
+# npx wrangler secret put STRIPE_SECRET_KEY --env staging
+# npx wrangler secret put STRIPE_WEBHOOK_SECRET --env staging
+# npx wrangler secret put RESEND_API_KEY --env staging
+# npx wrangler secret put ALGOLIA_APP_ID --env staging
+# npx wrangler secret put ALGOLIA_ADMIN_KEY --env staging
+# npx wrangler secret put FB_PAGE_ACCESS_TOKEN --env staging
+# npx wrangler secret put ADMIN_TEST_TOKEN --env staging
+#
+# IMPORTANT:
+# Stripe staging must use Stripe TEST MODE credentials.
+# ============================================================
+
+
+# ============================================================
+# CRON TRIGGERS
+# ============================================================
+
 [triggers]
-crons = ["0 10 * * *", "0 9 * * 1"]
+crons = [
+  "0 10 * * *",
+  "0 9 * * 1"
+]
 
-# ── Production Route ───────────────────────────────────────
+
+# ============================================================
+# PRODUCTION API ROUTE
+# ============================================================
+
 [[routes]]
 pattern = "api.mylatinolist.io/*"
 zone_name = "mylatinolist.io"
 
+
 # ============================================================
-# PRODUCTION
+# PRODUCTION ENVIRONMENT
 # ============================================================
 
 [env.production]
 name = "mll-api-production"
+
+
+# ── Production Variables ────────────────────────────────────
 
 [env.production.vars]
 ENVIRONMENT = "production"
 FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
 
+
+# ── Production KV ───────────────────────────────────────────
+
 [[env.production.kv_namespaces]]
 binding = "SESSION_CACHE"
 id = "8934635b28204b7eb3b58566bd97af43"
+
+
+# ── Production R2 ───────────────────────────────────────────
 
 [[env.production.r2_buckets]]
 binding = "MEDIA"
 bucket_name = "mll-media"
 
+
 # ============================================================
-# STAGING / MLL 2.0 DEVELOPMENT
+# STAGING / MLL 2.0 DEVELOPMENT ENVIRONMENT
 # ============================================================
 
 [env.staging]
 name = "mll-api-staging"
 
+
+# ── Staging Variables ───────────────────────────────────────
+
 [env.staging.vars]
+
 ENVIRONMENT = "staging"
+
+# Cloudflare Pages staging frontend
 FRONTEND_URL = "https://staging.mylatinolist.pages.dev"
 
-# Placeholder on purpose.
-# Replace with the new DEV Supabase project URL before deployment.
-SUPABASE_URL = "https://YOUR-DEV-SUPABASE-PROJECT.supabase.co"
+# Dedicated MLL DEV Supabase project (mll-dev)
+# Must never equal the production project jhjdhmjkcnjtbojocjam
+SUPABASE_URL = "https://bjtfrmkhishoadjtpzgg.supabase.co"
+
+
+# ── Staging KV ──────────────────────────────────────────────
+#
+# Dedicated staging namespace.
+# DO NOT replace this with the production KV ID.
+#
 
 [[env.staging.kv_namespaces]]
 binding = "SESSION_CACHE"
 id = "878fc40235fe4681a940a82a72042481"
+
+
+# ── Staging R2 ──────────────────────────────────────────────
+#
+# Dedicated development media bucket.
+#
 
 [[env.staging.r2_buckets]]
 binding = "MEDIA"
