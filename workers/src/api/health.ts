@@ -138,8 +138,9 @@ export async function handleHealth(request: Request, env: Env): Promise<Response
 
   // ── Resend ───────────────────────────────────────────────
   let resend: ServiceResult
+  const isStaging = env.ENVIRONMENT === 'staging'
   if (!env.RESEND_API_KEY) {
-    resend = { status: 'down', detail: 'RESEND_API_KEY not set' }
+    resend = { status: isStaging ? 'degraded' : 'down', detail: 'RESEND_API_KEY not set' }
   } else if (env.RESEND_API_KEY.startsWith('re_')) {
     resend = { status: 'healthy', detail: 'API key present' }
   } else {
@@ -149,7 +150,7 @@ export async function handleHealth(request: Request, env: Env): Promise<Response
   // ── Stripe ───────────────────────────────────────────────
   let stripe: ServiceResult
   if (!env.STRIPE_SECRET_KEY) {
-    stripe = { status: 'down', detail: 'STRIPE_SECRET_KEY not set' }
+    stripe = { status: isStaging ? 'degraded' : 'down', detail: 'STRIPE_SECRET_KEY not set' }
   } else {
     try {
       const rt = Date.now()

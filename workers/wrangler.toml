@@ -151,6 +151,9 @@ bucket_name = "mll-media"
 
 [env.staging]
 name = "mll-api-staging"
+workers_dev = true
+# Do not inherit the production api.mylatinolist.io route.
+routes = []
 
 
 # ── Staging Variables ───────────────────────────────────────
