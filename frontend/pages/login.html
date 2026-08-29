@@ -45,6 +45,7 @@
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/current-business.js"></script>
+  <script src="/js/safe-return.js"></script>
 </head>
 <body>
   <nav class="nav scrolled">
@@ -136,8 +137,12 @@ function showLoginForm() {
     });
 })();
 
+function loginReturnTarget() {
+  return window.MLL_SAFE_RETURN.loginReturnFromSearch(window.location.search);
+}
+
 document.getElementById('continue-session-btn').addEventListener('click', () => {
-  window.location.href = 'dashboard.html';
+  window.location.href = loginReturnTarget();
 });
 document.getElementById('switch-account-btn').addEventListener('click', () => {
   clearAuthSession();
@@ -182,7 +187,7 @@ async function handleLogin() {
     sessionStorage.setItem('mll_token', data.access_token);
     if (data.user?.id) sessionStorage.setItem('mll_user_id', data.user.id);
     else sessionStorage.removeItem('mll_user_id');
-    window.location.href = 'dashboard.html';
+    window.location.href = loginReturnTarget();
 
   } catch {
     btn.textContent = 'Sign in →'; btn.disabled = false;

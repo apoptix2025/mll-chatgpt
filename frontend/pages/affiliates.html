@@ -14,13 +14,18 @@
     .skeleton{background:var(--surface-3);border-radius:var(--radius-md);animation:pulse 1.4s ease-in-out infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
     .skel-aff{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;display:flex;flex-direction:column;gap:10px;}
-    .join-btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1.5px solid var(--coral);color:var(--coral);background:transparent;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;}
+    .join-btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1.5px solid var(--coral);color:var(--coral);background:transparent;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;white-space:nowrap;min-width:118px;text-align:center;}
     .join-btn:hover{background:var(--coral);color:#fff;}
+    .join-btn:disabled{opacity:0.75;cursor:default;}
+    .join-btn.is-joined,.join-btn.is-joined:hover{border-color:var(--teal);color:var(--teal);background:transparent;cursor:default;}
+    .aff-page-grid .aff-footer{gap:8px;flex-wrap:wrap;}
+    .join-error{grid-column:1/-1;background:#FCEBEB;color:#791F1F;border-radius:var(--radius-md);padding:10px 14px;font-size:13px;margin-bottom:8px;display:none;}
     .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink-muted);}
     .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
     .stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;text-align:center;}
     .stat-card .n{font-family:var(--font-display);font-size:28px;font-weight:500;color:var(--coral);}
     .stat-card .l{font-size:13px;color:var(--ink-muted);margin-top:4px;}
+    @media(max-width:1024px){.aff-page-grid{grid-template-columns:repeat(2,1fr);}}
     @media(max-width:768px){.aff-page-grid{grid-template-columns:1fr;}.stats-row{grid-template-columns:1fr;}}
   </style>
   <!-- Google tag (gtag.js) -->
@@ -87,6 +92,7 @@
       <div class="stat-card"><div class="n" data-en="Free" data-es="Gratis">Free</div><div class="l" data-en="To join any program" data-es="Para unirte a cualquier programa">To join any program</div></div>
     </div>
 
+    <div class="join-error" id="join-error" role="alert"></div>
     <div class="aff-page-grid" id="aff-page-grid"></div>
 
     <div id="partner" style="background:var(--coral);border-radius:var(--radius-xl);padding:48px;text-align:center;margin-bottom:80px;">
@@ -97,48 +103,152 @@
   </div>
 <script>
 const API=window.MLL_CONFIG.API_URL;
+const LOGIN_RETURN='login.html?return=/pages/affiliates';
+const pendingJoins=new Set();
+
+function sessionToken(){
+  return sessionStorage.getItem('mll_token');
+}
+function escapeHtml(value){
+  return String(value==null?'':value).replace(/[&<>"']/g,function(ch){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]);
+  });
+}
+function showJoinError(message){
+  const el=document.getElementById('join-error');
+  if(!el) return;
+  el.textContent=message||'Could not join this program. Please try again.';
+  el.style.display='block';
+}
+function hideJoinError(){
+  const el=document.getElementById('join-error');
+  if(!el) return;
+  el.textContent='';
+  el.style.display='none';
+}
+function markJoined(btn){
+  if(!btn) return;
+  btn.classList.add('is-joined');
+  btn.disabled=true;
+  btn.textContent="You're enrolled";
+  btn.setAttribute('aria-disabled','true');
+}
+function markAvailable(btn){
+  if(!btn) return;
+  btn.classList.remove('is-joined');
+  btn.disabled=false;
+  btn.textContent='Join Program';
+  btn.removeAttribute('aria-disabled');
+}
 function skelAffs(){return Array(6).fill('<div class="skel-aff"><div class="skeleton" style="height:44px;width:44px;border-radius:8px;"></div><div class="skeleton" style="height:15px;width:60%;border-radius:4px;"></div><div class="skeleton" style="height:12px;width:90%;border-radius:4px;"></div><div class="skeleton" style="height:12px;width:70%;border-radius:4px;"></div></div>').join('');}
+
+async function loadEnrolledProgramIds(token){
+  if(!token) return new Set();
+  try{
+    const res=await fetch(`${API}/api/affiliates/enrollments`,{
+      headers:{Authorization:`Bearer ${token}`}
+    });
+    if(res.status===401) return new Set();
+    if(!res.ok) return new Set();
+    const data=await res.json();
+    const rows=Array.isArray(data.enrollments)?data.enrollments:[];
+    return new Set(rows.map(function(row){return row&&row.program_id;}).filter(Boolean));
+  }catch(_err){
+    return new Set();
+  }
+}
+
 async function loadAffiliates(){
   const grid=document.getElementById('aff-page-grid');
   grid.innerHTML=skelAffs();
+  hideJoinError();
   try{
-    const res=await fetch(`${API}/api/affiliates`);
-    const data=await res.json();
+    const token=sessionToken();
+    const [listRes, enrolled]=await Promise.all([
+      fetch(`${API}/api/affiliates`),
+      loadEnrolledProgramIds(token)
+    ]);
+    const data=await listRes.json();
     const affiliates=data.affiliates||[];
     document.getElementById('stat-programs').textContent=affiliates.length||'—';
     if(!affiliates.length){
       grid.innerHTML=`<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">🤝</div><p>No affiliate programs available yet.</p></div>`;
       return;
     }
-    grid.innerHTML=affiliates.map(a=>`
+    grid.innerHTML=affiliates.map(function(a){
+      const joined=enrolled.has(a.id);
+      return `
       <div class="aff-card">
         <div class="aff-top">
-          <div class="aff-logo" style="background:${a.bg_color||'#EBF2FF'}">${a.emoji||'🤝'}</div>
+          <div class="aff-logo" style="background:${escapeHtml(a.bg_color||'#EBF2FF')}">${escapeHtml(a.emoji||'🤝')}</div>
           <div>
-            <div class="aff-name">${a.name}</div>
-            <div class="aff-category">${a.category||''}</div>
+            <div class="aff-name">${escapeHtml(a.name)}</div>
+            <div class="aff-category">${escapeHtml(a.category||'')}</div>
           </div>
         </div>
-        <div class="aff-desc">${a.description||''}</div>
+        <div class="aff-desc">${escapeHtml(a.description||'')}</div>
         <div class="aff-footer">
-          <span class="aff-commission">${a.commission_text||''}</span>
-          <button class="join-btn" onclick="handleJoin('${a.id}','${a.name}')">Join →</button>
+          <span class="aff-commission">${escapeHtml(a.commission_text||'')}</span>
+          <button type="button" class="join-btn${joined?' is-joined':''}" data-program-id="${escapeHtml(a.id)}" ${joined?'disabled aria-disabled="true"':''}>${joined?"You're enrolled":'Join Program'}</button>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }catch(err){
     grid.innerHTML=`<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">⚠️</div><p>Could not load programs. Please try again.</p></div>`;
   }
 }
-function handleJoin(id, name){
-  const token=sessionStorage.getItem('mll_token');
+
+async function handleJoin(btn){
+  if(!btn||btn.disabled||btn.classList.contains('is-joined')) return;
+  const programId=btn.getAttribute('data-program-id');
+  if(!programId||pendingJoins.has(programId)) return;
+
+  const token=sessionToken();
   if(!token){
-    if(confirm(`Sign in to join the ${name} affiliate program. Go to sign in?`)){
-      window.location.href='login.html';
-    }
+    window.location.href=LOGIN_RETURN;
     return;
   }
-  window.location.href='dashboard.html';
+
+  hideJoinError();
+  pendingJoins.add(programId);
+  btn.disabled=true;
+  btn.textContent='Joining...';
+
+  try{
+    const res=await fetch(`${API}/api/affiliates/join`,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        Authorization:`Bearer ${token}`
+      },
+      body:JSON.stringify({program_id:programId})
+    });
+    if(res.status===401){
+      window.location.href=LOGIN_RETURN;
+      return;
+    }
+    if(res.status===201||res.status===409){
+      markJoined(btn);
+      return;
+    }
+    let message='Could not join this program. Please try again.';
+    if(res.status===400) message='No business is assigned to this account.';
+    if(res.status===404) message='That affiliate program is not available.';
+    markAvailable(btn);
+    showJoinError(message);
+  }catch(_err){
+    markAvailable(btn);
+    showJoinError('Network error. Please try again.');
+  }finally{
+    pendingJoins.delete(programId);
+  }
 }
+
+document.getElementById('aff-page-grid').addEventListener('click',function(event){
+  const btn=event.target.closest('.join-btn');
+  if(!btn) return;
+  handleJoin(btn);
+});
 loadAffiliates();
 </script>
   <script src="/js/nav.js"></script>

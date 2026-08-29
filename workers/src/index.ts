@@ -80,7 +80,7 @@ export default {
                                                   response = await handleJobs(request, env)
       else if (path.startsWith('/api/marketplace') && request.method === 'GET')
                                                   response = await handleMarketplace(request, env)
-      else if (path.startsWith('/api/affiliates') && request.method === 'GET')
+      else if (path === '/api/affiliates' && request.method === 'GET')
                                                   response = await handleAffiliates(request, env)
       else if (path.startsWith('/api/resources') && request.method === 'GET')
                                                   response = await handleResources(request, env)

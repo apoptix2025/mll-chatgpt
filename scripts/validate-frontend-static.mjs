@@ -29,6 +29,7 @@ const pages = [
   'pages/pricing.html',
   'js/config.js',
   'js/current-business.js',
+  'js/safe-return.js',
   'css/main.css',
 ]
 
@@ -193,6 +194,28 @@ if (!/sessionStorage\.setItem\('mll_token', data\.access_token\)/.test(loginHtml
 }
 if (/localStorage\.setItem\(\s*['"]mll_token['"]/.test(loginHtml)) {
   console.error('LOGIN FAIL token stored in localStorage')
+  failed += 1
+}
+if (!/safe-return\.js/.test(loginHtml) || !/loginReturnTarget\(\)/.test(loginHtml)) {
+  console.error('LOGIN FAIL safe same-origin return is missing')
+  failed += 1
+}
+
+const affiliatesHtml = readFileSync(join(frontend, 'pages/affiliates.html'), 'utf8')
+if (!/\/api\/affiliates\/join/.test(affiliatesHtml) || !/Authorization:`Bearer \$\{token\}`/.test(affiliatesHtml)) {
+  console.error('AFFILIATE FAIL join does not POST with Bearer token')
+  failed += 1
+}
+if (/window\.location\.href='dashboard\.html'/.test(affiliatesHtml)) {
+  console.error('AFFILIATE FAIL join still redirects to dashboard')
+  failed += 1
+}
+if (!/login.html\?return=\/pages\/affiliates/.test(affiliatesHtml)) {
+  console.error('AFFILIATE FAIL unauthenticated join has no login return')
+  failed += 1
+}
+if (/localStorage\.setItem\(\s*['"]mll_token['"]/.test(affiliatesHtml)) {
+  console.error('AFFILIATE FAIL token stored in localStorage')
   failed += 1
 }
 

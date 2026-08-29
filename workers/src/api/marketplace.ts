@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Env } from '../index'
+import { resolveAssignedBusiness } from '../lib/billing-business'
 import { publicMediaUrl } from '../lib/media'
 
 const PRODUCT_ID_PATH = /^\/api\/marketplace\/([0-9a-f-]{36})$/i
@@ -264,33 +265,62 @@ export async function handleAffiliates(request: Request, env: Env, userId?: stri
     return Response.json({ affiliates: data })
   }
 
+  // GET /api/affiliates/enrollments — assigned-business memberships (auth required)
+  if (request.method === 'GET' && url.pathname === '/api/affiliates/enrollments' && userId) {
+    const resolved = await resolveAssignedBusiness(supabase, userId, 'id, name')
+    if (!resolved.ok) return Response.json({ error: resolved.error }, { status: resolved.status })
+
+    const { data, error } = await supabase
+      .from('affiliate_enrollments')
+      .select('program_id, status, joined_at')
+      .eq('business_id', resolved.business.id)
+
+    if (error) return Response.json({ error: 'Unable to load enrollments' }, { status: 500 })
+    return Response.json({ enrollments: data || [] })
+  }
+
   // POST /api/affiliates/join — join a program (auth required)
   if (request.method === 'POST' && url.pathname === '/api/affiliates/join' && userId) {
-    const { program_id } = await request.json() as { program_id: string }
+    let body: Record<string, unknown> = {}
+    try {
+      body = await request.json() as Record<string, unknown>
+    } catch {
+      return Response.json({ error: 'Invalid request' }, { status: 400 })
+    }
+
+    const program_id = typeof body.program_id === 'string' ? body.program_id.trim() : ''
     if (!program_id) return Response.json({ error: 'program_id required' }, { status: 400 })
 
-    const { data: biz } = await supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', userId)
-      .single()
+    const resolved = await resolveAssignedBusiness(supabase, userId, 'id, name')
+    if (!resolved.ok) return Response.json({ error: resolved.error }, { status: resolved.status })
 
-    if (!biz) return Response.json({ error: 'No business found' }, { status: 403 })
+    const { data: program } = await supabase
+      .from('affiliate_programs')
+      .select('id')
+      .eq('id', program_id)
+      .eq('status', 'active')
+      .maybeSingle()
+    if (!program) return Response.json({ error: 'Program not found' }, { status: 404 })
 
     const { data: existing } = await supabase
       .from('affiliate_enrollments')
-      .select('id')
-      .eq('business_id', biz.id)
+      .select('id, program_id, business_id, status, joined_at')
+      .eq('business_id', resolved.business.id)
       .eq('program_id', program_id)
       .maybeSingle()
 
     if (existing) {
-      return Response.json({ error: 'Already enrolled' }, { status: 409 })
+      return Response.json({ error: 'Already enrolled', enrollment: existing }, { status: 409 })
     }
 
     const { data, error } = await supabase
       .from('affiliate_enrollments')
-      .insert({ business_id: biz.id, program_id, status: 'active', joined_at: new Date().toISOString() })
+      .insert({
+        business_id: resolved.business.id,
+        program_id,
+        status: 'active',
+        joined_at: new Date().toISOString(),
+      })
       .select()
       .single()
 
