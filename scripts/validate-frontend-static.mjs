@@ -26,6 +26,7 @@ const pages = [
   'pages/admin.html',
   'pages/business.html',
   'pages/reset-password.html',
+  'pages/pricing.html',
   'js/config.js',
   'js/current-business.js',
   'css/main.css',
@@ -249,6 +250,41 @@ if (!/injectAdminSidebarLinks/.test(dashboard) || !/health\.html/.test(currentBi
   failed += 1
 }
 
+const pricingHtml = readFileSync(join(frontend, 'pages/pricing.html'), 'utf8')
+if (!/data-mll-page="pricing"/.test(pricingHtml) || !/MLL Pricing/.test(pricingHtml) || !/Choose your plan/.test(pricingHtml)) {
+  console.error('PRICING FAIL page is missing unique pricing markers')
+  failed += 1
+}
+if (/v2-hero|Popular near you/.test(pricingHtml)) {
+  console.error('PRICING FAIL pricing.html still looks like the homepage')
+  failed += 1
+}
+if (!/\$19/.test(pricingHtml) || !/\$49/.test(pricingHtml) || !/\$99/.test(pricingHtml) || !/\$299/.test(pricingHtml)) {
+  console.error('PRICING FAIL plan prices do not match billing source')
+  failed += 1
+}
+if (!/sessionStorage\.getItem\('mll_token'\)/.test(pricingHtml) || !/href = 'billing\.html'/.test(pricingHtml)) {
+  console.error('PRICING FAIL authenticated paid CTA does not route to billing')
+  failed += 1
+}
+if (!/enroll\.html/.test(pricingHtml) || !/mailto:partners@mylatinolist\.io/.test(pricingHtml)) {
+  console.error('PRICING FAIL starter/agency CTAs missing')
+  failed += 1
+}
+if (/create-checkout-session|STRIPE_SECRET|sk_live/.test(pricingHtml)) {
+  console.error('PRICING FAIL pricing page includes checkout/secrets')
+  failed += 1
+}
+const indexHtmlForPricing = readFileSync(join(frontend, 'index.html'), 'utf8')
+if (!/href="\/pages\/pricing"/.test(indexHtmlForPricing)) {
+  console.error('PRICING FAIL homepage Pricing link is not /pages/pricing')
+  failed += 1
+}
+if (/href="pages\/enroll\.html#pricing"/.test(indexHtmlForPricing)) {
+  console.error('PRICING FAIL homepage still points Pricing at enroll#pricing')
+  failed += 1
+}
+
 if (failed) {
   console.error('frontend static validation FAIL ' + failed)
   process.exit(1)
@@ -264,3 +300,4 @@ console.log('  login existing-session handling verified')
 console.log('  business profile canonical /pages/business?slug= routing verified')
 console.log('  health dashboard uses protected /api/admin/health')
 console.log('  dashboard/listing assigned-business context verified')
+console.log('  public pricing page exists and is not homepage fallback')

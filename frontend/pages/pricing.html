@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing — MyLatinoList</title>
+  <meta name="description" content="My Latino List plans: Starter, Basic, Pro, Featured, and Agency.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body { background: var(--surface-2); padding-top: var(--nav-h); }
+    .pricing-wrap { max-width: 1180px; margin: 0 auto; padding: 48px 20px 80px; }
+    .pricing-kicker { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--coral); margin-bottom: 8px; }
+    .pricing-h { font-family: var(--font-display); font-size: clamp(28px, 4vw, 40px); font-weight: 700; color: var(--ink); letter-spacing: -0.03em; margin: 0 0 10px; }
+    .pricing-sub { font-size: 16px; color: var(--ink-soft); max-width: 560px; line-height: 1.6; margin: 0 0 28px; }
+    .billing-toggle { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; background: #fff; border: 1px solid var(--border); border-radius: 40px; padding: 4px; width: fit-content; }
+    .bt-opt { padding: 7px 20px; border-radius: 40px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--ink-muted); font-family: var(--font-body); transition: all 0.15s; white-space: nowrap; }
+    .bt-opt.active { background: var(--coral); color: #fff; }
+    .bt-save { font-size: 11px; background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 10px; font-weight: 500; margin-left: 4px; }
+    .plan-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .plan-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 16px; position: relative; display: flex; flex-direction: column; min-width: 0; }
+    .plan-card.popular { border-color: var(--coral); }
+    .plan-pop-badge { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 10px; font-weight: 500; padding: 2px 12px; border-radius: 10px; white-space: nowrap; }
+    .plan-name { font-size: 11px; font-weight: 600; color: var(--ink-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .plan-price { font-family: var(--font-display); font-size: 24px; font-weight: 500; color: var(--ink); margin-bottom: 2px; line-height: 1; }
+    .plan-price sub { font-size: 12px; font-weight: 300; color: var(--ink-muted); font-family: var(--font-body); }
+    .plan-save { font-size: 11px; color: #15803d; font-weight: 500; margin-bottom: 10px; min-height: 16px; }
+    .plan-feats { list-style: none; display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; flex: 1; padding: 0; }
+    .plan-feats li { font-size: 11px; color: var(--ink-soft); display: flex; align-items: flex-start; gap: 5px; line-height: 1.4; }
+    .plan-feats li::before { content: '✓'; color: var(--teal); font-size: 10px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+    .plan-btn { width: 100%; padding: 10px 8px; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border-mid); background: transparent; color: var(--ink-soft); font-family: var(--font-body); text-align: center; text-decoration: none; display: block; box-sizing: border-box; margin-top: auto; }
+    .plan-btn.primary { background: var(--coral); color: #fff; border-color: var(--coral); }
+    .plan-btn.primary:hover { background: var(--coral-dark); }
+    .pricing-note { font-size: 12px; color: var(--ink-muted); text-align: center; }
+    .pricing-note a { color: var(--coral); }
+    @media (max-width: 1024px) { .plan-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 720px) { .plan-grid { grid-template-columns: 1fr; } .pricing-wrap { padding: 32px 16px 64px; } }
+  </style>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YB4TE3JXR7');
+  </script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+</head>
+<body>
+  <nav class="nav scrolled has-mobile" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <div class="nav-links">
+        <a href="directory.html" data-en="Discover" data-es="Descubrir">Discover</a>
+        <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+        <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+        <a href="voz.html">La Voz Latino</a>
+        <a href="enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>
+      </div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+        <a href="enroll.html" class="btn-cta" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+      </div>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="directory.html">Discover</a>
+      <a href="jobs.html">Jobs</a>
+      <a href="marketplace.html">Marketplace</a>
+      <a href="voz.html">La Voz Latino</a>
+      <a href="enroll.html">For Business</a>
+      <a href="login.html">Sign in</a>
+    </div>
+  </nav>
+
+  <main class="pricing-wrap" data-mll-page="pricing">
+    <div class="pricing-kicker">MLL Pricing</div>
+    <h1 class="pricing-h">Choose your plan</h1>
+    <p class="pricing-sub">Compare My Latino List plans. Checkout happens on Billing after you have an account — this page does not start Stripe checkout.</p>
+
+    <div class="billing-toggle" id="billing-toggle">
+      <button class="bt-opt active" id="bt-monthly" onclick="setBilling('monthly')">Monthly</button>
+      <button class="bt-opt" id="bt-annual" onclick="setBilling('annual')">Annual <span class="bt-save">Save 2 months</span></button>
+    </div>
+
+    <div class="plan-grid" id="plans">
+      <div class="plan-card" id="plan-free">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$0<sub>/mo</sub></div>
+        <div class="plan-save"></div>
+        <ul class="plan-feats">
+          <li>Basic directory listing</li>
+          <li>Business name, phone &amp; category</li>
+          <li>Community badge</li>
+          <li>1 photo &amp; QR code</li>
+          <li>Free for 90 days</li>
+        </ul>
+        <a class="plan-btn" href="enroll.html">Get started →</a>
+      </div>
+      <div class="plan-card" id="plan-basic">
+        <div class="plan-name">Basic</div>
+        <div class="plan-price" id="price-basic">$19<sub>/mo</sub></div>
+        <div class="plan-save" id="save-basic"></div>
+        <ul class="plan-feats">
+          <li>Never expires</li>
+          <li>Full profile + 5 photos</li>
+          <li>Business hours</li>
+          <li>Review management</li>
+          <li>Share listing tools</li>
+        </ul>
+        <a class="plan-btn primary" href="enroll.html" data-plan-cta="basic">Get started →</a>
+      </div>
+      <div class="plan-card popular" id="plan-pro">
+        <div class="plan-pop-badge">⭐ Most popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price" id="price-pro">$49<sub>/mo</sub></div>
+        <div class="plan-save" id="save-pro"></div>
+        <ul class="plan-feats">
+          <li>Everything in Basic</li>
+          <li>Unlimited photos</li>
+          <li>Analytics dashboard</li>
+          <li>Marketplace selling</li>
+          <li>Jobs board (10 posts/mo)</li>
+          <li>La Voz Latino &amp; affiliates</li>
+          <li>Priority support + custom URL</li>
+        </ul>
+        <a class="plan-btn primary" href="enroll.html" data-plan-cta="pro">Get started →</a>
+      </div>
+      <div class="plan-card" id="plan-featured">
+        <div class="plan-name">Featured</div>
+        <div class="plan-price" id="price-featured">$99<sub>/mo</sub></div>
+        <div class="plan-save" id="save-featured"></div>
+        <ul class="plan-feats">
+          <li>Everything in Pro</li>
+          <li>Homepage featured slot</li>
+          <li>Unlimited job posts</li>
+          <li>Priority search #1–3</li>
+          <li>Custom landing page</li>
+          <li>Account rep + verified ✓</li>
+          <li>Monthly social shoutout</li>
+        </ul>
+        <a class="plan-btn primary" href="enroll.html" data-plan-cta="featured">Get started →</a>
+      </div>
+      <div class="plan-card" id="plan-agency">
+        <div class="plan-name">Agency</div>
+        <div class="plan-price" id="price-agency">$299<sub>/mo</sub></div>
+        <div class="plan-save" id="save-agency"></div>
+        <ul class="plan-feats">
+          <li>Manage up to 10 businesses</li>
+          <li>White-label dashboard</li>
+          <li>Bulk enrollment</li>
+          <li>Priority homepage placement</li>
+          <li>Monthly strategy call</li>
+          <li>Custom analytics reports</li>
+        </ul>
+        <a class="plan-btn primary" href="mailto:partners@mylatinolist.io">Contact us →</a>
+      </div>
+    </div>
+    <p class="pricing-note">✓ Cancel anytime · No contracts · Secure billing via Stripe<br>Already have an account? <a href="login.html">Sign in</a> or open <a href="billing.html">Billing</a> to upgrade.</p>
+  </main>
+
+<script>
+const PRICES = {
+  monthly: { basic:'$19',  pro:'$49',   featured:'$99',   agency:'$299'  },
+  annual:  { basic:'$190', pro:'$490',  featured:'$990',  agency:'$2,990' },
+  saves:   { basic:'$38',  pro:'$98',   featured:'$198',  agency:'$598'  },
+};
+
+function setBilling(cycle) {
+  document.getElementById('bt-monthly').classList.toggle('active', cycle === 'monthly');
+  document.getElementById('bt-annual').classList.toggle('active', cycle === 'annual');
+  const suffix = cycle === 'annual' ? '/yr' : '/mo';
+  ['basic','pro','featured','agency'].forEach(function (p) {
+    const el = document.getElementById('price-' + p);
+    const saveEl = document.getElementById('save-' + p);
+    if (el) el.innerHTML = PRICES[cycle][p] + '<sub>' + suffix + '</sub>';
+    if (saveEl) saveEl.textContent = cycle === 'annual' ? 'Save ' + PRICES.saves[p] + '/yr' : '';
+  });
+}
+
+(function wirePaidCtas() {
+  var token = null;
+  try { token = sessionStorage.getItem('mll_token'); } catch (e) {}
+  document.querySelectorAll('[data-plan-cta]').forEach(function (a) {
+    if (token) {
+      a.href = 'billing.html';
+      a.textContent = 'Upgrade on Billing →';
+    } else {
+      a.href = 'enroll.html';
+    }
+  });
+})();
+</script>
+  <script src="/js/nav.js"></script>
+</body>
+</html>

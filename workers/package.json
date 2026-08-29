@@ -11,6 +11,7 @@
     "test:billing": "node ../scripts/test-billing-business.mjs",
     "test:cors-health": "node ../scripts/test-cors-health.mjs",
     "test:dashboard": "node ../scripts/test-dashboard-listing.mjs",
+    "test:pricing": "node ../scripts/test-pricing.mjs",
     "check:staging": "node scripts/check-staging-safety.mjs"
   },
   "dependencies": {
