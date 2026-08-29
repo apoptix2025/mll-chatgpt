@@ -102,6 +102,21 @@ if (/voz\.html" data-en="Resources"/.test(navJs)) {
   failed += 1
 }
 
+const mediaJs = readFileSync(join(frontend, 'js/media.js'), 'utf8')
+if (!/ap-optix-llc['"]:\s*BASE \+ ['"]ap-optix-ai-tech\.webp['"]/.test(mediaJs)) {
+  console.error('MEDIA FAIL AP Optix slug is not mapped to ap-optix-ai-tech.webp')
+  failed += 1
+}
+if (/ap-optix-llc['"]:\s*BASE \+ ['"]community\.jpg['"]/.test(mediaJs)) {
+  console.error('MEDIA FAIL AP Optix still mapped to community fallback')
+  failed += 1
+}
+const optixImg = join(frontend, 'assets/businesses/ap-optix-ai-tech.webp')
+if (!existsSync(optixImg)) {
+  console.error('MEDIA FAIL missing frontend/assets/businesses/ap-optix-ai-tech.webp')
+  failed += 1
+}
+
 if (failed) {
   console.error('frontend static validation FAIL ' + failed)
   process.exit(1)
@@ -111,3 +126,4 @@ console.log('  pages and config.js production mapping verified')
 console.log('  dashboard referral empty/error states verified')
 console.log('  dashboard La Voz Latino navigation and resources API verified')
 console.log('  public nav branded as La Voz Latino')
+console.log('  AP Optix AI tech listing image mapped')

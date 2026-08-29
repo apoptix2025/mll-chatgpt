@@ -3,6 +3,7 @@
 (function () {
   var BASE = '/assets/businesses/';
   var BY_SLUG = {
+    'ap-optix-llc': BASE + 'ap-optix-ai-tech.webp',
     'la-cocina-de-maryland': BASE + 'restaurant.jpg',
     'mendez-remodeling-co': BASE + 'remodeling.jpg',
     'flores-beauty-studio': BASE + 'beauty.jpg',
