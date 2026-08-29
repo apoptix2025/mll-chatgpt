@@ -366,7 +366,7 @@ async function loadProfile() {
   // QR + Kit links
   document.getElementById('qr-link').href       = `biz-qr.html?id=${b.slug}`;
   document.getElementById('kit-link').href      = `biz-kit.html?id=${b.slug}`;
-  document.getElementById('biz-page-link').href = `business.html?id=${b.slug}`;
+  document.getElementById('biz-page-link').href = `/pages/business?slug=${encodeURIComponent(b.slug || '')}`;
 
   // Build hours editor with saved data
   buildHoursEditor(b.hours);

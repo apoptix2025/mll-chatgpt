@@ -116,6 +116,47 @@ if (!existsSync(optixImg)) {
   console.error('MEDIA FAIL missing frontend/assets/businesses/ap-optix-ai-tech.webp')
   failed += 1
 }
+if (!/function profileHref/.test(mediaJs) || !/\/pages\/business\?slug=/.test(mediaJs)) {
+  console.error('ROUTE FAIL media.js missing canonical /pages/business?slug= helper')
+  failed += 1
+}
+if (/\(opts\.prefix\s*\|\|\s*['"]pages\//.test(mediaJs) || /['"]pages\/['"]\s*\+\s*['"]business\.html/.test(mediaJs)) {
+  console.error('ROUTE FAIL media.js still builds relative pages/business.html links')
+  failed += 1
+}
+
+const businessHtml = readFileSync(join(frontend, 'pages/business.html'), 'utf8')
+if (!/params\.get\('slug'\)/.test(businessHtml)) {
+  console.error('ROUTE FAIL business.html does not read ?slug=')
+  failed += 1
+}
+if (!/params\.get\('id'\)/.test(businessHtml)) {
+  console.error('ROUTE FAIL business.html dropped ?id= fallback')
+  failed += 1
+}
+
+const listingHtml = readFileSync(join(frontend, 'pages/listing.html'), 'utf8')
+if (!/\/pages\/business\?slug=/.test(listingHtml)) {
+  console.error('ROUTE FAIL listing.html public profile link is not canonical')
+  failed += 1
+}
+
+const routeFiles = [
+  'js/media.js',
+  'js/main.js',
+  'pages/directory.html',
+  'pages/business.html',
+  'pages/listing.html',
+  'pages/dashboard.html',
+  'index.html',
+]
+for (const rel of routeFiles) {
+  const src = readFileSync(join(frontend, rel), 'utf8')
+  if (/\/pages\/pages\/business/.test(src) || /pages\/pages\/business/.test(src)) {
+    console.error('ROUTE FAIL ' + rel + ' contains /pages/pages/business')
+    failed += 1
+  }
+}
 
 const billingHtml = readFileSync(join(frontend, 'pages/billing.html'), 'utf8')
 const billingChecks = [
@@ -165,3 +206,4 @@ console.log('  public nav branded as La Voz Latino')
 console.log('  AP Optix AI tech listing image mapped')
 console.log('  billing admin upgrade guard verified')
 console.log('  login existing-session handling verified')
+console.log('  business profile canonical /pages/business?slug= routing verified')

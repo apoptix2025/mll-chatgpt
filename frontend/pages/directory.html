@@ -317,7 +317,7 @@ function skelGrid() {
 }
 
 function bizCard(b) {
-  if (window.MLL_MEDIA) return window.MLL_MEDIA.cardHTML(b, { prefix: '', cta: 'View profile →', showDesc: true });
+  if (window.MLL_MEDIA) return window.MLL_MEDIA.cardHTML(b, { cta: 'View profile →', showDesc: true });
   return '<article class="v2-card"><div class="v2-card-media"></div><div class="v2-card-body"><h3>' + (b.name || '') + '</h3></div></article>';
 }
 

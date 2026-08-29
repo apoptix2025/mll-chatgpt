@@ -306,7 +306,8 @@
 
 <script>
 const API = window.MLL_CONFIG.API_URL;
-const slug = new URLSearchParams(window.location.search).get('id') || '';
+const params = new URLSearchParams(window.location.search);
+const slug = (params.get('slug') || params.get('id') || '').trim();
 let bizSlug = slug;
 
 function normalizeUrl(url) {
@@ -350,6 +351,10 @@ async function loadBusiness() {
 
     bizData = b;
     bizSlug = b.slug;
+    const canonical = '/pages/business?slug=' + encodeURIComponent(b.slug) + (src && src !== 'direct' ? '&src=' + encodeURIComponent(src) : '');
+    if ((window.location.pathname + window.location.search) !== canonical) {
+      history.replaceState({}, '', canonical);
+    }
 
     // Update page meta
     document.getElementById('page-title').textContent  = `${b.name} — MyLatinoList`;
@@ -614,7 +619,7 @@ function injectJsonLd(b) {
     '@type': 'LocalBusiness',
     name: b.name,
     description: b.description || '',
-    url: `https://mylatinolist.io/pages/business.html?id=${b.slug}`,
+    url: `https://mylatinolist.io/pages/business?slug=${encodeURIComponent(b.slug)}`,
     telephone: b.phone || undefined,
     address: {
       '@type': 'PostalAddress',
@@ -651,7 +656,7 @@ function injectJsonLd(b) {
     if (!el) { el = document.createElement('meta'); el.setAttribute(attr, prop); document.head.appendChild(el) }
     el.setAttribute('content', val)
   }
-  const pageUrl = `https://mylatinolist.io/pages/business.html?id=${b.slug}`
+  const pageUrl = `https://mylatinolist.io/pages/business?slug=${encodeURIComponent(b.slug)}`
   setMeta('og:title',       `${b.name} — MyLatinoList`)
   setMeta('og:description', b.description?.slice(0, 155) || `${b.name} on MyLatinoList`)
   setMeta('og:url',         pageUrl)

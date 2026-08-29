@@ -53,9 +53,14 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   }
 
+  function profileHref(bizOrSlug) {
+    var slug = typeof bizOrSlug === 'string' ? bizOrSlug : (bizOrSlug && bizOrSlug.slug) || '';
+    return '/pages/business?slug=' + encodeURIComponent(slug);
+  }
+
   function cardHTML(biz, opts) {
     opts = opts || {};
-    var href = (opts.prefix || 'pages/') + 'business.html?id=' + encodeURIComponent(biz.slug);
+    var href = profileHref(biz);
     var saved = isSaved(biz.slug) ? ' is-saved' : '';
     var rating = biz.rating != null && biz.rating !== '' ? Number(biz.rating).toFixed(1) : '—';
     var reviews = biz.review_count != null ? biz.review_count : 0;
@@ -96,6 +101,7 @@
   window.MLL_MEDIA = {
     imageUrl: imageUrl,
     cardHTML: cardHTML,
+    profileHref: profileHref,
     isSaved: isSaved,
     toggleSaved: toggleSaved,
     BY_CATEGORY: BY_CATEGORY
