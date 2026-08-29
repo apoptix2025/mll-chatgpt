@@ -484,32 +484,56 @@ async function loadBusiness() {
   }
 }
 
-async function loadProducts(bizId) {
-  try {
-    const res  = await fetch(`${API}/api/marketplace`);
-    const data = await res.json();
-    const prods = (data.products||[]).filter(p => p.business_id === bizId);
-    if (!prods.length) return;
+function marketplaceOfferingsView(payload, bizId, failed) {
+  if (failed) return { state: 'error', products: [] };
+  const list = Array.isArray(payload && payload.products) ? payload.products : [];
+  const products = list.filter(function (p) { return p && p.business_id === bizId; });
+  return { state: products.length ? 'ready' : 'empty', products: products };
+}
 
+function renderProductCard(p) {
+  return `
+      <div class="product-card">
+        <div class="product-img" style="background:${p.bg_color||'#EBF2FF'}"><span style="font-size:32px;">${p.emoji||'📦'}</span></div>
+        <div class="product-body">
+          <div class="product-name">${p.name}</div>
+          <div class="product-bottom"><span class="product-price">$${Number(p.price).toFixed(2)}</span><span class="product-rating">★${p.rating}</span></div>
+        </div>
+      </div>`;
+}
+
+function showProductsEmptyState(message) {
+  const empty = document.getElementById('no-products');
+  const full = document.getElementById('products-full');
+  const preview = document.getElementById('products-preview');
+  if (full) full.innerHTML = '';
+  if (preview) preview.style.display = 'none';
+  if (!empty) return;
+  empty.textContent = message || empty.getAttribute('data-en') || 'No products listed yet.';
+  empty.style.display = 'block';
+}
+
+async function loadProducts(bizId) {
+  const empty = document.getElementById('no-products');
+  if (empty) empty.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API}/api/marketplace`);
+    if (!res.ok) throw new Error('unavailable');
+    const data = await res.json();
+    const view = marketplaceOfferingsView(data, bizId, false);
+    if (view.state !== 'ready') {
+      showProductsEmptyState('No products listed yet.');
+      return;
+    }
+
+    if (empty) empty.style.display = 'none';
     document.getElementById('products-preview').style.display = 'block';
-    const miniHtml = prods.slice(0,3).map(p => `
-      <div class="product-card">
-        <div class="product-img" style="background:${p.bg_color||'#EBF2FF'}"><span style="font-size:32px;">${p.emoji||'📦'}</span></div>
-        <div class="product-body">
-          <div class="product-name">${p.name}</div>
-          <div class="product-bottom"><span class="product-price">$${Number(p.price).toFixed(2)}</span><span class="product-rating">★${p.rating}</span></div>
-        </div>
-      </div>`).join('');
-    document.getElementById('products-mini').innerHTML = miniHtml;
-    document.getElementById('products-full').innerHTML = prods.map(p => `
-      <div class="product-card">
-        <div class="product-img" style="background:${p.bg_color||'#EBF2FF'}"><span style="font-size:32px;">${p.emoji||'📦'}</span></div>
-        <div class="product-body">
-          <div class="product-name">${p.name}</div>
-          <div class="product-bottom"><span class="product-price">$${Number(p.price).toFixed(2)}</span><span class="product-rating">★${p.rating}</span></div>
-        </div>
-      </div>`).join('');
-  } catch {}
+    document.getElementById('products-mini').innerHTML = view.products.slice(0,3).map(renderProductCard).join('');
+    document.getElementById('products-full').innerHTML = view.products.map(renderProductCard).join('');
+  } catch {
+    showProductsEmptyState('Products are unavailable right now.');
+  }
 }
 
 async function loadReviews(bizId, count) {

@@ -137,6 +137,14 @@ if (!/params\.get\('id'\)/.test(businessHtml)) {
   console.error('ROUTE FAIL business.html dropped ?id= fallback')
   failed += 1
 }
+if (!/showProductsEmptyState\('No products listed yet\.'\)/.test(businessHtml) || /if \(!prods\.length\) return;/.test(businessHtml)) {
+  console.error('SERVICES FAIL empty marketplace list still leaves a blank tab')
+  failed += 1
+}
+if (!/Products are unavailable right now\./.test(businessHtml)) {
+  console.error('SERVICES FAIL marketplace error has no safe message')
+  failed += 1
+}
 
 const listingHtml = readFileSync(join(frontend, 'pages/listing.html'), 'utf8')
 if (!/\/pages\/business\?slug=/.test(listingHtml)) {
