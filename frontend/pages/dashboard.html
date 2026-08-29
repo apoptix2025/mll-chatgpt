@@ -175,6 +175,10 @@
         Jobs
         <span class="sb-badge" id="sb-jobs-badge" style="display:none"></span>
       </a>
+      <a href="voz.html" class="sb-link">
+        <svg viewBox="0 0 15 15" fill="none"><path d="M7.5 1L14 5V10L7.5 14L1 10V5L7.5 1Z" stroke="currentColor" stroke-width="1.1"/></svg>
+        La Voz Latino
+      </a>
       <a href="dashboard.html" class="sb-link">Appointments</a>
       <a href="dashboard.html" class="sb-link">Messages</a>
       <a href="affiliates.html" class="sb-link">Marketing</a>
@@ -293,7 +297,7 @@
           </div>
         </div>
         <div class="dash-card">
-          <div class="dc-head"><span class="dc-title">La Voz Latino resources</span><span class="dc-link">Explore all →</span></div>
+          <div class="dc-head"><span class="dc-title">La Voz Latino resources</span><a href="voz.html" class="dc-link">Explore all →</a></div>
           <div class="res-list" id="res-list">
             <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">Loading...</div>
           </div>
@@ -628,16 +632,22 @@ async function loadDashboard() {
       </div>`).join('');
   }
 
-  // 6. Load resources
-  const resData = await apiFetch('/api/resources') || null;
+  // 6. Load resources from the existing production API (same as voz.html)
   const resList = document.getElementById('res-list');
-  if (resData?.resources?.length) {
-    resList.innerHTML = resData.resources.slice(0,3).map(r => `
-      <div class="res-row">
-        <div class="res-ic" style="background:${r.bg_color}">${r.icon}</div>
+  if (resList) {
+    const resData = await apiFetch('/api/resources');
+    if (!resData) {
+      resList.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">Could not load resources. <a href="voz.html" style="color:var(--coral);">Try La Voz Latino →</a></div>`;
+    } else if (!resData.resources || !resData.resources.length) {
+      resList.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">No resources available. <a href="voz.html" style="color:var(--coral);">Open La Voz Latino →</a></div>`;
+    } else {
+      resList.innerHTML = resData.resources.slice(0,3).map(r => `
+      <a class="res-row" href="voz.html" style="text-decoration:none;">
+        <div class="res-ic" style="background:${r.bg_color || '#EEF0FE'}">${r.icon || '📄'}</div>
         <span class="res-lbl">${r.title}</span>
-        <span class="res-tag" style="background:${r.tag_bg};color:${r.tag_color}">${r.tag}</span>
-      </div>`).join('');
+        <span class="res-tag" style="background:${r.tag_bg || '#EEF0FE'};color:${r.tag_color || '#3C3489'}">${r.tag || r.category || ''}</span>
+      </a>`).join('');
+    }
   }
 
   // Dynamic bar chart dates — last 7 days + Today

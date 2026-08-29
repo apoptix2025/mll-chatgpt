@@ -63,6 +63,10 @@ const dashChecks = [
   ['referral empty state', /Referral code unavailable/],
   ['referral renderer', /function renderReferralCard/],
   ['referral error state', /Could not load referral details/],
+  ['La Voz Latino sidebar', /href="voz\.html"[\s\S]*La Voz Latino/],
+  ['resources API', /\/api\/resources/],
+  ['resources empty state', /No resources available/],
+  ['resources error state', /Could not load resources/],
 ]
 for (const [label, re] of dashChecks) {
   if (!re.test(dashboard)) {
@@ -74,6 +78,10 @@ if (/if \(bizRaw\?\.referral_code\)/.test(dashboard) && !/Referral code unavaila
   console.error('DASHBOARD FAIL referral card still skips empty code')
   failed += 1
 }
+if (/SBA loan programs|DACA business resources|Minority business grants/.test(dashboard)) {
+  console.error('DASHBOARD FAIL hard-coded La Voz Latino resources')
+  failed += 1
+}
 
 if (failed) {
   console.error('frontend static validation FAIL ' + failed)
@@ -82,3 +90,4 @@ if (failed) {
 console.log('frontend static validation PASS')
 console.log('  pages and config.js production mapping verified')
 console.log('  dashboard referral empty/error states verified')
+console.log('  dashboard La Voz Latino navigation and resources API verified')
