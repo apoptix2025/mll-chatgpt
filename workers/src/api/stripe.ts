@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Env } from '../index'
+import { resolveAssignedBusiness } from '../lib/billing-business'
 import { notifyPlanUpgrade, notifyPlanCancellation } from './notify'
 
 // ── Price IDs ─────────────────────────────────────────────────────────────────────
@@ -114,21 +115,15 @@ async function createCheckoutSession(request: Request, env: Env, userId: string)
     return Response.json({ error: 'Plan not available yet' }, { status: 400 })
   }
 
-  const { data: business } = await supabase
-    .from('businesses')
-    .select('id, name, stripe_customer_id')
-    .eq('owner_id', userId)
-    .single()
-
-  if (!business) {
-    return Response.json({ error: 'Business not found' }, { status: 404 })
+  const resolved = await resolveAssignedBusiness(supabase, userId)
+  if (!resolved.ok) {
+    return Response.json({ error: resolved.error }, { status: resolved.status })
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('email')
-    .eq('id', userId)
-    .single()
+  const { business, profile } = resolved
+  if (business.plan === 'admin') {
+    return Response.json({ error: 'Admin accounts do not require a paid subscription.' }, { status: 403 })
+  }
 
   const params = new URLSearchParams({
     mode: 'subscription',
@@ -332,13 +327,13 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
 async function createPortalSession(request: Request, env: Env, userId: string): Promise<Response> {
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
 
-  const { data: business } = await supabase
-    .from('businesses')
-    .select('stripe_customer_id')
-    .eq('owner_id', userId)
-    .single()
+  const resolved = await resolveAssignedBusiness(supabase, userId)
+  if (!resolved.ok) {
+    return Response.json({ error: resolved.error }, { status: resolved.status })
+  }
 
-  if (!business?.stripe_customer_id) {
+  const { business } = resolved
+  if (!business.stripe_customer_id) {
     return Response.json({ error: 'No billing account found' }, { status: 404 })
   }
 

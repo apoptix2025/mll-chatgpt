@@ -102,7 +102,7 @@
       <div class="sb-section">Account</div>
       <a href="listing.html" class="sb-link"><svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="5" r="2.5" stroke="currentColor" stroke-width="1.1"/><path d="M2 13c0-3.04 2.46-5.5 5.5-5.5S13 9.96 13 13" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>My profile</a>
       <a href="billing.html" class="sb-link active"><svg viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M1 7h13" stroke="currentColor" stroke-width="1.1"/></svg>Billing</a>
-      <a href="billing.html#plans" class="sb-link"><svg viewBox="0 0 15 15" fill="none"><path d="M7.5 3v9M3 7.5h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Upgrade plan</a>
+      <a href="billing.html#plans" class="sb-link" id="upgrade-plan-link"><svg viewBox="0 0 15 15" fill="none"><path d="M7.5 3v9M3 7.5h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Upgrade plan</a>
       <a href="login.html" class="sb-link" onclick="sessionStorage.clear();return true;" style="margin-top:8px;color:var(--ink-muted);"><svg viewBox="0 0 15 15" fill="none"><path d="M9 2H3a1 1 0 00-1 1v9a1 1 0 001 1h6M11 10l3-2.5L11 5M6 7.5h8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>Sign out</a>
     </aside>
     <main class="main">
@@ -121,7 +121,7 @@
         </div>
       </div>
       <!-- Billing toggle -->
-      <div class="billing-toggle">
+      <div class="billing-toggle" id="billing-toggle">
         <button class="bt-opt active" id="bt-monthly" onclick="setBilling('monthly')">Monthly</button>
         <button class="bt-opt" id="bt-annual" onclick="setBilling('annual')">Annual <span class="bt-save">Save 2 months</span></button>
       </div>
@@ -262,6 +262,10 @@ if (params.get('cancelled') === '1') {
 // ── Stripe Checkout ──────────────────────────────────────────
 const planLabels = { basic:'Basic', pro:'Pro', featured:'Featured', agency:'Agency' };
 async function startCheckout(plan) {
+  if (window.__mll_plan === 'admin') {
+    alert('Admin accounts do not require a paid subscription.');
+    return;
+  }
   const btn = document.getElementById('btn-' + plan);
   const origText = btn ? btn.textContent : '';
   if (btn) { btn.textContent = 'Redirecting...'; btn.disabled = true; }
@@ -304,8 +308,10 @@ async function openBillingPortal() {
 // ── Load profile + wire up buttons ──────────────────────────
 fetch(`${API}/api/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
   .then(r => r.json()).then(d => {
+    const assignedId = d?.profile?.business_id;
     const bArr = d?.profile?.businesses;
-    const b    = Array.isArray(bArr) ? bArr[0] : bArr;
+    const list = Array.isArray(bArr) ? bArr : (bArr ? [bArr] : []);
+    const b    = list.find(x => x && x.id === assignedId) || list[0];
     const f    = d?.profile?.first_name || '';
     const l    = d?.profile?.last_name  || '';
     if (!b) return;
@@ -315,6 +321,7 @@ fetch(`${API}/api/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
     document.getElementById('dash-user-name').textContent = b.name || '';
     document.getElementById('dash-user-initials').textContent = (f.charAt(0)+l.charAt(0)).toUpperCase();
     const plan = b.plan || 'free';
+    window.__mll_plan = plan;
     document.getElementById('current-plan-name').textContent = plan.charAt(0).toUpperCase()+plan.slice(1);
     const descs = {
       free:     'Upgrade to unlock full features, analytics, and more.',
@@ -322,8 +329,23 @@ fetch(`${API}/api/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
       pro:      'You have full access to all Pro features.',
       featured: 'You have full access to all Featured benefits including homepage placement.',
       agency:   'You have full access to all Agency features.',
+      admin:    'Admin accounts do not require a paid subscription.',
     };
     document.getElementById('current-plan-desc').textContent = descs[plan] || '';
+
+    if (plan === 'admin') {
+      const toggle = document.getElementById('billing-toggle');
+      const plans  = document.getElementById('plans');
+      const upLink = document.getElementById('upgrade-plan-link');
+      if (toggle) toggle.style.display = 'none';
+      if (plans)  plans.style.display = 'none';
+      if (upLink) upLink.style.display = 'none';
+      ['basic','pro','featured'].forEach(p => {
+        const btn = document.getElementById('btn-' + p);
+        if (btn) { btn.disabled = true; btn.removeAttribute('onclick'); }
+      });
+      return;
+    }
 
     // Mark current plan card
     const currentCard = document.getElementById('plan-' + plan);

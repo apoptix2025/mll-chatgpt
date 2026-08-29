@@ -117,6 +117,42 @@ if (!existsSync(optixImg)) {
   failed += 1
 }
 
+const billingHtml = readFileSync(join(frontend, 'pages/billing.html'), 'utf8')
+const billingChecks = [
+  ['admin plan copy', /Admin accounts do not require a paid subscription/],
+  ['admin checkout guard', /window\.__mll_plan === 'admin'/],
+  ['admin hides upgrade UI', /if \(plan === 'admin'\)/],
+  ['assigned business_id preference', /profile\?\.business_id/],
+]
+for (const [label, re] of billingChecks) {
+  if (!re.test(billingHtml)) {
+    console.error('BILLING FAIL ' + label)
+    failed += 1
+  }
+}
+if (/btn-basic[\s\S]*startCheckout\('basic'\)/.test(billingHtml) && !/plan === 'admin'/.test(billingHtml)) {
+  console.error('BILLING FAIL admin can still start customer checkout')
+  failed += 1
+}
+
+const loginHtml = readFileSync(join(frontend, 'pages/login.html'), 'utf8')
+if (/if \(sessionStorage\.getItem\('mll_token'\)\) window\.location\.href = 'dashboard\.html'/.test(loginHtml)) {
+  console.error('LOGIN FAIL silent redirect of existing session')
+  failed += 1
+}
+if (!/existing-session/.test(loginHtml) || !/Sign in with a different account/.test(loginHtml)) {
+  console.error('LOGIN FAIL existing session is not identified')
+  failed += 1
+}
+if (!/sessionStorage\.setItem\('mll_token', data\.access_token\)/.test(loginHtml)) {
+  console.error('LOGIN FAIL successful login does not overwrite mll_token')
+  failed += 1
+}
+if (/localStorage\.setItem\(\s*['"]mll_token['"]/.test(loginHtml)) {
+  console.error('LOGIN FAIL token stored in localStorage')
+  failed += 1
+}
+
 if (failed) {
   console.error('frontend static validation FAIL ' + failed)
   process.exit(1)
@@ -127,3 +163,5 @@ console.log('  dashboard referral empty/error states verified')
 console.log('  dashboard La Voz Latino navigation and resources API verified')
 console.log('  public nav branded as La Voz Latino')
 console.log('  AP Optix AI tech listing image mapped')
+console.log('  billing admin upgrade guard verified')
+console.log('  login existing-session handling verified')

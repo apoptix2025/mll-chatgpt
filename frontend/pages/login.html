@@ -28,6 +28,11 @@
     .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
     .divider span{font-size:12px;color:var(--ink-muted);}
     .forgot{font-size:12px;color:var(--coral);text-align:right;display:block;margin-top:-8px;margin-bottom:14px;cursor:pointer;}
+    .session-box{background:#EDE9FE;color:#5B21B6;border-radius:var(--radius-md);padding:14px 16px;font-size:13px;margin-bottom:18px;display:none;}
+    .session-box strong{display:block;color:#3B0764;margin:4px 0 10px;}
+    .session-actions{display:flex;flex-direction:column;gap:8px;}
+    .session-continue{width:100%;padding:10px;border-radius:var(--radius-md);background:var(--coral);color:#fff;font-size:13px;font-weight:500;border:none;cursor:pointer;font-family:var(--font-body);}
+    .session-switch{width:100%;padding:10px;border-radius:var(--radius-md);background:#fff;color:#5B21B6;font-size:13px;font-weight:500;border:1px solid #c4b5fd;cursor:pointer;font-family:var(--font-body);}
   </style>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-YB4TE3JXR7"></script>
@@ -66,11 +71,21 @@
       <div class="login-sub" data-en="Sign in to your mylatinolist business account" data-es="Inicia sesión en tu cuenta de negocio de mylatinolist">Sign in to your mylatinolist business account</div>
 
       <div class="error-box" id="error-box"></div>
+      <div class="session-box" id="existing-session">
+        <div data-en="You are already signed in as" data-es="Ya iniciaste sesión como">You are already signed in as</div>
+        <strong id="existing-session-label">your account</strong>
+        <div class="session-actions">
+          <button type="button" class="session-continue" id="continue-session-btn">Continue to dashboard →</button>
+          <button type="button" class="session-switch" id="switch-account-btn">Sign in with a different account</button>
+        </div>
+      </div>
 
+      <div id="login-form-fields">
       <div class="field"><label data-en="Email address" data-es="Correo electrónico">Email address</label><input id="l-email" type="email" placeholder="you@yourbusiness.com" data-en-ph="you@yourbusiness.com" data-es-ph="tu@tunegocio.com" autocomplete="email"></div>
       <div class="field"><label data-en="Password" data-es="Contraseña">Password</label><input id="l-pw" type="password" placeholder="Your password" data-en-ph="Your password" data-es-ph="Tu contraseña" autocomplete="current-password"></div>
       <a class="forgot" onclick="handleForgot()" data-en="Forgot your password?" data-es="¿Olvidaste tu contraseña?">Forgot your password?</a>
       <button class="login-btn" id="login-btn" onclick="handleLogin()">Sign in →</button>
+      </div>
 
       <div class="divider"><span data-en="or" data-es="o">or</span></div>
       <div class="login-footer">
@@ -82,8 +97,55 @@
 <script>
 const API = window.MLL_CONFIG.API_URL;
 
-// If already logged in go to dashboard
-if (sessionStorage.getItem('mll_token')) window.location.href = 'dashboard.html';
+function clearAuthSession() {
+  sessionStorage.removeItem('mll_token');
+  sessionStorage.removeItem('mll_user_id');
+  sessionStorage.removeItem('mll_business_id');
+}
+
+function showExistingSession(label) {
+  const box = document.getElementById('existing-session');
+  const fields = document.getElementById('login-form-fields');
+  document.getElementById('existing-session-label').textContent = label;
+  box.style.display = 'block';
+  if (fields) fields.style.display = 'none';
+}
+
+function showLoginForm() {
+  const box = document.getElementById('existing-session');
+  const fields = document.getElementById('login-form-fields');
+  if (box) box.style.display = 'none';
+  if (fields) fields.style.display = 'block';
+}
+
+(function identifyExistingSession() {
+  const existing = sessionStorage.getItem('mll_token');
+  if (!existing) return;
+  fetch(`${API}/api/auth/me`, { headers: { Authorization: `Bearer ${existing}` } })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(d => {
+      const email = d?.user?.email || d?.profile?.email || '';
+      const assignedId = d?.profile?.business_id;
+      const bArr = d?.profile?.businesses;
+      const list = Array.isArray(bArr) ? bArr : (bArr ? [bArr] : []);
+      const biz = list.find(x => x && x.id === assignedId) || list[0];
+      const bizName = biz?.name || '';
+      showExistingSession(bizName && email ? `${email} · ${bizName}` : (email || bizName || 'your account'));
+    })
+    .catch(() => {
+      clearAuthSession();
+      showLoginForm();
+    });
+})();
+
+document.getElementById('continue-session-btn').addEventListener('click', () => {
+  window.location.href = 'dashboard.html';
+});
+document.getElementById('switch-account-btn').addEventListener('click', () => {
+  clearAuthSession();
+  showLoginForm();
+  document.getElementById('l-email').focus();
+});
 
 document.getElementById('l-pw').addEventListener('keydown', e => {
   if (e.key === 'Enter') handleLogin();
@@ -121,6 +183,7 @@ async function handleLogin() {
 
     sessionStorage.setItem('mll_token', data.access_token);
     if (data.user?.id) sessionStorage.setItem('mll_user_id', data.user.id);
+    else sessionStorage.removeItem('mll_user_id');
     window.location.href = 'dashboard.html';
 
   } catch {

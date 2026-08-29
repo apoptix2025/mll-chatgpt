@@ -8,6 +8,7 @@
     "deploy:staging": "npm run check:staging && wrangler deploy --env staging",
     "deploy:production": "wrangler deploy --env production",
     "type-check": "tsc --noEmit",
+    "test:billing": "node ../scripts/test-billing-business.mjs",
     "check:staging": "node scripts/check-staging-safety.mjs"
   },
   "dependencies": {
