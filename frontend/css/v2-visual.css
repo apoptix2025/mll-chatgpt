@@ -536,8 +536,9 @@ body:has(.v2-topnav) { padding-top: 0 !important; }
 .prof-identity {
   display: flex;
   gap: 20px;
-  align-items: flex-end;
-  margin-top: -56px;
+  align-items: flex-start;
+  margin-top: 0;
+  padding-top: 20px;
   position: relative;
   z-index: 3;
 }
@@ -549,6 +550,7 @@ body:has(.v2-topnav) { padding-top: 0 !important; }
   background: #fff;
   box-shadow: var(--shadow-md);
   flex-shrink: 0;
+  margin-top: -72px;
 }
 .prof-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .prof-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
@@ -565,6 +567,13 @@ body:has(.v2-topnav) { padding-top: 0 !important; }
 .prof-act.primary { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
 .biz-tabs { background: #fff; }
 .biz-tab.active { color: var(--blue-600); border-bottom-color: var(--blue-600); }
+
+@media (max-width: 768px) {
+  .prof-banner { height: 220px; }
+  .prof-identity { padding-top: 16px; gap: 14px; }
+  .prof-avatar { width: 88px; height: 88px; margin-top: -56px; }
+  .prof-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
 
 /* Listing wizard */
 .wiz-layout {
