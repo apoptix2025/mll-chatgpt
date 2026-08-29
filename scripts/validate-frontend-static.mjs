@@ -27,6 +27,7 @@ const pages = [
   'pages/business.html',
   'pages/reset-password.html',
   'js/config.js',
+  'js/current-business.js',
   'css/main.css',
 ]
 
@@ -212,6 +213,42 @@ if (!/MRR unavailable/.test(healthHtml)) {
   failed += 1
 }
 
+const listingSrc = readFileSync(join(frontend, 'pages/listing.html'), 'utf8')
+const currentBiz = readFileSync(join(frontend, 'js/current-business.js'), 'utf8')
+if (!/resolveAssignedBusiness/.test(currentBiz) || !/profile\.business_id/.test(currentBiz)) {
+  console.error('DASH FAIL current-business helper does not use profile.business_id')
+  failed += 1
+}
+if (/businesses\[0\]/.test(currentBiz) || /\|\| list\[0\]/.test(currentBiz)) {
+  console.error('DASH FAIL current-business helper still falls back to first business')
+  failed += 1
+}
+if (!/MLL_CURRENT_BUSINESS\.resolveAssignedBusiness/.test(dashboard) || !/MLL_CURRENT_BUSINESS\.resolveAssignedBusiness/.test(listingSrc)) {
+  console.error('DASH FAIL dashboard/listing do not use assigned-business helper')
+  failed += 1
+}
+if (/businesses\[0\]/.test(dashboard) || /bArr\[0\]/.test(dashboard) || /businesses\[0\]/.test(listingSrc) || /bArr\[0\]/.test(listingSrc)) {
+  console.error('DASH FAIL dashboard/listing still use businesses[0]')
+  failed += 1
+}
+if (/href="dashboard\.html" class="sb-link">Appointments/.test(dashboard) || /href="dashboard\.html#leads"/.test(dashboard)) {
+  console.error('DASH FAIL dead modules still route to dashboard')
+  failed += 1
+}
+if (!/sb-soon[\s\S]*Coming soon/.test(dashboard)) {
+  console.error('DASH FAIL coming soon modules missing')
+  failed += 1
+}
+const dashSidebar = dashboard.split('<aside class="sidebar">')[1]?.split('</aside>')[0] || ''
+if ((dashSidebar.match(/href="billing\.html"/g) || []).length !== 1) {
+  console.error('DASH FAIL billing sidebar destination is not unique')
+  failed += 1
+}
+if (!/injectAdminSidebarLinks/.test(dashboard) || !/health\.html/.test(currentBiz)) {
+  console.error('DASH FAIL admin/health nav is not helper-gated')
+  failed += 1
+}
+
 if (failed) {
   console.error('frontend static validation FAIL ' + failed)
   process.exit(1)
@@ -226,3 +263,4 @@ console.log('  billing admin upgrade guard verified')
 console.log('  login existing-session handling verified')
 console.log('  business profile canonical /pages/business?slug= routing verified')
 console.log('  health dashboard uses protected /api/admin/health')
+console.log('  dashboard/listing assigned-business context verified')

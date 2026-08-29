@@ -606,6 +606,27 @@ button { cursor: pointer; font-family: inherit; }
   .search-select { flex: 1; }
   .voz-right { flex-direction: column; }
 }
+.sb-link.sb-soon {
+  opacity: 0.55;
+  cursor: default;
+  pointer-events: none;
+  color: var(--ink-muted);
+}
+.sb-link.sb-soon:hover {
+  background: transparent;
+  color: var(--ink-muted);
+}
+.sb-soon-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  background: var(--surface-3, #f3f4f6);
+  color: var(--ink-muted);
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
 @media (max-width: 1024px) {
   /* Dashboard mobile sidebar + back bar */
   .dash-layout { grid-template-columns: 1fr !important; }

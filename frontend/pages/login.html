@@ -44,6 +44,7 @@
   </script>
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
+  <script src="/js/current-business.js"></script>
 </head>
 <body>
   <nav class="nav scrolled">
@@ -125,10 +126,7 @@ function showLoginForm() {
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(d => {
       const email = d?.user?.email || d?.profile?.email || '';
-      const assignedId = d?.profile?.business_id;
-      const bArr = d?.profile?.businesses;
-      const list = Array.isArray(bArr) ? bArr : (bArr ? [bArr] : []);
-      const biz = list.find(x => x && x.id === assignedId) || list[0];
+      const biz = window.MLL_CURRENT_BUSINESS.resolveAssignedBusiness(d).business;
       const bizName = biz?.name || '';
       showExistingSession(bizName && email ? `${email} · ${bizName}` : (email || bizName || 'your account'));
     })
