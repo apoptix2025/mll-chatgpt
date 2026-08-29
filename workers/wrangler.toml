@@ -131,6 +131,24 @@ FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
 
 
+# ── Production API route ────────────────────────────────────
+# Required on [env.production]; top-level [[routes]] apply to the
+# default worker name (mll-api), not mll-api-production.
+
+[[env.production.routes]]
+pattern = "api.mylatinolist.io/*"
+zone_name = "mylatinolist.io"
+
+
+# ── Production cron (same schedule as current production) ───
+
+[env.production.triggers]
+crons = [
+  "0 10 * * *",
+  "0 9 * * 1"
+]
+
+
 # ── Production KV ───────────────────────────────────────────
 
 [[env.production.kv_namespaces]]
