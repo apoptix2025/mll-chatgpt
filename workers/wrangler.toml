@@ -10,7 +10,7 @@ compatibility_flags = ["nodejs_compat"]
 # PRODUCTION
 #   Frontend:  https://mylatinolist.io
 #   API:       https://api.mylatinolist.io
-#   Worker:    mll-api-production
+#   Worker:    mll-api
 #   Supabase:  Production
 #   KV:        Production
 #   R2:        mll-media
@@ -100,10 +100,7 @@ SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
 # ============================================================
 
 [triggers]
-crons = [
-  "0 10 * * *",
-  "0 9 * * 1"
-]
+crons = []
 
 
 # ============================================================
@@ -120,7 +117,7 @@ zone_name = "mylatinolist.io"
 # ============================================================
 
 [env.production]
-name = "mll-api-production"
+name = "mll-api"
 
 
 # ── Production Variables ────────────────────────────────────
@@ -132,8 +129,9 @@ SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
 
 
 # ── Production API route ────────────────────────────────────
-# Required on [env.production]; top-level [[routes]] apply to the
-# default worker name (mll-api), not mll-api-production.
+# Same hostname already owned by Worker mll-api. Deploy --env
+# production onto that existing Worker; do not create a second
+# Worker name for this route.
 
 [[env.production.routes]]
 pattern = "api.mylatinolist.io/*"
