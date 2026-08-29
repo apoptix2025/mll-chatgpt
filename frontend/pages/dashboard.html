@@ -26,9 +26,11 @@
     .dash-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
     .dash-greeting { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--navy-900, var(--ink)); letter-spacing: -0.03em; }
     .dash-sub { font-size: 13px; color: var(--ink-muted); margin-top: 3px; }
-    .hdr-btns { display: flex; gap: 8px; }
+    .hdr-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .btn-sm { font-size: 12px; padding: 8px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-mid); background: #fff; color: var(--ink-soft); cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
     .btn-sm:hover { background: var(--surface-2); }
+    .btn-sm:disabled, .btn-sm.btn-soon { opacity: 0.55; cursor: default; pointer-events: none; }
+    .btn-sm:disabled:hover, .btn-sm.btn-soon:hover { background: #fff; }
     .btn-sm-primary { font-size: 12px; padding: 8px 16px; border-radius: var(--radius-sm); border: none; background: var(--coral); color: #fff; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
     .btn-sm-primary:hover { background: var(--coral-dark); }
     .profile-bar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -97,6 +99,8 @@
       .sidebar { display: none; }
       .kpi-row { grid-template-columns: 1fr 1fr; }
       .dash-grid { grid-template-columns: 1fr; }
+      .dash-header { flex-direction: column; gap: 12px; }
+      .hdr-btns { justify-content: flex-start; }
     }
   </style>
   <!-- Google tag (gtag.js) -->
@@ -193,7 +197,7 @@
           <div class="dash-sub" id="dash-sub">Fetching your business data...</div>
         </div>
         <div class="hdr-btns">
-          <button class="btn-sm">Export report</button>
+          <button type="button" class="btn-sm btn-soon" disabled aria-disabled="true">Export report · Coming soon</button>
           <button class="btn-sm-primary" onclick="window.location='billing.html'">Upgrade to Featured →</button>
         </div>
       </div>
@@ -202,7 +206,7 @@
         <div class="kpi">
           <div class="kpi-lbl" data-en="Profile Views" data-es="Vistas del perfil">Profile Views</div>
           <div class="kpi-num" id="kpi-views" style="color:var(--coral);">—</div>
-          <div class="kpi-trend kpi-nt" id="kpi-views-trend">Loading...</div>
+          <div class="kpi-trend kpi-nt" id="kpi-views-trend">Profile analytics coming soon</div>
         </div>
         <div class="kpi">
           <div class="kpi-lbl" data-en="New Leads" data-es="Nuevos contactos">New Leads</div>
@@ -211,8 +215,8 @@
         </div>
         <div class="kpi">
           <div class="kpi-lbl" data-en="Marketplace Sales" data-es="Ventas del mercado">Marketplace Sales</div>
-          <div class="kpi-num" id="kpi-sales" style="color:var(--teal);">$0</div>
-          <div class="kpi-trend kpi-up">From listed products</div>
+          <div class="kpi-num" id="kpi-sales" style="color:var(--teal);">—</div>
+          <div class="kpi-trend kpi-nt" id="kpi-sales-trend">Marketplace sales tracking coming soon</div>
         </div>
         <div class="kpi">
           <div class="kpi-lbl" data-en="Average Rating" data-es="Calificación promedio">Average Rating</div>
@@ -258,7 +262,7 @@
 
       <div class="dash-grid">
         <div class="dash-card">
-          <div class="dc-head"><span class="dc-title">Marketplace products</span><span class="dc-link">+ Add product</span></div>
+          <div class="dc-head"><span class="dc-title">Marketplace products</span><a href="marketplace.html" class="dc-link">+ Add product</a></div>
           <div class="prod-list" id="prod-list">
             <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">Loading...</div>
           </div>
@@ -273,7 +277,7 @@
 
       <div class="dash-grid">
         <div class="dash-card">
-          <div class="dc-head"><span class="dc-title">Jobs board</span><span class="dc-link">+ Post job</span></div>
+          <div class="dc-head"><span class="dc-title">Jobs board</span><a href="jobs.html" class="dc-link">+ Post job</a></div>
           <div class="job-list-dash" id="job-list-dash">
             <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">Loading...</div>
           </div>
@@ -398,6 +402,12 @@ function greet(lang) {
   if (h < 12) return es ? 'Buenos días' : 'Hello';
   if (h < 17) return es ? 'Buenas tardes' : 'Hello';
   return es ? 'Buenas noches' : 'Hello';
+}
+
+function escapeDashText(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+  });
 }
 
 function timeAgo(d) {
@@ -558,24 +568,48 @@ async function loadDashboard() {
     `<span class="pb-step ${s.done?'done':'todo'}">${s.label}</span>`
   ).join('');
 
-  // 2. Load leads count
+  // 2. Load leads count + recent rows from the real leads API
   const leadsData = await apiFetch(`/api/leads?business_id=${biz?.id}`);
   const leadsCount = leadsData?.total || 0;
+  const leads = Array.isArray(leadsData?.leads) ? leadsData.leads : [];
   document.getElementById('kpi-leads').textContent = leadsCount;
-  document.getElementById('kpi-leads-trend').textContent = leadsCount > 0 ? `↑ ${leadsCount} total` : 'No leads yet';
+  document.getElementById('kpi-leads-trend').textContent = leadsCount > 0 ? `${leadsCount} total` : 'No leads yet';
 
-  // 3. Load products
+  const leadList = document.getElementById('lead-list');
+  if (leadList) {
+    if (leads.length) {
+      leadList.innerHTML = leads.slice(0, 3).map(function (l) {
+        const name = escapeDashText(l.name || 'A visitor');
+        const action = l.action === 'call' ? 'Phone call'
+          : l.action === 'email' ? 'Email inquiry'
+          : l.action === 'directions' ? 'Directions'
+          : l.action === 'website' ? 'Website click'
+          : 'Inquiry';
+        const initial = name.charAt(0).toUpperCase();
+        return `<div class="lead-row">
+          <div class="lead-av" style="background:var(--coral-light);color:var(--coral-dark);">${initial}</div>
+          <div><div class="lead-nm">${name}</div><div class="lead-ac">${action}</div></div>
+          <div class="lead-tm">${timeAgo(l.created_at)}</div>
+        </div>`;
+      }).join('');
+    } else {
+      leadList.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">No leads yet.</div>`;
+    }
+  }
+
+  // 3. Load products — listings only; sales_count is not a real order source
   const prodData = await apiFetch('/api/marketplace?page=1');
   const myProducts = prodData?.products?.filter(p => p.business_id === biz?.id) || [];
-  const salesTotal = myProducts.reduce((sum, p) => sum + (p.sales_count * p.price), 0);
-  document.getElementById('kpi-sales').textContent = salesTotal > 0 ? '$' + Math.round(salesTotal).toLocaleString() : '$0';
+  document.getElementById('kpi-sales').textContent = '—';
+  const salesTrend = document.getElementById('kpi-sales-trend');
+  if (salesTrend) salesTrend.textContent = 'Marketplace sales tracking coming soon';
 
   const prodList = document.getElementById('prod-list');
   if (myProducts.length) {
     prodList.innerHTML = myProducts.slice(0,3).map(p => `
       <div class="prod-row">
         <div class="prod-ic">${p.emoji || '📦'}</div>
-        <div><div class="prod-nm">${p.name}</div><div class="prod-sold">${p.sales_count} sold this month</div></div>
+        <div><div class="prod-nm">${escapeDashText(p.name)}</div><div class="prod-sold">Listed in marketplace</div></div>
         <div class="prod-price">$${Number(p.price).toFixed(2)}</div>
       </div>`).join('');
   } else {
@@ -605,7 +639,7 @@ async function loadDashboard() {
       <div class="af-row">
         <div class="af-ic" style="background:${a.bg_color}">${a.emoji}</div>
         <div><div class="af-nm">${a.name}</div><div class="af-earn">${a.commission_text}</div></div>
-        <span class="af-status" style="background:${a.badge_bg};color:${a.badge_color};cursor:pointer">Join →</span>
+        <a href="affiliates.html" class="af-status" style="background:${a.badge_bg};color:${a.badge_color};text-decoration:none;">View →</a>
       </div>`).join('');
   }
 
@@ -627,19 +661,8 @@ async function loadDashboard() {
     }
   }
 
-  // Dynamic bar chart dates — last 7 days + Today
-  const labelsEl = document.getElementById('bc-labels');
-  if (labelsEl) {
-    const days = [];
-    for (let i = 7; i >= 1; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i);
-      days.push(d.toLocaleDateString('en-US', { month:'short', day:'numeric' }));
-    }
-    days.push('Today');
-    labelsEl.innerHTML = days.map(d => `<span>${d}</span>`).join('');
-  }
   document.getElementById('kpi-views').textContent    = '—';
-  document.getElementById('kpi-views-trend').textContent = 'Analytics coming soon';
+  document.getElementById('kpi-views-trend').textContent = 'Profile analytics coming soon';
   const ratingEl = document.getElementById('kpi-rating');
   const ratingTrend = document.getElementById('kpi-rating-trend');
   if (ratingEl) ratingEl.textContent = biz?.rating ? Number(biz.rating).toFixed(1) : '—';

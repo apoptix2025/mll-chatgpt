@@ -263,6 +263,14 @@ if (!/sb-soon[\s\S]*Coming soon/.test(dashboard)) {
   console.error('DASH FAIL coming soon modules missing')
   failed += 1
 }
+if (!/Export report · Coming soon/.test(dashboard) || !/disabled aria-disabled="true"/.test(dashboard)) {
+  console.error('DASH FAIL export control is still actionable')
+  failed += 1
+}
+if (/1,284|\$830/.test(dashboard) || /sales_count \* p\.price/.test(dashboard)) {
+  console.error('DASH FAIL fake dashboard metrics remain')
+  failed += 1
+}
 const dashSidebar = dashboard.split('<aside class="sidebar">')[1]?.split('</aside>')[0] || ''
 if ((dashSidebar.match(/href="billing\.html"/g) || []).length !== 1) {
   console.error('DASH FAIL billing sidebar destination is not unique')
