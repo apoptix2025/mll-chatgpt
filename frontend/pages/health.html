@@ -309,7 +309,11 @@ async function runCheck() {
 
   try {
     const t0  = Date.now();
-    const res  = await fetch(`${API}/api/health`);
+    const res  = await fetch(`${API}/api/admin/health`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.status === 401) { window.location.href = 'login.html'; return; }
+    if (res.status === 403) { window.location.href = 'dashboard.html'; return; }
     const data = await res.json();
     render(data, Date.now() - t0);
     checkClientGA4();
@@ -342,8 +346,8 @@ function setMeter(id, pct) {
 
 // ── Render ───────────────────────────────────────────────────
 function render(data, roundtrip) {
-  const ts = new Date().toLocaleTimeString();
-  document.getElementById('last-checked').textContent = `Last checked: ${ts}`;
+  const ts = data.timestamp ? new Date(data.timestamp).toLocaleString() : '';
+  document.getElementById('last-checked').textContent = ts ? `Last checked: ${ts}` : '';
 
   // Overall banner
   const banner = document.getElementById('overall-banner');
@@ -402,14 +406,26 @@ function renderCost(c) {
   document.getElementById('cost-monthly').textContent = fmt$(c.current_monthly_cost);
   document.getElementById('cost-monthly-sub').textContent = `base: Google WS + domain`;
 
-  document.getElementById('cost-mrr').textContent = fmt$(c.mrr);
-  document.getElementById('cost-mrr-sub').textContent = `${c.plans.pro} pro + ${c.plans.featured} featured`;
+  if (c.mrr_available && c.mrr != null) {
+    document.getElementById('cost-mrr').textContent = fmt$(c.mrr);
+    document.getElementById('cost-mrr-sub').textContent = `${c.paid_subscriptions || 0} verified Stripe subscriptions`;
+  } else {
+    document.getElementById('cost-mrr').textContent = 'Unavailable';
+    document.getElementById('cost-mrr-sub').textContent = 'No verified paid subscriptions';
+  }
 
   const net = c.net_monthly;
   const netEl = document.getElementById('cost-net');
-  netEl.textContent = (net >= 0 ? '+' : '') + fmt$(net);
-  netEl.style.color = net >= 0 ? '#15803d' : '#dc2626';
-  document.getElementById('cost-card-net').className = 'cost-card ' + (net >= 0 ? 'positive' : 'negative');
+  if (net == null) {
+    netEl.textContent = 'Unavailable';
+    netEl.style.color = '';
+    document.getElementById('cost-card-net').className = 'cost-card';
+    document.getElementById('cost-net-sub').textContent = 'Requires verified MRR';
+  } else {
+    netEl.textContent = (net >= 0 ? '+' : '') + fmt$(net);
+    netEl.style.color = net >= 0 ? '#15803d' : '#dc2626';
+    document.getElementById('cost-card-net').className = 'cost-card ' + (net >= 0 ? 'positive' : 'negative');
+  }
 
   // Budget status card
   const bs = c.budget_status;
@@ -436,10 +452,10 @@ function renderCost(c) {
   document.getElementById('meter-workers-val').textContent = `~${u.workers_req_day_est.toLocaleString()} / ${u.workers_req_day_limit.toLocaleString()} /day`;
 
   // Revenue breakdown
-  document.getElementById('rev-free').textContent     = `${c.plans.free} users · $0/mo`;
-  document.getElementById('rev-pro').textContent      = `${c.plans.pro} users · ${fmt$(c.plans.pro * 39)}/mo`;
-  document.getElementById('rev-featured').textContent = `${c.plans.featured} users · ${fmt$(c.plans.featured * 89)}/mo`;
-  document.getElementById('rev-total').textContent    = `${fmt$(c.mrr)}/mo`;
+  document.getElementById('rev-free').textContent     = `${c.plans.free} listings · not revenue`;
+  document.getElementById('rev-pro').textContent      = `${c.plans.pro} listings · not counted as MRR`;
+  document.getElementById('rev-featured').textContent = `${c.plans.featured} listings · not counted as MRR`;
+  document.getElementById('rev-total').textContent    = c.mrr_available && c.mrr != null ? `${fmt$(c.mrr)}/mo` : 'MRR unavailable';
 
   // Alerts
   const alertsList = document.getElementById('alerts-list');

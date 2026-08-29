@@ -52,7 +52,7 @@ export default {
 
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
-      return withCors(new Response(null, { status: 204 }), env)
+      return withCors(new Response(null, { status: 204 }), request)
     }
 
     try {
@@ -61,13 +61,13 @@ export default {
       // ── Stripe webhook — MUST be before auth, needs raw body ──
       if (path === '/api/stripe/webhook' && request.method === 'POST') {
         response = await handleStripe(request, env, ctx)
-        return withCors(response, env)
+        return withCors(response, request)
       }
 
       // ── Admin routes (auth enforced inside handler) ────────
       if (path === '/api/admin/test-drip' && request.method === 'POST') {
         response = await handleTestDrip(request, env)
-        return withCors(response, env)
+        return withCors(response, request)
       }
       if (path.startsWith('/api/admin'))         response = await handleAuth(request, env)
 
@@ -105,7 +105,7 @@ export default {
         if (!authResult.ok) {
           return withCors(
             Response.json({ error: 'Unauthorized' }, { status: 401 }),
-            env
+            request
           )
         }
 
@@ -119,13 +119,13 @@ export default {
         else response = Response.json({ error: 'Not found' }, { status: 404 })
       }
 
-      return withCors(response, env)
+      return withCors(response, request)
 
     } catch (err) {
       console.error('Worker error:', err)
       return withCors(
         Response.json({ error: 'Internal server error' }, { status: 500 }),
-        env
+        request
       )
     }
   }

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Env } from '../index'
+import { handleDetailedHealth } from './health'
 
 export const ADMIN_EMAILS = ['info@apoptix.io']
 
@@ -132,11 +133,19 @@ export async function handleAuth(request: Request, env: Env): Promise<Response> 
 
     const anonSupabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY)
     const { data: { user }, error: userError } = await anonSupabase.auth.getUser(token)
-    if (userError || !user || !isAdmin(user.email)) {
+    if (userError || !user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if (!isAdmin(user.email)) {
       return Response.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const serviceSupabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
+
+    // GET /api/admin/health
+    if (url.pathname === '/api/admin/health' && request.method === 'GET') {
+      return handleDetailedHealth(env)
+    }
 
     // POST /api/admin/set-plan
     if (url.pathname === '/api/admin/set-plan' && request.method === 'POST') {

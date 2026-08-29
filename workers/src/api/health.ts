@@ -12,10 +12,7 @@ const LIMITS = {
   workers_req_day:   100_000,
 }
 
-// Pricing
-const PRICE_PRO      = 39
-const PRICE_FEATURED = 89
-const BASE_COST      = 7.25   // Google Workspace $6 + domain $1.25
+const BASE_COST = 7.25   // Google Workspace $6 + domain $1.25
 
 interface ServiceResult {
   status: 'healthy' | 'degraded' | 'down'
@@ -26,8 +23,10 @@ interface ServiceResult {
 interface CostEstimate {
   base_monthly:          number
   current_monthly_cost:  number
-  mrr:                   number
-  net_monthly:           number
+  mrr:                   number | null
+  mrr_available:         boolean
+  paid_subscriptions:    number
+  net_monthly:           number | null
   plans: {
     free:     number
     pro:      number
@@ -71,11 +70,19 @@ interface HealthResponse {
   env_vars: Record<string, boolean>
 }
 
-export async function handleHealth(request: Request, env: Env): Promise<Response> {
+export async function handleHealth(request: Request, _env: Env): Promise<Response> {
   if (request.method !== 'GET') {
     return Response.json({ error: 'Method not allowed' }, { status: 405 })
   }
 
+  return Response.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    version: VERSION,
+  })
+}
+
+export async function handleDetailedHealth(env: Env): Promise<Response> {
   const t0 = Date.now()
 
   // ── Worker ───────────────────────────────────────────────
@@ -90,6 +97,7 @@ export async function handleHealth(request: Request, env: Env): Promise<Response
     leads:      null as number | null,
   }
   let planCounts = { free: 0, pro: 0, featured: 0 }
+  let paidSubscriptions = 0
 
   try {
     const sb = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
@@ -103,13 +111,14 @@ export async function handleHealth(request: Request, env: Env): Promise<Response
     } else {
       supabase = { status: 'healthy', latency_ms: latency }
 
-      const [bizRes, profRes, revRes, leadRes, proRes, featuredRes] = await Promise.all([
+      const [bizRes, profRes, revRes, leadRes, proRes, featuredRes, paidRes] = await Promise.all([
         sb.from('businesses').select('*', { count: 'exact', head: true }),
         sb.from('profiles').select('*',   { count: 'exact', head: true }),
         sb.from('reviews').select('*',    { count: 'exact', head: true }),
         sb.from('leads').select('*',      { count: 'exact', head: true }),
         sb.from('businesses').select('*', { count: 'exact', head: true }).eq('plan', 'pro'),
         sb.from('businesses').select('*', { count: 'exact', head: true }).eq('plan', 'featured'),
+        sb.from('businesses').select('*', { count: 'exact', head: true }).not('stripe_subscription_id', 'is', null),
       ])
 
       stats.businesses = bizRes.count  ?? null
@@ -121,6 +130,7 @@ export async function handleHealth(request: Request, env: Env): Promise<Response
       const pro      = proRes.count ?? 0
       const featured = featuredRes.count ?? 0
       planCounts = { pro, featured, free: totalBiz - pro - featured }
+      paidSubscriptions = paidRes.count ?? 0
     }
   } catch (e) {
     supabase = { status: 'down', detail: String(e) }
@@ -191,9 +201,10 @@ export async function handleHealth(request: Request, env: Env): Promise<Response
   // Workers: ~10 req/user/day estimate
   const workersEst = profCount * 10
 
-  const mrr         = planCounts.pro * PRICE_PRO + planCounts.featured * PRICE_FEATURED
   const currentCost = BASE_COST
-  const netMonthly  = mrr - currentCost
+  const mrrAvailable = false
+  const mrr: number | null = null
+  const netMonthly: number | null = null
 
   const warnings: string[] = []
   const dbPct      = dbSizeMB  / LIMITS.supabase_db_mb
@@ -223,6 +234,8 @@ export async function handleHealth(request: Request, env: Env): Promise<Response
     base_monthly:         BASE_COST,
     current_monthly_cost: currentCost,
     mrr,
+    mrr_available:        mrrAvailable,
+    paid_subscriptions:   paidSubscriptions,
     net_monthly:          netMonthly,
     plans:                planCounts,
     usage: {

@@ -194,6 +194,24 @@ if (/localStorage\.setItem\(\s*['"]mll_token['"]/.test(loginHtml)) {
   failed += 1
 }
 
+const healthHtml = readFileSync(join(frontend, 'pages/health.html'), 'utf8')
+if (!/\/api\/admin\/health/.test(healthHtml)) {
+  console.error('HEALTH FAIL dashboard does not call protected /api/admin/health')
+  failed += 1
+}
+if (/fetch\(`\$\{API\}\/api\/health`\)/.test(healthHtml)) {
+  console.error('HEALTH FAIL dashboard still loads public /api/health for details')
+  failed += 1
+}
+if (!/data\.timestamp/.test(healthHtml)) {
+  console.error('HEALTH FAIL dashboard does not display API timestamp')
+  failed += 1
+}
+if (!/MRR unavailable/.test(healthHtml)) {
+  console.error('HEALTH FAIL dashboard still treats listing plans as MRR')
+  failed += 1
+}
+
 if (failed) {
   console.error('frontend static validation FAIL ' + failed)
   process.exit(1)
@@ -207,3 +225,4 @@ console.log('  AP Optix AI tech listing image mapped')
 console.log('  billing admin upgrade guard verified')
 console.log('  login existing-session handling verified')
 console.log('  business profile canonical /pages/business?slug= routing verified')
+console.log('  health dashboard uses protected /api/admin/health')

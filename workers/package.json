@@ -9,6 +9,7 @@
     "deploy:production": "wrangler deploy --env production",
     "type-check": "tsc --noEmit",
     "test:billing": "node ../scripts/test-billing-business.mjs",
+    "test:cors-health": "node ../scripts/test-cors-health.mjs",
     "check:staging": "node scripts/check-staging-safety.mjs"
   },
   "dependencies": {
