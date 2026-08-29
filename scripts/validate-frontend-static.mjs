@@ -83,6 +83,25 @@ if (/SBA loan programs|DACA business resources|Minority business grants/.test(da
   failed += 1
 }
 
+const indexHtml = readFileSync(join(frontend, 'index.html'), 'utf8')
+const navJs = readFileSync(join(frontend, 'js/nav.js'), 'utf8')
+if (!/href="pages\/voz\.html"[^>]*>La Voz Latino/.test(indexHtml)) {
+  console.error('NAV FAIL homepage public label is not La Voz Latino')
+  failed += 1
+}
+if (/href="pages\/voz\.html"[^>]*>Resources</.test(indexHtml) || /data-en="Resources"[\s\S]{0,40}voz\.html/.test(indexHtml)) {
+  console.error('NAV FAIL homepage still uses Resources as voz dest label')
+  failed += 1
+}
+if (!/voz\.html" data-en="La Voz Latino"/.test(navJs)) {
+  console.error('NAV FAIL shared nav.js label is not La Voz Latino')
+  failed += 1
+}
+if (/voz\.html" data-en="Resources"/.test(navJs)) {
+  console.error('NAV FAIL shared nav.js still uses Resources label')
+  failed += 1
+}
+
 if (failed) {
   console.error('frontend static validation FAIL ' + failed)
   process.exit(1)
@@ -91,3 +110,4 @@ console.log('frontend static validation PASS')
 console.log('  pages and config.js production mapping verified')
 console.log('  dashboard referral empty/error states verified')
 console.log('  dashboard La Voz Latino navigation and resources API verified')
+console.log('  public nav branded as La Voz Latino')

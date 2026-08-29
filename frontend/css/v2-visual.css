@@ -46,7 +46,8 @@ body:has(.v2-topnav) { padding-top: 0 !important; }
   font-size: 14px;
   font-weight: 600;
   color: var(--text-secondary);
-  padding: 8px 12px;
+  padding: 8px 10px;
+  white-space: nowrap;
   border-radius: 999px;
   transition: background 0.15s, color 0.15s;
 }
@@ -458,16 +459,20 @@ body:has(.v2-topnav) { padding-top: 0 !important; }
 
 .v2-stars { color: #f59e0b; font-weight: 700; }
 
-@media (max-width: 1024px) {
-  .v2-hero-grid, .v2-community, .wiz-layout, .prof-hero-grid { grid-template-columns: 1fr; }
-  .v2-hero-photo img { height: 340px; }
-  .v2-grid-4, .v2-featured-row, .dir-grid { grid-template-columns: repeat(2, 1fr) !important; }
-  .v2-actions { grid-template-columns: 1fr 1fr; }
+@media (max-width: 1100px) {
+  /* Longer "La Voz Latino" label: collapse desktop links before they crowd For Business. */
   .v2-links,
   .v2-top-actions .v2-btn-ghost,
   .v2-top-actions .v2-btn-primary,
   .v2-icon-btn { display: none; }
   .v2-hamburger { display: flex; }
+}
+
+@media (max-width: 1024px) {
+  .v2-hero-grid, .v2-community, .wiz-layout, .prof-hero-grid { grid-template-columns: 1fr; }
+  .v2-hero-photo img { height: 340px; }
+  .v2-grid-4, .v2-featured-row, .dir-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .v2-actions { grid-template-columns: 1fr 1fr; }
   .cat-tiles { grid-template-columns: repeat(2, 1fr); }
 }
 

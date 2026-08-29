@@ -87,7 +87,7 @@
           '<a href="' + p + 'directory.html" data-en="Discover" data-es="Descubrir">Discover</a>' +
           '<a href="' + p + 'jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>' +
           '<a href="' + p + 'marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>' +
-          '<a href="' + p + 'voz.html" data-en="Resources" data-es="Recursos">Resources</a>' +
+          '<a href="' + p + 'voz.html" data-en="La Voz Latino" data-es="La Voz Latino">La Voz Latino</a>' +
           '<a href="' + p + 'enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>' +
         '</div>' +
         '<div class="v2-top-actions">' +
@@ -101,7 +101,7 @@
         '<a href="' + p + 'directory.html" data-en="Discover" data-es="Descubrir">Discover</a>' +
         '<a href="' + p + 'jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>' +
         '<a href="' + p + 'marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>' +
-        '<a href="' + p + 'voz.html" data-en="Resources" data-es="Recursos">Resources</a>' +
+        '<a href="' + p + 'voz.html" data-en="La Voz Latino" data-es="La Voz Latino">La Voz Latino</a>' +
         '<a href="' + p + 'enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>' +
         '<a href="' + p + 'login.html" data-en="Sign In" data-es="Iniciar sesión">Sign In</a>' +
         '<a href="' + p + 'enroll.html" class="v2-btn-primary" style="margin:8px 12px;text-align:center;" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>' +
