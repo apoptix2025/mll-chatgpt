@@ -364,8 +364,46 @@ document.querySelectorAll('.sidebar .sb-link').forEach(link => {
 const token      = sessionStorage.getItem('mll_token');
 const bizId      = sessionStorage.getItem('mll_business_id');
 
+function setReferralCopyEnabled(enabled) {
+  const btn = document.getElementById('copy-ref-btn');
+  if (!btn) return;
+  btn.disabled = !enabled;
+  btn.style.opacity = enabled ? '1' : '0.5';
+  btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+}
+
+function renderReferralCard(biz, options) {
+  const linkEl = document.getElementById('ref-link-display');
+  const codeEl = document.getElementById('ref-code-display');
+  const credEl = document.getElementById('ref-credits');
+  if (!linkEl || !codeEl || !credEl) return;
+
+  if (options && options.error) {
+    linkEl.textContent = 'Could not load referral details';
+    codeEl.textContent = '—';
+    credEl.textContent = '—';
+    setReferralCopyEnabled(false);
+    return;
+  }
+
+  const code = biz && biz.referral_code ? String(biz.referral_code).trim() : '';
+  credEl.textContent = (biz && biz.referral_credits != null) ? String(biz.referral_credits) : '0';
+
+  if (!code) {
+    linkEl.textContent = 'Referral code unavailable';
+    codeEl.textContent = '—';
+    setReferralCopyEnabled(false);
+    return;
+  }
+
+  linkEl.textContent = `https://mylatinolist.io/pages/enroll.html?ref=${encodeURIComponent(code)}`;
+  codeEl.textContent = code;
+  setReferralCopyEnabled(true);
+}
+
 // If no token redirect to login
 if (!token) {
+  renderReferralCard(null);
   window.location.href = 'login.html';
 }
 
@@ -399,12 +437,16 @@ async function apiFetch(path) {
 async function loadDashboard() {
   // 1. Load user + business profile
   const me = await apiFetch('/api/auth/me');
-  if (!me || !me.profile) return;
+  if (!me || !me.profile) {
+    renderReferralCard(null, { error: true });
+    return;
+  }
 
   const profile  = me.profile;
   const bizArr   = profile.businesses;
   const biz      = Array.isArray(bizArr) ? bizArr[0] : bizArr;
   window.__mll_biz = biz;
+  renderReferralCard(biz);
   const fname    = profile.first_name || me.user?.user_metadata?.first_name || 'there';
   const bizName  = biz?.name  || 'Your business';
   const bizCity  = biz?.city  || '';
@@ -687,22 +729,13 @@ async function loadActivity(bizId) {
   }
 }
 
-loadDashboard().then(() => {
-  // Populate referral card after biz data loads
-  const bizRaw = window.__mll_biz;
-  if (bizRaw?.referral_code) {
-    const code    = bizRaw.referral_code;
-    const link    = `https://mylatinolist.io/pages/enroll.html?ref=${code}`;
-    document.getElementById('ref-link-display').textContent  = link;
-    document.getElementById('ref-code-display').textContent  = code;
-    document.getElementById('ref-credits').textContent       = bizRaw.referral_credits || 0;
-  }
-});
+loadDashboard().catch(() => renderReferralCard(null, { error: true }));
 
 function copyReferralLink() {
   const biz = window.__mll_biz;
-  if (!biz?.referral_code) return;
-  const link = `https://mylatinolist.io/pages/enroll.html?ref=${biz.referral_code}`;
+  const code = biz && biz.referral_code ? String(biz.referral_code).trim() : '';
+  if (!code) return;
+  const link = `https://mylatinolist.io/pages/enroll.html?ref=${encodeURIComponent(code)}`;
   navigator.clipboard.writeText(link).then(() => {
     const btn = document.getElementById('copy-ref-btn');
     btn.textContent = 'Copied!';

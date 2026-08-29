@@ -58,9 +58,27 @@ if (config.includes('bjtfrmkhishoadjtpzgg')) {
   failed += 1
 }
 
+const dashboard = readFileSync(join(frontend, 'pages/dashboard.html'), 'utf8')
+const dashChecks = [
+  ['referral empty state', /Referral code unavailable/],
+  ['referral renderer', /function renderReferralCard/],
+  ['referral error state', /Could not load referral details/],
+]
+for (const [label, re] of dashChecks) {
+  if (!re.test(dashboard)) {
+    console.error('DASHBOARD FAIL ' + label)
+    failed += 1
+  }
+}
+if (/if \(bizRaw\?\.referral_code\)/.test(dashboard) && !/Referral code unavailable/.test(dashboard)) {
+  console.error('DASHBOARD FAIL referral card still skips empty code')
+  failed += 1
+}
+
 if (failed) {
   console.error('frontend static validation FAIL ' + failed)
   process.exit(1)
 }
 console.log('frontend static validation PASS')
 console.log('  pages and config.js production mapping verified')
+console.log('  dashboard referral empty/error states verified')
