@@ -41,6 +41,12 @@ if (stagingEnv !== 'staging') problems.push('Staging ENVIRONMENT is not "staging
 if (stagingFrontend !== STAGING_FRONTEND) {
   problems.push('Staging FRONTEND_URL is not https://staging.mylatinolist.pages.dev.');
 }
+if (!/(?:^|\n)\[env\.staging\.ai\]/.test(toml)) {
+  problems.push('Staging Workers AI binding is missing.');
+}
+if (!stagingBlock.includes('878fc40235fe4681a940a82a72042481')) {
+  problems.push('Staging AI quota KV must remain the dedicated staging namespace.');
+}
 
 if (problems.length) {
   console.error('\nBLOCKED: staging is not isolated from production.\n');

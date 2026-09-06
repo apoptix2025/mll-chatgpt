@@ -46,7 +46,7 @@ const pagesPages = /\/pages\/pages\/partners/
 const partnersLabel = /data-en="Partners"/
 
 assert('A homepage desktop includes Partners', partnersHref.test(desktop) && partnersLabel.test(desktop) && /Partners<\/a>/.test(desktop))
-assert('A homepage desktop order is Discover…Partners…For Business', order.test(desktop) && /Discover[\s\S]+Jobs[\s\S]+Marketplace[\s\S]+La Voz Latino/.test(desktop))
+assert('A homepage desktop order is Home…Businesses…Partners…For Business', order.test(desktop) && /Home[\s\S]+Businesses[\s\S]+Jobs[\s\S]+Marketplace[\s\S]+La Voz Latino/.test(desktop))
 assert('A homepage desktop Partners appears once', count(desktop, /data-en="Partners"/g) === 1)
 
 assert('B injected desktop includes Partners', partnersHref.test(injectedDesktop) && partnersLabel.test(injectedDesktop))

@@ -54,6 +54,10 @@ preview_bucket_name = "mll-media-dev"
 ENVIRONMENT = "production"
 FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
+MLL_AI_ENABLED = "false"
+
+# Default (no --env) stays AI-disabled.
+# Production AI is enabled only under [env.production].
 
 
 # ============================================================
@@ -126,6 +130,13 @@ name = "mll-api"
 ENVIRONMENT = "production"
 FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
+MLL_AI_ENABLED = "true"
+
+
+# ── Production Workers AI (do not copy staging KV/R2/Supabase) ──
+
+[env.production.ai]
+binding = "AI"
 
 
 # ── Production API route ────────────────────────────────────
@@ -177,6 +188,7 @@ routes = []
 [env.staging.vars]
 
 ENVIRONMENT = "staging"
+MLL_AI_ENABLED = "true"
 
 # Cloudflare Pages staging frontend
 FRONTEND_URL = "https://staging.mylatinolist.pages.dev"
@@ -184,6 +196,12 @@ FRONTEND_URL = "https://staging.mylatinolist.pages.dev"
 # Dedicated MLL DEV Supabase project (mll-dev)
 # Must never equal the production project jhjdhmjkcnjtbojocjam
 SUPABASE_URL = "https://bjtfrmkhishoadjtpzgg.supabase.co"
+
+
+# ── Staging Workers AI (keep isolated from production KV/R2/DB) ──
+
+[env.staging.ai]
+binding = "AI"
 
 
 # ── Staging KV ──────────────────────────────────────────────

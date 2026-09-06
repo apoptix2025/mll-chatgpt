@@ -49,24 +49,58 @@
     currentLang = lang;          // set first so the initial apply does NOT dispatch
     applyLang(lang);
 
-    // --- HAMBURGER (full-nav pages) ---
+    syncMobileDrawerFromDesktop();
+    bindMobileDrawer(document.getElementById('hamburger'), document.getElementById('nav-mobile'), document.getElementById('nav-mobile-backdrop'), document.getElementById('nav-mobile-close'));
+    bindToolbarAi(document.getElementById('mll-ai-toolbar'));
     document.querySelectorAll('.hamburger').forEach(function (h) {
+      if (h.id === 'hamburger') return;
       h.addEventListener('click', function () {
         var menu = document.querySelector('.nav-mobile');
         if (menu) menu.classList.toggle('open');
       });
     });
-    // Close the mobile menu when a link inside it is tapped.
     document.querySelectorAll('.nav-mobile a').forEach(function (a) {
       a.addEventListener('click', function () {
         var menu = a.closest('.nav-mobile');
-        if (menu) menu.classList.remove('open');
+        if (menu) closeMobileDrawer(menu);
       });
     });
 
     injectMarketingNav();
     injectMobileNav();
+    if (!document.querySelector('script[data-mll-ai]')) {
+      var ai = document.createElement('script');
+      ai.src = '/js/mll-ai.js';
+      ai.setAttribute('data-mll-ai', '1');
+      document.body.appendChild(ai);
+    }
   });
+
+  function bindToolbarAi(btn) {
+    if (!btn) return;
+    function syncExpanded() {
+      btn.setAttribute('aria-expanded', document.body.classList.contains('mll-ai-open') ? 'true' : 'false');
+    }
+    btn.addEventListener('click', function () {
+      var launch = document.getElementById('mll-ai-launch');
+      if (launch) launch.click();
+    });
+    if (typeof MutationObserver === 'function') {
+      new MutationObserver(syncExpanded).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
+
+  function syncMobileDrawerFromDesktop() {
+    var src = document.querySelector('.v2-home .v2-links') || document.querySelector('nav.v2-topnav .v2-links');
+    var dest = document.getElementById('nav-mobile-primary');
+    if (!src || !dest) return;
+    var affiliates = dest.querySelector('a[href*="affiliates"]');
+    dest.innerHTML = '';
+    src.querySelectorAll('a').forEach(function (a) {
+      dest.appendChild(a.cloneNode(true));
+    });
+    if (affiliates) dest.appendChild(affiliates);
+  }
 
   function inPages() {
     return location.pathname.indexOf('/pages/') !== -1;
@@ -82,9 +116,10 @@
     nav.className = 'v2-topnav has-mobile';
     nav.innerHTML =
       '<div class="v2-topnav-inner">' +
-        '<a href="' + home + '" class="logo"><span class="logo-mark"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>' +
+        '<a href="' + home + '" class="logo"><span class="logo-mark"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-lockup"><span class="logo-text">my<strong>latino</strong>list</span><span class="logo-slogan">CONNECT • SUPPORT • GROW</span></span></a>' +
         '<div class="v2-links">' +
-          '<a href="' + p + 'directory.html" data-en="Discover" data-es="Descubrir">Discover</a>' +
+          '<a href="' + home + '" data-en="Home" data-es="Inicio">Home</a>' +
+          '<a href="' + p + 'directory.html" data-en="Businesses" data-es="Negocios">Businesses</a>' +
           '<a href="' + p + 'jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>' +
           '<a href="' + p + 'marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>' +
           '<a href="' + p + 'voz.html" data-en="La Voz Latino" data-es="La Voz Latino">La Voz Latino</a>' +
@@ -92,6 +127,7 @@
           '<a href="' + p + 'enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>' +
         '</div>' +
         '<div class="v2-top-actions">' +
+          '<a class="v2-icon-btn" href="' + p + 'directory.html" aria-label="Search"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></a>' +
           '<div class="lang-toggle"><button class="lang-btn" data-lang="en" onclick="switchLang(\'en\')">EN</button><span>|</span><button class="lang-btn" data-lang="es" onclick="switchLang(\'es\')">ES</button></div>' +
           '<a href="' + p + 'login.html" class="v2-btn-ghost" data-en="Sign In" data-es="Iniciar sesión">Sign In</a>' +
           '<a href="' + p + 'enroll.html" class="v2-btn-primary" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>' +
@@ -99,7 +135,8 @@
         '<button class="v2-hamburger hamburger" aria-label="Menu"><span></span><span></span><span></span></button>' +
       '</div>' +
       '<div class="nav-mobile" id="nav-mobile">' +
-        '<a href="' + p + 'directory.html" data-en="Discover" data-es="Descubrir">Discover</a>' +
+        '<a href="' + home + '" data-en="Home" data-es="Inicio">Home</a>' +
+        '<a href="' + p + 'directory.html" data-en="Businesses" data-es="Negocios">Businesses</a>' +
         '<a href="' + p + 'jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>' +
         '<a href="' + p + 'marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>' +
         '<a href="' + p + 'voz.html" data-en="La Voz Latino" data-es="La Voz Latino">La Voz Latino</a>' +
@@ -120,6 +157,68 @@
         var menu = a.closest('.nav-mobile');
         if (menu) menu.classList.remove('open');
       });
+    });
+  }
+
+  function closeMobileDrawer(menu) {
+    if (!menu) return;
+    menu.classList.remove('open');
+    var btn = document.getElementById('hamburger');
+    if (btn) {
+      btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'Open menu');
+    }
+    document.body.classList.remove('mll-nav-open');
+    var back = document.getElementById('nav-mobile-backdrop');
+    if (back) {
+      back.hidden = true;
+      back.classList.remove('is-open');
+    }
+  }
+
+  function openMobileDrawer(menu) {
+    if (!menu) return;
+    menu.classList.add('open');
+    var btn = document.getElementById('hamburger');
+    if (btn) {
+      btn.setAttribute('aria-expanded', 'true');
+      btn.setAttribute('aria-label', 'Close menu');
+    }
+    document.body.classList.add('mll-nav-open');
+    var back = document.getElementById('nav-mobile-backdrop');
+    if (back) {
+      back.hidden = false;
+      back.classList.add('is-open');
+    }
+    var closeBtn = document.getElementById('nav-mobile-close');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function bindMobileDrawer(btn, menu, backdrop, closeBtn) {
+    if (!btn || !menu) return;
+    btn.addEventListener('click', function () {
+      if (menu.classList.contains('open')) closeMobileDrawer(menu);
+      else openMobileDrawer(menu);
+    });
+    if (closeBtn) closeBtn.addEventListener('click', function () { closeMobileDrawer(menu); });
+    if (backdrop) backdrop.addEventListener('click', function () { closeMobileDrawer(menu); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menu.classList.contains('open')) {
+        closeMobileDrawer(menu);
+        btn.focus();
+      }
+      if (e.key !== 'Tab' || !menu.classList.contains('open')) return;
+      var focusable = menu.querySelectorAll('a, button');
+      if (!focusable.length) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     });
   }
 
