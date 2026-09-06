@@ -521,19 +521,23 @@ body.mll-nav-open { overflow: hidden; }
     justify-content: center;
     gap: 0;
   }
-  .v2-home .mll-menu-icon {
+  .v2-home .v2-hamburger .mll-menu-icon {
     width: 24px;
     height: 18px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    background: transparent;
+    background-color: transparent;
+    box-shadow: none;
   }
-  .v2-home .mll-menu-icon span {
+  .v2-home .v2-hamburger .mll-menu-icon span {
     display: block;
-    width: 100%;
+    width: 24px;
     height: 2px;
-    border-radius: 2px;
-    background: var(--navy-900, #10213A);
+    flex: 0 0 2px;
+    border-radius: 999px;
+    background: #0f2747;
   }
   .mll-hero-premium { height: auto; max-height: none; overflow: hidden; }
   .mll-hero-split {
@@ -559,23 +563,23 @@ body.mll-nav-open { overflow: hidden; }
 @media (max-width: 767px) {
   .v2-home .v2-topnav-inner {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto 44px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px;
     align-items: center;
     justify-content: start;
-    column-gap: 12px;
+    column-gap: 8px;
     row-gap: 0;
     gap: unset;
     width: 100%;
     min-height: 54px;
     height: 56px;
     max-height: 58px;
-    padding: 6px 12px;
+    padding: 6px 10px;
   }
   .v2-home .v2-links { display: none; }
   .v2-home .v2-top-actions { display: contents; }
   .v2-home .v2-topnav-inner .logo {
     min-width: 0;
-    max-width: 120px;
+    max-width: 115px;
     margin: 0;
     justify-self: start;
     overflow: hidden;
@@ -584,7 +588,8 @@ body.mll-nav-open { overflow: hidden; }
   .v2-home .v2-top-actions .lang-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    justify-self: center;
+    gap: 5px;
     margin: 0;
     height: 34px;
   }
@@ -597,6 +602,7 @@ body.mll-nav-open { overflow: hidden; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    justify-self: center;
     min-height: 32px;
     height: 34px;
     margin: 0;
@@ -628,19 +634,23 @@ body.mll-nav-open { overflow: hidden; }
     padding: 0;
     gap: 0;
   }
-  .v2-home .mll-menu-icon {
+  .v2-home .v2-hamburger .mll-menu-icon {
     width: 24px;
     height: 18px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    background: transparent;
+    background-color: transparent;
+    box-shadow: none;
   }
-  .v2-home .mll-menu-icon span {
+  .v2-home .v2-hamburger .mll-menu-icon span {
     display: block;
-    width: 100%;
+    width: 24px;
     height: 2px;
-    border-radius: 2px;
-    background: var(--navy-900, #10213A);
+    flex: 0 0 2px;
+    border-radius: 999px;
+    background: #0f2747;
   }
   .v2-home .mll-ai-launch {
     display: inline-flex;
@@ -750,8 +760,8 @@ body.mll-nav-open { overflow: hidden; }
 @media (max-width: 360px) {
   .mll-hero-popular { grid-template-columns: minmax(0, 1fr); }
   .v2-home .v2-topnav-inner {
-    column-gap: 8px;
-    padding: 6px 10px;
+    column-gap: 6px;
+    padding: 6px 8px;
   }
   .v2-home .v2-topnav-inner .logo { max-width: 105px; }
   .v2-home .v2-topnav .logo-text { font-size: 14px; }
