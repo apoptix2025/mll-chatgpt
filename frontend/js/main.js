@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobSignin   = document.getElementById('mob-signin');
   const mobDash     = document.getElementById('mob-dashboard');
   if (mobSignin && mobDash) {
-    mobSignin.style.display  = isLoggedIn ? 'none'  : 'block';
-    mobDash.style.display    = isLoggedIn ? 'block' : 'none';
+    mobSignin.style.display  = isLoggedIn ? 'none' : '';
+    mobDash.style.display    = isLoggedIn ? '' : 'none';
   }
 
   if (isLoggedIn) {

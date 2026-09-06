@@ -49,6 +49,7 @@
     currentLang = lang;          // set first so the initial apply does NOT dispatch
     applyLang(lang);
 
+    syncMobileDrawerFromDesktop();
     bindMobileDrawer(document.getElementById('hamburger'), document.getElementById('nav-mobile'), document.getElementById('nav-mobile-backdrop'), document.getElementById('nav-mobile-close'));
     document.querySelectorAll('.hamburger').forEach(function (h) {
       if (h.id === 'hamburger') return;
@@ -73,6 +74,18 @@
       document.body.appendChild(ai);
     }
   });
+
+  function syncMobileDrawerFromDesktop() {
+    var src = document.querySelector('.v2-home .v2-links') || document.querySelector('nav.v2-topnav .v2-links');
+    var dest = document.getElementById('nav-mobile-primary');
+    if (!src || !dest) return;
+    var affiliates = dest.querySelector('a[href*="affiliates"]');
+    dest.innerHTML = '';
+    src.querySelectorAll('a').forEach(function (a) {
+      dest.appendChild(a.cloneNode(true));
+    });
+    if (affiliates) dest.appendChild(affiliates);
+  }
 
   function inPages() {
     return location.pathname.indexOf('/pages/') !== -1;
