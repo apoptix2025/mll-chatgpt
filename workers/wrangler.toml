@@ -56,9 +56,8 @@ FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
 MLL_AI_ENABLED = "false"
 
-# Workers AI is enabled on STAGING ONLY.
-# Do not add a production AI binding or set production MLL_AI_ENABLED=true
-# without a separate approval.
+# Default (no --env) stays AI-disabled.
+# Production AI is enabled only under [env.production].
 
 
 # ============================================================
@@ -131,7 +130,13 @@ name = "mll-api"
 ENVIRONMENT = "production"
 FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
-MLL_AI_ENABLED = "false"
+MLL_AI_ENABLED = "true"
+
+
+# ── Production Workers AI (do not copy staging KV/R2/Supabase) ──
+
+[env.production.ai]
+binding = "AI"
 
 
 # ── Production API route ────────────────────────────────────
@@ -193,7 +198,7 @@ FRONTEND_URL = "https://staging.mylatinolist.pages.dev"
 SUPABASE_URL = "https://bjtfrmkhishoadjtpzgg.supabase.co"
 
 
-# ── Staging Workers AI (do not copy to production) ──────────
+# ── Staging Workers AI (keep isolated from production KV/R2/DB) ──
 
 [env.staging.ai]
 binding = "AI"

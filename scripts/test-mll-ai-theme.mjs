@@ -68,8 +68,9 @@ assert('5 Verified only from real verification data', /is_verified === true/.tes
 assert('6 AI launcher exists and open/close are wired', /Ask MLL AI/.test(aiJs) && /function open\(/.test(aiJs) && /function close\(/.test(aiJs) && /aria-expanded/.test(aiJs) && /Escape/.test(aiJs))
 assert('7 AI mobile panel is a bottom sheet above bottom nav', /max-width: 768px/.test(aiCss) && /bottom: 0/.test(aiCss) && /has-mll-bottom-nav \.mll-ai-panel/.test(aiCss) && /has-mll-bottom-nav \.mll-ai-launch/.test(aiCss))
 assert('8 AI disabled state shows coming soon', /MLL AI is coming soon/.test(aiJs) && /if \(!enabled\)/.test(aiJs))
-assert('8 Worker flag defaults false', /\[env\.production\.vars\][\s\S]*?MLL_AI_ENABLED = "false"/.test(wrangler) && /toLowerCase\(\) === 'true'/.test(aiApi))
-assert('8 staging AI flag is isolated', /\[env\.staging\.vars\][\s\S]*MLL_AI_ENABLED = "true"/.test(wrangler) && /\[env\.staging\.ai\]/.test(wrangler) && !/(?:^|\n)\[env\.production\.ai\]/.test(wrangler))
+assert('8 Worker default env stays AI-disabled', /(?:^|\n)\[vars\][\s\S]*?MLL_AI_ENABLED = "false"/.test(wrangler) && /toLowerCase\(\) === 'true'/.test(aiApi))
+assert('8 production AI is enabled under env.production', /\[env\.production\.vars\][\s\S]*?MLL_AI_ENABLED = "true"/.test(wrangler) && /\[env\.production\.ai\]/.test(wrangler))
+assert('8 staging AI flag is isolated', /\[env\.staging\.vars\][\s\S]*MLL_AI_ENABLED = "true"/.test(wrangler) && /\[env\.staging\.ai\]/.test(wrangler) && /bjtfrmkhishoadjtpzgg/.test(wrangler) && /878fc40235fe4681a940a82a72042481/.test(wrangler))
 assert('9 AI no-results state is friendly and not fabricated', /No matching listings/.test(aiJs) && /couldn't find a matching MLL business/.test(aiApi))
 
 assert('10 no /pages/pages/ routing', !/\/pages\/pages\//.test(index) && !/\/pages\/pages\//.test(navJs) && !/\/pages\/pages\//.test(aiJs) && !/\/pages\/pages\//.test(mainJs))
