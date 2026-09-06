@@ -20,6 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     mobSignin.style.display  = isLoggedIn ? 'none' : '';
     mobDash.style.display    = isLoggedIn ? '' : 'none';
   }
+  const toolbarSignin = document.getElementById('toolbar-signin');
+  const toolbarAccount = document.getElementById('toolbar-account');
+  if (toolbarSignin && toolbarAccount) {
+    toolbarSignin.style.display = isLoggedIn ? 'none' : '';
+    toolbarAccount.style.display = isLoggedIn ? '' : 'none';
+  }
 
   if (isLoggedIn) {
     const signinBtn = document.getElementById('nav-signin') || document.querySelector('.nav-actions .btn-ghost');
