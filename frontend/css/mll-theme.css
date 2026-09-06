@@ -35,6 +35,7 @@
   padding: 7px 14px;
   box-shadow: none;
 }
+.v2-home .mll-ai-toolbar { display: none; }
 
 .mll-nav-backdrop {
   display: none;
@@ -540,6 +541,58 @@ body.mll-nav-open { overflow: hidden; }
   .mll-cta-row { flex-wrap: wrap; min-height: 0; }
 }
 @media (max-width: 767px) {
+  .v2-home .v2-topnav-inner {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+  }
+  .v2-home .v2-links { display: none; }
+  .v2-home .v2-top-actions { display: contents; }
+  .v2-home .v2-topnav-inner .logo {
+    min-width: 0;
+    justify-self: start;
+  }
+  .v2-home .v2-topnav .logo-text { font-size: 16px; }
+  .v2-home .v2-top-actions .lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin: 0;
+  }
+  .v2-home .v2-top-actions .lang-btn {
+    min-height: 32px;
+    padding: 4px 8px;
+  }
+  .v2-home .mll-ai-toolbar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: end;
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 999px;
+    background: #0866FF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .v2-home .mll-ai-toolbar:focus-visible {
+    outline: 3px solid rgba(8, 102, 255, 0.4);
+    outline-offset: 2px;
+  }
+  .v2-home .v2-hamburger {
+    justify-self: end;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .v2-home .mll-ai-launch { display: none; }
   .mll-container { padding-inline: 16px; }
   .mll-hero-premium { height: auto; max-height: none; }
   .mll-hero-split {
@@ -638,4 +691,5 @@ body.mll-nav-open { overflow: hidden; }
 }
 @media (max-width: 360px) {
   .mll-hero-popular { grid-template-columns: minmax(0, 1fr); }
+  .v2-home .mll-ai-toolbar-brand { display: none; }
 }

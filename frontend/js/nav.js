@@ -51,6 +51,7 @@
 
     syncMobileDrawerFromDesktop();
     bindMobileDrawer(document.getElementById('hamburger'), document.getElementById('nav-mobile'), document.getElementById('nav-mobile-backdrop'), document.getElementById('nav-mobile-close'));
+    bindToolbarAi(document.getElementById('mll-ai-toolbar'));
     document.querySelectorAll('.hamburger').forEach(function (h) {
       if (h.id === 'hamburger') return;
       h.addEventListener('click', function () {
@@ -74,6 +75,20 @@
       document.body.appendChild(ai);
     }
   });
+
+  function bindToolbarAi(btn) {
+    if (!btn) return;
+    function syncExpanded() {
+      btn.setAttribute('aria-expanded', document.body.classList.contains('mll-ai-open') ? 'true' : 'false');
+    }
+    btn.addEventListener('click', function () {
+      var launch = document.getElementById('mll-ai-launch');
+      if (launch) launch.click();
+    });
+    if (typeof MutationObserver === 'function') {
+      new MutationObserver(syncExpanded).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
 
   function syncMobileDrawerFromDesktop() {
     var src = document.querySelector('.v2-home .v2-links') || document.querySelector('nav.v2-topnav .v2-links');

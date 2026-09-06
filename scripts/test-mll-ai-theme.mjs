@@ -147,6 +147,12 @@ const tabletHero = between(themeCss, '@media (max-width: 1099px) {', '@media (ma
 assert('tablet hero does not use mobile image-first order', !/\.mll-hero-media \{[\s\S]*order: 1/.test(tabletHero) && !/\.mll-hero-copy \{[\s\S]*order: 2/.test(tabletHero))
 assert('desktop split hero stays copy left image right', /grid-template-columns: minmax\(0, 56%\) minmax\(0, 44%\)/.test(themeCss) && index.indexOf('mll-hero-copy') < index.indexOf('mll-hero-media') && !/\border:/.test(between(themeCss, '.mll-hero-split {', '.mll-hero-copy {')))
 assert('mobile hamburger remains after hero flow change', /id="hamburger"/.test(index) && /aria-controls="nav-mobile"/.test(index))
+assert('mobile toolbar order is Logo EN/ES MLL AI Menu', /class="logo"/.test(index) && /class="lang-toggle"/.test(index) && /id="mll-ai-toolbar"/.test(index) && /id="hamburger"/.test(index) && index.indexOf('class="logo"') < index.indexOf('class="lang-toggle"') && index.indexOf('class="lang-toggle"') < index.indexOf('id="mll-ai-toolbar"') && index.indexOf('id="mll-ai-toolbar"') < index.indexOf('id="hamburger"'))
+assert('mobile toolbar uses compact 4-column grid', /@media \(max-width: 767px\)[\s\S]*grid-template-columns: auto auto minmax\(0, 1fr\) auto/.test(themeCss) && /\.v2-home \.v2-top-actions \{ display: contents; \}/.test(themeCss))
+assert('mobile toolbar AI opens existing bottom sheet', /id="mll-ai-toolbar"/.test(index) && /✨/.test(index) && /mll-ai-toolbar-brand/.test(index) && /getElementById\('mll-ai-launch'\)/.test(navJs) && /function bindToolbarAi/.test(navJs) && /Ask MLL AI/.test(aiJs))
+assert('mobile floating AI launcher is hidden', /@media \(max-width: 767px\)[\s\S]*\.v2-home \.mll-ai-launch \{ display: none; \}/.test(themeCss))
+assert('desktop toolbar AI pill stays hidden', /\.v2-home \.mll-ai-toolbar \{ display: none; \}/.test(themeCss) && !/@media \(min-width: 1100px\)[\s\S]*\.mll-ai-toolbar \{[\s\S]*display: inline-flex/.test(themeCss))
+assert('tiny screens shorten toolbar AI label', /@media \(max-width: 360px\)[\s\S]*\.v2-home \.mll-ai-toolbar-brand \{ display: none; \}/.test(themeCss))
 
 if (failed) {
   console.error('mll ai theme tests FAIL ' + failed)
