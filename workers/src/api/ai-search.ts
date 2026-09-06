@@ -108,16 +108,32 @@ export function parseIntentDeterministic(query: string): Intent {
   return { intent, category, location, language, q: raw, replyLang }
 }
 
+function locationFromModel(raw: string, query: string): string {
+  const loc = safeLike(raw)
+  if (!loc) return ''
+  if (/sinlugar|specifico|unknown|n\/a|none|null|nearby|cerca/i.test(loc)) return ''
+  return query.toLowerCase().includes(loc.toLowerCase()) ? loc : ''
+}
+
 function mergeIntent(parsed: Partial<Intent>, fallback: Intent): Intent {
   const rawIntent = String(parsed.intent || '')
-  const intent: SearchIntent =
+  let intent: SearchIntent =
     rawIntent === 'job_search' || rawIntent === 'resource_search' || rawIntent === 'unsupported'
       ? rawIntent
       : rawIntent === 'business_search'
         ? 'business_search'
         : fallback.intent
-  const category = mapCategory(String(parsed.category || '')) || fallback.category
-  const location = safeLike(String(parsed.location || fallback.location))
+  if (
+    fallback.intent === 'business_search' &&
+    fallback.category &&
+    intent === 'resource_search' &&
+    !/immigration|inmigraci|daca|resource|recurso|grant|sba/i.test(fallback.q)
+  ) {
+    intent = 'business_search'
+  }
+  if (fallback.intent === 'job_search') intent = 'job_search'
+  const category = fallback.category || mapCategory(String(parsed.category || ''))
+  const location = fallback.location || locationFromModel(String(parsed.location || ''), fallback.q)
   const language = /spanish|espa[nñ]ol/i.test(String(parsed.language || fallback.language)) ? 'Spanish' : fallback.language
   return { intent, category, location, language, q: fallback.q, replyLang: fallback.replyLang }
 }
