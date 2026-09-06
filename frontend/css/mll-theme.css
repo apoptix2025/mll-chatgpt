@@ -519,6 +519,21 @@ body.mll-nav-open { overflow: hidden; }
     min-height: 44px;
     align-items: center;
     justify-content: center;
+    gap: 0;
+  }
+  .v2-home .mll-menu-icon {
+    width: 24px;
+    height: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .v2-home .mll-menu-icon span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--navy-900, #10213A);
   }
   .mll-hero-premium { height: auto; max-height: none; overflow: hidden; }
   .mll-hero-split {
@@ -544,17 +559,17 @@ body.mll-nav-open { overflow: hidden; }
 @media (max-width: 767px) {
   .v2-home .v2-topnav-inner {
     display: grid;
-    grid-template-columns: minmax(0, 1.3fr) auto auto auto 44px;
+    grid-template-columns: minmax(0, 1fr) auto auto 44px;
     align-items: center;
     justify-content: start;
-    column-gap: 7px;
+    column-gap: 12px;
     row-gap: 0;
     gap: unset;
     width: 100%;
     min-height: 54px;
     height: 56px;
     max-height: 58px;
-    padding: 6px 10px;
+    padding: 6px 12px;
   }
   .v2-home .v2-links { display: none; }
   .v2-home .v2-top-actions { display: contents; }
@@ -600,30 +615,7 @@ body.mll-nav-open { overflow: hidden; }
     outline: 3px solid rgba(8, 102, 255, 0.4);
     outline-offset: 2px;
   }
-  .v2-home .mll-ai-toolbar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    justify-self: start;
-    width: auto;
-    height: 34px;
-    min-height: 34px;
-    margin: 0;
-    padding: 0 10px;
-    border: 0;
-    border-radius: 999px;
-    background: #0866FF;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-  .v2-home .mll-ai-toolbar:focus-visible {
-    outline: 3px solid rgba(8, 102, 255, 0.4);
-    outline-offset: 2px;
-  }
+  .v2-home .mll-ai-toolbar { display: none; }
   .v2-home .v2-hamburger {
     display: grid;
     place-items: center;
@@ -634,8 +626,31 @@ body.mll-nav-open { overflow: hidden; }
     min-height: 44px;
     margin: 0;
     padding: 0;
+    gap: 0;
   }
-  .v2-home .mll-ai-launch { display: none; }
+  .v2-home .mll-menu-icon {
+    width: 24px;
+    height: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .v2-home .mll-menu-icon span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--navy-900, #10213A);
+  }
+  .v2-home .mll-ai-launch {
+    display: inline-flex;
+    right: 16px;
+    bottom: calc(var(--mll-bottom-nav, 72px) + 16px);
+  }
+  body.mll-nav-open .mll-ai-launch {
+    visibility: hidden;
+    pointer-events: none;
+  }
   .mll-container { padding-inline: 16px; }
   .mll-hero-premium { height: auto; max-height: none; }
   .mll-hero-split {
@@ -735,12 +750,10 @@ body.mll-nav-open { overflow: hidden; }
 @media (max-width: 360px) {
   .mll-hero-popular { grid-template-columns: minmax(0, 1fr); }
   .v2-home .v2-topnav-inner {
-    column-gap: 6px;
-    padding: 6px 8px;
+    column-gap: 8px;
+    padding: 6px 10px;
   }
   .v2-home .v2-topnav-inner .logo { max-width: 105px; }
   .v2-home .v2-topnav .logo-text { font-size: 14px; }
-  .v2-home .mll-toolbar-auth { font-size: 12px; }
-  .v2-home .mll-ai-toolbar { padding: 0 8px; font-size: 11px; }
-  .v2-home .mll-ai-toolbar-brand { display: none; }
+  .v2-home .mll-toolbar-auth { font-size: 11px; }
 }
