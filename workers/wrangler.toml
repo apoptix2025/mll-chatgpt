@@ -56,12 +56,9 @@ FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
 MLL_AI_ENABLED = "false"
 
-# Workers AI is NOT enabled by default (no paid binding created).
-# Staging-only enablement, after explicit approval:
-#   [env.staging.ai]
-#   binding = "AI"
-#   Then set env.staging.vars MLL_AI_ENABLED = "true"
-# Do not enable on production without a separate approval.
+# Workers AI is enabled on STAGING ONLY.
+# Do not add a production AI binding or set production MLL_AI_ENABLED=true
+# without a separate approval.
 
 
 # ============================================================
@@ -186,7 +183,7 @@ routes = []
 [env.staging.vars]
 
 ENVIRONMENT = "staging"
-MLL_AI_ENABLED = "false"
+MLL_AI_ENABLED = "true"
 
 # Cloudflare Pages staging frontend
 FRONTEND_URL = "https://staging.mylatinolist.pages.dev"
@@ -194,6 +191,12 @@ FRONTEND_URL = "https://staging.mylatinolist.pages.dev"
 # Dedicated MLL DEV Supabase project (mll-dev)
 # Must never equal the production project jhjdhmjkcnjtbojocjam
 SUPABASE_URL = "https://bjtfrmkhishoadjtpzgg.supabase.co"
+
+
+# ── Staging Workers AI (do not copy to production) ──────────
+
+[env.staging.ai]
+binding = "AI"
 
 
 # ── Staging KV ──────────────────────────────────────────────

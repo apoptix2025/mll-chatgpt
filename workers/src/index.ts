@@ -41,7 +41,7 @@ export interface Env {
   ENVIRONMENT: string
   FRONTEND_URL: string
   MLL_AI_ENABLED?: string
-  AI?: unknown
+  AI?: { run: (model: string, input: Record<string, unknown>) => Promise<unknown> }
 }
 
 export default {

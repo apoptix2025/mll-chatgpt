@@ -41,6 +41,13 @@ if (stagingEnv !== 'staging') problems.push('Staging ENVIRONMENT is not "staging
 if (stagingFrontend !== STAGING_FRONTEND) {
   problems.push('Staging FRONTEND_URL is not https://staging.mylatinolist.pages.dev.');
 }
+if (/(?:^|\n)\[env\.production\.ai\]/.test(toml)) {
+  problems.push('Production Workers AI binding is present. Staging-only AI deploys must not add a production AI section.');
+}
+const prodAi = (toml.match(/\[env\.production\.vars\][\s\S]*?MLL_AI_ENABLED\s*=\s*\"([^\"]+)\"/) || [])[1];
+if (prodAi && prodAi.toLowerCase() === 'true') {
+  problems.push('Production MLL_AI_ENABLED is true. Stop.');
+}
 
 if (problems.length) {
   console.error('\nBLOCKED: staging is not isolated from production.\n');

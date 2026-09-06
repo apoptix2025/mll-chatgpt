@@ -1,20 +1,29 @@
 (function () {
   var VISITOR_LIMIT = 3
-  var ENTITLEMENTS = { visitor: 3, free: 10, basic: 25, pro: 60, featured: 100, agency: 200 }
+  var AUTH_LIMIT = 10
+  var ENTITLEMENTS = { visitor: 3, auth: 10 }
   var API = (window.MLL_CONFIG && window.MLL_CONFIG.API_URL) || ''
   var opened = false
   var inited = false
   var enabled = false
   var remaining = VISITOR_LIMIT
+  var signedIn = false
 
-  function quotaKey() { return 'mll_ai_free_used' }
-  function usedCount() {
-    try { return parseInt(localStorage.getItem(quotaKey()) || '0', 10) || 0 } catch (e) { return 0 }
+  function hasToken() {
+    try { return !!sessionStorage.getItem('mll_token') } catch (e) { return false }
   }
-  function bumpUsed() {
-    try { localStorage.setItem(quotaKey(), String(usedCount() + 1)) } catch (e) {}
+
+  function quotaLabel() {
+    if (!enabled) return 'Coming soon'
+    if (remaining <= 0) return "You've used your free MLL AI searches."
+    if (remaining === (signedIn ? AUTH_LIMIT : VISITOR_LIMIT)) return remaining + ' free AI searches available'
+    return remaining + ' free AI searches remaining'
   }
-  function localRemaining() { return Math.max(0, VISITOR_LIMIT - usedCount()) }
+
+  function setQuota() {
+    var node = document.getElementById('mll-ai-quota')
+    if (node) node.textContent = quotaLabel()
+  }
 
   function el(html) {
     var d = document.createElement('div')
@@ -35,12 +44,14 @@
               '<div class="mll-ai-sub">Ask. Discover. Support Latino.</div></div>' +
               '<button type="button" class="mll-ai-close" id="mll-ai-close" aria-label="Close MLL AI">×</button>' +
             '</div>' +
-            '<div class="mll-ai-quota" id="mll-ai-quota">3 free AI searches</div>' +
           '</div>' +
           '<div class="mll-ai-body" id="mll-ai-body"></div>' +
           '<form class="mll-ai-foot" id="mll-ai-form">' +
-            '<input type="text" id="mll-ai-input" maxlength="240" placeholder="Ask MLL AI anything..." aria-label="Ask MLL AI">' +
-            '<button type="submit" class="mll-ai-send" aria-label="Send">→</button>' +
+            '<div class="mll-ai-quota" id="mll-ai-quota">3 free AI searches available</div>' +
+            '<div class="mll-ai-compose">' +
+              '<input type="text" id="mll-ai-input" maxlength="300" placeholder="Ask MLL AI anything..." aria-label="Ask MLL AI">' +
+              '<button type="submit" class="mll-ai-send" aria-label="Send">→</button>' +
+            '</div>' +
           '</form>' +
         '</aside>' +
       '</div>'
@@ -69,20 +80,18 @@
   }
 
   function welcome() {
-    remaining = Math.min(remaining, localRemaining())
-    document.getElementById('mll-ai-quota').textContent = enabled ? (remaining + ' free AI searches') : 'Coming soon'
+    signedIn = hasToken()
+    setQuota()
     document.getElementById('mll-ai-form').hidden = false
     var body = document.getElementById('mll-ai-body')
     body.innerHTML =
-      '<p class="mll-ai-msg">Hi! I\'m MLL AI. I can help you find Latino-owned businesses, jobs, resources and more.</p>' +
-      '<p class="mll-ai-msg">What are you looking for?</p>' +
+      '<p class="mll-ai-msg">Hi! I\'m MLL AI. I can help you find Latino-owned businesses, jobs, and La Voz Latino resources.</p>' +
       '<div class="mll-ai-prompts">' +
-        chip('Find a contractor near me') +
-        chip('Latino restaurants nearby') +
-        chip('Spanish-speaking attorney') +
-        chip('Hair salon in Silver Spring') +
-        chip('Find a job') +
-        chip('Immigration help') +
+        chip('Find a contractor near Silver Spring') +
+        chip('Show me Latino restaurants') +
+        chip('Find a Spanish-speaking attorney') +
+        chip('Find IT jobs') +
+        chip('Help me find immigration resources') +
       '</div>'
     body.querySelectorAll('[data-prompt]').forEach(function (b) {
       b.addEventListener('click', function () { send(b.getAttribute('data-prompt')) })
@@ -97,10 +106,15 @@
     if (inited) return
     inited = true
     try {
-      var res = await fetch(API + '/api/ai/status')
+      var headers = {}
+      var token = null
+      try { token = sessionStorage.getItem('mll_token') } catch (e) {}
+      if (token) headers.Authorization = 'Bearer ' + token
+      var res = await fetch(API + '/api/ai/status', { headers: headers })
       var data = res.ok ? await res.json() : { enabled: false }
       enabled = !!data.enabled
       if (typeof data.remaining === 'number') remaining = data.remaining
+      signedIn = hasToken()
     } catch (e) {
       enabled = false
     }
@@ -122,35 +136,84 @@
     if (q) send(q)
   }
 
+  function imageFor(b) {
+    if (window.MLL_MEDIA && typeof window.MLL_MEDIA.imageUrl === 'function') return window.MLL_MEDIA.imageUrl(b)
+    return b.image || b.logo_url || ''
+  }
+
+  function resultList(data) {
+    if (Array.isArray(data.results)) return data.results
+    var nested = data.results || {}
+    return [].concat(nested.businesses || [], nested.jobs || [], nested.resources || [])
+  }
+
+  function exhaustedHtml() {
+    return '<p class="mll-ai-empty">You\'ve used your free MLL AI searches.</p>' +
+      '<div class="mll-ai-cta">' +
+        '<a class="mll-ai-btn" href="pages/login.html">Create Account</a>' +
+        '<a class="mll-ai-btn ghost" href="pages/pricing.html">View Plans</a>' +
+      '</div>'
+  }
+
   function renderResults(data) {
     var body = document.getElementById('mll-ai-body')
-    var html = '<p class="mll-ai-msg">' + (data.message || 'Here is what I found on My Latino List.') + '</p>'
-    var biz = (data.results && data.results.businesses) || []
-    var jobs = (data.results && data.results.jobs) || []
-    var res = (data.results && data.results.resources) || []
-    if (!biz.length && !jobs.length && !res.length) {
+    if (typeof data.remaining === 'number') remaining = data.remaining
+    setQuota()
+    if (remaining <= 0 && (!data.results || !resultList(data).length) && data.error === 'quota_exceeded') {
+      body.innerHTML = exhaustedHtml()
+      return
+    }
+    var html = '<p class="mll-ai-msg">' + escapeHtml(data.message || 'Here is what I found on My Latino List.') + '</p>'
+    var items = resultList(data)
+    if (!items.length) {
       html += '<p class="mll-ai-empty">No matching listings yet. Try a different category or location, or browse the directory.</p>'
     }
-    biz.forEach(function (b) {
-      var href = '/pages/business?slug=' + encodeURIComponent(b.slug || '')
-      html += '<div class="mll-ai-result"><a href="' + href + '">' + escapeHtml(b.name || 'Business') + '</a>' +
-        (b.category ? '<div>' + escapeHtml(b.category) + '</div>' : '') +
-        (b.city ? '<div>' + escapeHtml([b.city, b.state].filter(Boolean).join(', ')) + '</div>' : '') +
-        '</div>'
+    items.forEach(function (item) {
+      if (item.slug || item.name) html += bizCard(item)
+      else if (item.title && (item.company_name || item.job_type || item.href && String(item.href).indexOf('jobs') !== -1)) html += jobCard(item)
+      else html += resourceCard(item)
     })
-    jobs.forEach(function (j) {
-      html += '<div class="mll-ai-result"><a href="pages/jobs.html">' + escapeHtml(j.title || 'Job') + '</a>' +
-        (j.company_name ? '<div>' + escapeHtml(j.company_name) + '</div>' : '') + '</div>'
-    })
-    res.forEach(function (r) {
-      var href = r.url && /^https?:/.test(r.url) ? r.url : 'pages/voz.html'
-      html += '<div class="mll-ai-result"><a href="' + href + '">' + escapeHtml(r.title || 'Resource') + '</a></div>'
-    })
+    if (remaining <= 0) html += exhaustedHtml()
     body.innerHTML = html
-    if (typeof data.remaining === 'number') {
-      remaining = data.remaining
-      document.getElementById('mll-ai-quota').textContent = remaining + ' free AI searches'
-    }
+  }
+
+  function bizCard(b) {
+    var href = '/pages/business?slug=' + encodeURIComponent(b.slug || '')
+    var img = imageFor(b)
+    var loc = [b.city, b.state].filter(Boolean).join(', ')
+    var maps = loc ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((b.name || '') + ' ' + loc) : ''
+    return '<div class="mll-ai-result">' +
+      (img ? '<img class="mll-ai-thumb" src="' + escapeHtml(img) + '" alt="">' : '') +
+      '<div class="mll-ai-result-copy">' +
+        '<a href="' + href + '">' + escapeHtml(b.name || 'Business') + '</a>' +
+        (b.verified ? '<span class="v2-verified">Verified</span>' : '') +
+        (b.category ? '<div>' + escapeHtml(b.category) + '</div>' : '') +
+        (loc ? '<div>' + escapeHtml(loc) + '</div>' : '') +
+        '<div class="mll-ai-actions">' +
+          '<a href="' + href + '">View</a>' +
+          (b.phone ? '<a href="tel:' + escapeHtml(String(b.phone).replace(/[^\d+]/g, '')) + '">Call</a>' : '') +
+          (maps ? '<a href="' + maps + '" target="_blank" rel="noopener">Directions</a>' : '') +
+        '</div>' +
+      '</div></div>'
+  }
+
+  function jobCard(j) {
+    var href = j.href || ('/pages/jobs.html?id=' + encodeURIComponent(j.id || ''))
+    return '<div class="mll-ai-result"><div class="mll-ai-result-copy">' +
+      '<a href="' + escapeHtml(href) + '">' + escapeHtml(j.title || 'Job') + '</a>' +
+      (j.company_name ? '<div>' + escapeHtml(j.company_name) + '</div>' : '') +
+      ([j.city, j.state].filter(Boolean).length ? '<div>' + escapeHtml([j.city, j.state].filter(Boolean).join(', ')) + '</div>' : '') +
+      '<div class="mll-ai-actions"><a href="' + escapeHtml(href) + '">View</a></div>' +
+      '</div></div>'
+  }
+
+  function resourceCard(r) {
+    var href = r.href || (r.url && /^https?:/.test(r.url) ? r.url : '/pages/voz.html')
+    return '<div class="mll-ai-result"><div class="mll-ai-result-copy">' +
+      '<a href="' + escapeHtml(href) + '">' + escapeHtml(r.title || 'Resource') + '</a>' +
+      (r.category ? '<div>' + escapeHtml(r.category) + '</div>' : '') +
+      '<div class="mll-ai-actions"><a href="' + escapeHtml(href) + '">View</a></div>' +
+      '</div></div>'
   }
 
   function escapeHtml(s) {
@@ -162,8 +225,9 @@
       document.getElementById('mll-ai-body').innerHTML = '<p class="mll-ai-msg">MLL AI is coming soon.</p>'
       return
     }
-    if (localRemaining() <= 0) {
-      document.getElementById('mll-ai-body').innerHTML = '<p class="mll-ai-empty">You have used your 3 free AI searches. Sign in later for more.</p>'
+    if (remaining <= 0) {
+      document.getElementById('mll-ai-body').innerHTML = exhaustedHtml()
+      setQuota()
       return
     }
     document.getElementById('mll-ai-input').value = query
@@ -176,18 +240,36 @@
       var res = await fetch(API + '/api/ai/search', {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({ query: query.slice(0, 240) })
+        body: JSON.stringify({ query: query.slice(0, 300) })
       })
-      var data = await res.json()
+      var data = {}
+      try { data = await res.json() } catch (e) { data = {} }
       if (data && data.enabled === false) {
         enabled = false
         welcome()
         return
       }
-      bumpUsed()
+      if (res.status === 429 && data.error === 'quota_exceeded') {
+        remaining = 0
+        setQuota()
+        document.getElementById('mll-ai-body').innerHTML = exhaustedHtml()
+        return
+      }
+      if (res.status === 429 && data.error === 'rate_limited') {
+        document.getElementById('mll-ai-body').innerHTML = '<p class="mll-ai-empty">' + escapeHtml(data.message || 'Please wait a few seconds and try again.') + '</p>'
+        return
+      }
+      if (!res.ok && data.error === 'unavailable') {
+        document.getElementById('mll-ai-body').innerHTML = '<p class="mll-ai-empty">MLL AI is temporarily unavailable. Try regular search.</p>'
+        return
+      }
+      if (!res.ok) {
+        document.getElementById('mll-ai-body').innerHTML = '<p class="mll-ai-empty">' + escapeHtml(data.message || 'MLL AI is temporarily unavailable. Try regular search.') + '</p>'
+        return
+      }
       renderResults(data || {})
     } catch (e) {
-      document.getElementById('mll-ai-body').innerHTML = '<p class="mll-ai-empty">MLL AI is unavailable right now. Use Search on the homepage.</p>'
+      document.getElementById('mll-ai-body').innerHTML = '<p class="mll-ai-empty">MLL AI is temporarily unavailable. Try regular search.</p>'
     }
   }
 
