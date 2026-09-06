@@ -10,7 +10,8 @@ const AI_TIMEOUT_MS = 5000
 const AI_MAX_TOKENS = 80
 const VISITOR_LIMIT = 3
 const AUTH_LIMIT = 10
-const RATE_TTL_SEC = 4
+const RATE_WINDOW_MS = 4000
+const RATE_KV_TTL_SEC = 60
 const QUOTA_TTL_SEC = 60 * 60 * 26
 const METRICS_TTL_SEC = 60 * 60 * 48
 
@@ -235,8 +236,15 @@ async function consumeQuota(env: Env, state: QuotaState): Promise<QuotaState> {
 async function rateLimited(env: Env, hashedId: string): Promise<boolean> {
   const key = `airate:${hashedId}`
   const existing = await env.SESSION_CACHE.get(key)
-  if (existing) return true
-  await env.SESSION_CACHE.put(key, '1', { expirationTtl: RATE_TTL_SEC })
+  if (existing) {
+    try {
+      const ts = Number(JSON.parse(existing).t) || 0
+      if (Date.now() - ts < RATE_WINDOW_MS) return true
+    } catch {
+      return true
+    }
+  }
+  await env.SESSION_CACHE.put(key, JSON.stringify({ t: Date.now() }), { expirationTtl: RATE_KV_TTL_SEC })
   return false
 }
 

@@ -31,7 +31,7 @@ assert('supported intents only', /business_search/.test(aiApi) && /job_search/.t
 assert('spanish intent keywords', /abogado/.test(aiApi) && /restaurante/.test(aiApi) && /empleo/.test(aiApi) && /inmigraci/.test(aiApi))
 assert('never invent listings', /Never invent businesses/.test(aiApi) && /publicBusiness/.test(aiApi) && /SAFE_BIZ/.test(aiApi))
 assert('quota is KV not localStorage-only', /aiquota:/.test(aiApi) && /SESSION_CACHE/.test(aiApi) && /hashedId/.test(aiApi))
-assert('rate limit 429', /airate:/.test(aiApi) && /RATE_TTL_SEC = 4/.test(aiApi) && /rate_limited/.test(aiApi))
+assert('rate limit 429', /airate:/.test(aiApi) && /RATE_WINDOW_MS = 4000/.test(aiApi) && /rate_limited/.test(aiApi))
 assert('query length 300', /MAX_QUERY = 300/.test(aiApi) && /maxlength="300"/.test(aiJs))
 assert('visitor 3 / auth 10', /VISITOR_LIMIT = 3/.test(aiApi) && /AUTH_LIMIT = 10/.test(aiApi))
 assert('no Stripe AI billing', !/STRIPE/.test(aiApi) && !/create-checkout-session/.test(aiApi))
