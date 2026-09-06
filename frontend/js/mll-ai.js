@@ -70,14 +70,9 @@
 
   function welcome() {
     remaining = Math.min(remaining, localRemaining())
-    document.getElementById('mll-ai-quota').textContent = remaining + ' free AI searches'
-    var body = document.getElementById('mll-ai-body')
-    if (!enabled) {
-      body.innerHTML = '<p class="mll-ai-msg">MLL AI is coming soon.</p>'
-      document.getElementById('mll-ai-form').hidden = true
-      return
-    }
+    document.getElementById('mll-ai-quota').textContent = enabled ? (remaining + ' free AI searches') : 'Coming soon'
     document.getElementById('mll-ai-form').hidden = false
+    var body = document.getElementById('mll-ai-body')
     body.innerHTML =
       '<p class="mll-ai-msg">Hi! I\'m MLL AI. I can help you find Latino-owned businesses, jobs, resources and more.</p>' +
       '<p class="mll-ai-msg">What are you looking for?</p>' +
@@ -163,7 +158,10 @@
   }
 
   async function send(query) {
-    if (!enabled) return
+    if (!enabled) {
+      document.getElementById('mll-ai-body').innerHTML = '<p class="mll-ai-msg">MLL AI is coming soon.</p>'
+      return
+    }
     if (localRemaining() <= 0) {
       document.getElementById('mll-ai-body').innerHTML = '<p class="mll-ai-empty">You have used your 3 free AI searches. Sign in later for more.</p>'
       return

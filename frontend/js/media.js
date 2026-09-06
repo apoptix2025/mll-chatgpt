@@ -98,9 +98,9 @@
           '<a href="' + href + '"><h3>' + esc(biz.name) + verified + '</h3></a>' +
           '<div class="v2-card-meta">' +
             ratingHtml +
-            (ratingHtml && loc ? '<span>·</span>' : '') +
-            (loc ? '<span>' + loc + '</span>' : '') +
           '</div>' +
+          (biz.category ? '<span class="v2-card-cat">' + esc(biz.category) + '</span>' : '') +
+          (loc ? '<span class="v2-card-loc">' + loc + '</span>' : '') +
           (opts.showDesc && biz.description ? '<p class="v2-card-desc">' + esc(biz.description) + '</p>' : '') +
           actions +
         '</div>' +

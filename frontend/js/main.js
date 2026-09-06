@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-      grid.innerHTML = items.slice(0, 3).map(r => {
+      grid.innerHTML = items.slice(0, 4).map(r => {
         const href = r.url && /^https?:/i.test(r.url) ? r.url : 'pages/voz.html';
         const tag = r.category || r.tag || '';
         return (
