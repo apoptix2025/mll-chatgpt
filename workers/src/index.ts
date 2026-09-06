@@ -19,6 +19,7 @@ import { withCors } from './middleware/cors'
 import { withAuth } from './middleware/auth'
 import { handleScheduled } from './cron'
 import { handlePublicMedia } from './lib/media'
+import { handleAiSearch } from './api/ai-search'
 
 export interface Env {
   // KV
@@ -39,6 +40,8 @@ export interface Env {
   // Vars
   ENVIRONMENT: string
   FRONTEND_URL: string
+  MLL_AI_ENABLED?: string
+  AI?: unknown
 }
 
 export default {
@@ -98,6 +101,12 @@ export default {
                                                   response = await handleReferral(request, env)
       else if (path === '/api/sitemap' && request.method === 'GET')
                                                   response = await handleSitemap(request, env)
+      else if (path === '/api/ai/status' && request.method === 'GET')
+                                                  response = await handleAiSearch(request, env)
+      else if (path === '/api/ai/search' && request.method === 'GET')
+                                                  response = await handleAiSearch(request, env)
+      else if (path === '/api/ai/search' && request.method === 'POST')
+                                                  response = await handleAiSearch(request, env)
 
       // ── Protected routes (auth required) ──────────────────
       else {

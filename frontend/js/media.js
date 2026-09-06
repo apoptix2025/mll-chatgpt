@@ -58,32 +58,51 @@
     return '/pages/business?slug=' + encodeURIComponent(slug);
   }
 
+  function hasRealRating(biz) {
+    return biz && Number(biz.review_count) > 0 && biz.rating != null && biz.rating !== '';
+  }
+  function isVerified(biz) {
+    if (!biz) return false;
+    if (biz.is_verified === true) return true;
+    var tags = biz.tags;
+    if (Array.isArray(tags)) return tags.some(function (t) { return String(t).toLowerCase() === 'verified'; });
+    return false;
+  }
+
   function cardHTML(biz, opts) {
     opts = opts || {};
     var href = profileHref(biz);
     var saved = isSaved(biz.slug) ? ' is-saved' : '';
-    var rating = biz.rating != null && biz.rating !== '' ? Number(biz.rating).toFixed(1) : '—';
-    var reviews = biz.review_count != null ? biz.review_count : 0;
     var loc = esc(biz.city || '') + (biz.state ? ', ' + esc(biz.state) : '');
+    var ratingHtml = hasRealRating(biz)
+      ? '<span class="v2-stars">★ ' + Number(biz.rating).toFixed(1) + '</span><span>(' + Number(biz.review_count) + ')</span>'
+      : '';
+    var verified = isVerified(biz) ? '<span class="v2-verified">Verified</span>' : '';
+    var actions = '<div class="v2-card-actions">';
+    if (biz.phone) actions += '<a class="v2-card-act" href="tel:' + esc(String(biz.phone).replace(/[^\d+]/g, '')) + '">Call</a>';
+    if (biz.city || biz.state) {
+      var maps = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent([biz.name, biz.city, biz.state].filter(Boolean).join(', '));
+      actions += '<a class="v2-card-act" href="' + maps + '" target="_blank" rel="noopener">Directions</a>';
+    }
+    actions += '<a class="v2-card-act primary" href="' + href + '">View</a></div>';
     return (
       '<article class="v2-card">' +
         '<div class="v2-card-media">' +
-          '<a href="' + href + '"><img src="' + esc(imageUrl(biz)) + '" alt="' + esc(biz.name) + '"></a>' +
+          '<a href="' + href + '"><img src="' + esc(imageUrl(biz)) + '" alt="' + esc(biz.name) + '" loading="' + (opts.eager ? 'eager' : 'lazy') + '"></a>' +
           '<button type="button" class="v2-heart' + saved + '" data-save="' + esc(biz.slug) + '" aria-label="Save">' +
             '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" stroke="currentColor" stroke-width="1.8"/></svg>' +
           '</button>' +
-          '<span class="v2-chip">' + esc(biz.category || '') + '</span>' +
+          (biz.category ? '<span class="v2-chip">' + esc(biz.category) + '</span>' : '') +
         '</div>' +
         '<div class="v2-card-body">' +
-          '<a href="' + href + '"><h3>' + esc(biz.name) + '</h3></a>' +
+          '<a href="' + href + '"><h3>' + esc(biz.name) + verified + '</h3></a>' +
           '<div class="v2-card-meta">' +
-            '<span class="v2-stars">★ ' + rating + '</span>' +
-            '<span>(' + reviews + ')</span>' +
-            '<span>·</span>' +
-            '<span>' + loc + '</span>' +
+            ratingHtml +
+            (ratingHtml && loc ? '<span>·</span>' : '') +
+            (loc ? '<span>' + loc + '</span>' : '') +
           '</div>' +
           (opts.showDesc && biz.description ? '<p class="v2-card-desc">' + esc(biz.description) + '</p>' : '') +
-          '<a class="v2-card-cta" href="' + href + '">' + (opts.cta || 'View profile →') + '</a>' +
+          actions +
         '</div>' +
       '</article>'
     );

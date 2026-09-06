@@ -113,6 +113,25 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(data => {
       const el = document.getElementById('community-res-count');
       if (el && data && data.resources) el.textContent = String(data.resources.length);
+      const grid = document.getElementById('voz-latest-grid');
+      if (!grid) return;
+      const items = (data && data.resources) || [];
+      if (!items.length) {
+        grid.innerHTML = '<p class="mll-voz-empty">No articles available yet.</p>';
+        return;
+      }
+      const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+      grid.innerHTML = items.slice(0, 3).map(r => {
+        const href = r.url && /^https?:/i.test(r.url) ? r.url : 'pages/voz.html';
+        const tag = r.category || r.tag || '';
+        return (
+          '<a class="mll-voz-card" href="' + href + '">' +
+            (tag ? '<span class="mll-voz-tag">' + esc(tag) + '</span>' : '') +
+            '<b>' + esc(r.title || 'Resource') + '</b>' +
+            (r.description ? '<p>' + esc(r.description) + '</p>' : '') +
+          '</a>'
+        );
+      }).join('');
     })
     .catch(() => {});
 

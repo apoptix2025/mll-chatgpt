@@ -54,6 +54,14 @@ preview_bucket_name = "mll-media-dev"
 ENVIRONMENT = "production"
 FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
+MLL_AI_ENABLED = "false"
+
+# Workers AI is NOT enabled by default (no paid binding created).
+# Staging-only enablement, after explicit approval:
+#   [env.staging.ai]
+#   binding = "AI"
+#   Then set env.staging.vars MLL_AI_ENABLED = "true"
+# Do not enable on production without a separate approval.
 
 
 # ============================================================
@@ -126,6 +134,7 @@ name = "mll-api"
 ENVIRONMENT = "production"
 FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
+MLL_AI_ENABLED = "false"
 
 
 # ── Production API route ────────────────────────────────────
@@ -177,6 +186,7 @@ routes = []
 [env.staging.vars]
 
 ENVIRONMENT = "staging"
+MLL_AI_ENABLED = "false"
 
 # Cloudflare Pages staging frontend
 FRONTEND_URL = "https://staging.mylatinolist.pages.dev"

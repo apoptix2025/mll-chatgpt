@@ -29,7 +29,7 @@ export async function handleBusinesses(
 
     let query = supabase
       .from('businesses')
-      .select('id,name,slug,category,city,state,description,emoji,logo_url,rating,review_count,is_featured,tags', { count: 'exact' })
+      .select('id,name,slug,category,city,state,description,emoji,logo_url,rating,review_count,is_featured,tags,phone', { count: 'exact' })
       .eq('status', 'active')
       .neq('status', 'expired')
       .neq('name', 'Test')
