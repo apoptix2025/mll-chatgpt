@@ -148,11 +148,15 @@ assert('tablet hero does not use mobile image-first order', !/\.mll-hero-media \
 assert('desktop split hero stays copy left image right', /grid-template-columns: minmax\(0, 56%\) minmax\(0, 44%\)/.test(themeCss) && index.indexOf('mll-hero-copy') < index.indexOf('mll-hero-media') && !/\border:/.test(between(themeCss, '.mll-hero-split {', '.mll-hero-copy {')))
 assert('mobile hamburger remains after hero flow change', /id="hamburger"/.test(index) && /aria-controls="nav-mobile"/.test(index))
 assert('mobile toolbar order is Logo EN/ES MLL AI Menu', /class="logo"/.test(index) && /class="lang-toggle"/.test(index) && /id="mll-ai-toolbar"/.test(index) && /id="hamburger"/.test(index) && index.indexOf('class="logo"') < index.indexOf('class="lang-toggle"') && index.indexOf('class="lang-toggle"') < index.indexOf('id="mll-ai-toolbar"') && index.indexOf('id="mll-ai-toolbar"') < index.indexOf('id="hamburger"'))
-assert('mobile toolbar uses compact 4-column grid', /@media \(max-width: 767px\)[\s\S]*grid-template-columns: auto auto minmax\(0, 1fr\) auto/.test(themeCss) && /\.v2-home \.v2-top-actions \{ display: contents; \}/.test(themeCss))
+const mobileToolbar = between(themeCss, '@media (max-width: 767px) {', '@media (max-width: 360px)')
+assert('mobile toolbar uses compact 4-column grid', /grid-template-columns: minmax\(0, 1\.35fr\) auto auto 44px/.test(mobileToolbar) && /\.v2-home \.v2-top-actions \{ display: contents; \}/.test(mobileToolbar))
+assert('mobile toolbar AI has no margin-left auto', /\.v2-home \.mll-ai-toolbar \{/.test(mobileToolbar) && !/\.v2-home \.mll-ai-toolbar \{[\s\S]*?margin-left:\s*auto/.test(mobileToolbar) && !/minmax\(0, 1fr\)/.test(between(mobileToolbar, '.v2-home .v2-topnav-inner {', '}')))
+assert('mobile toolbar menu column is 44px', /auto auto 44px/.test(mobileToolbar) && /\.v2-home \.v2-hamburger \{[\s\S]*width: 44px/.test(mobileToolbar) && /\.v2-home \.v2-hamburger \{[\s\S]*height: 44px/.test(mobileToolbar))
 assert('mobile toolbar AI opens existing bottom sheet', /id="mll-ai-toolbar"/.test(index) && /✨/.test(index) && /mll-ai-toolbar-brand/.test(index) && /getElementById\('mll-ai-launch'\)/.test(navJs) && /function bindToolbarAi/.test(navJs) && /Ask MLL AI/.test(aiJs))
 assert('mobile floating AI launcher is hidden', /@media \(max-width: 767px\)[\s\S]*\.v2-home \.mll-ai-launch \{ display: none; \}/.test(themeCss))
 assert('desktop toolbar AI pill stays hidden', /\.v2-home \.mll-ai-toolbar \{ display: none; \}/.test(themeCss) && !/@media \(min-width: 1100px\)[\s\S]*\.mll-ai-toolbar \{[\s\S]*display: inline-flex/.test(themeCss))
 assert('tiny screens shorten toolbar AI label', /@media \(max-width: 360px\)[\s\S]*\.v2-home \.mll-ai-toolbar-brand \{ display: none; \}/.test(themeCss))
+assert('desktop header height rule remains 66px', /min-height: 66px/.test(themeCss) && /@media \(max-width: 767px\)[\s\S]*min-height: 54px/.test(themeCss))
 
 if (failed) {
   console.error('mll ai theme tests FAIL ' + failed)

@@ -543,36 +543,50 @@ body.mll-nav-open { overflow: hidden; }
 @media (max-width: 767px) {
   .v2-home .v2-topnav-inner {
     display: grid;
-    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1.35fr) auto auto 44px;
     align-items: center;
-    gap: 8px;
+    justify-content: start;
+    column-gap: 8px;
+    row-gap: 0;
+    gap: unset;
     width: 100%;
-    padding: 8px 12px;
+    min-height: 54px;
+    height: 56px;
+    max-height: 58px;
+    padding: 6px 10px;
   }
   .v2-home .v2-links { display: none; }
   .v2-home .v2-top-actions { display: contents; }
   .v2-home .v2-topnav-inner .logo {
     min-width: 0;
+    max-width: 125px;
+    margin: 0;
     justify-self: start;
+    overflow: hidden;
   }
   .v2-home .v2-topnav .logo-text { font-size: 16px; }
   .v2-home .v2-top-actions .lang-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
     margin: 0;
+    height: 34px;
   }
   .v2-home .v2-top-actions .lang-btn {
     min-height: 32px;
+    height: 32px;
     padding: 4px 8px;
   }
   .v2-home .mll-ai-toolbar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    justify-self: end;
-    min-height: 32px;
-    padding: 6px 10px;
+    justify-self: start;
+    width: auto;
+    height: 34px;
+    min-height: 34px;
+    margin: 0;
+    padding: 0 11px;
     border: 0;
     border-radius: 999px;
     background: #0866FF;
@@ -588,9 +602,15 @@ body.mll-nav-open { overflow: hidden; }
     outline-offset: 2px;
   }
   .v2-home .v2-hamburger {
+    display: grid;
+    place-items: center;
     justify-self: end;
+    width: 44px;
+    height: 44px;
     min-width: 44px;
     min-height: 44px;
+    margin: 0;
+    padding: 0;
   }
   .v2-home .mll-ai-launch { display: none; }
   .mll-container { padding-inline: 16px; }
@@ -691,5 +711,11 @@ body.mll-nav-open { overflow: hidden; }
 }
 @media (max-width: 360px) {
   .mll-hero-popular { grid-template-columns: minmax(0, 1fr); }
+  .v2-home .v2-topnav-inner {
+    column-gap: 6px;
+    padding: 6px 8px;
+  }
+  .v2-home .v2-topnav-inner .logo { max-width: 108px; }
+  .v2-home .v2-topnav .logo-text { font-size: 15px; }
   .v2-home .mll-ai-toolbar-brand { display: none; }
 }
