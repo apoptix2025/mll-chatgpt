@@ -36,19 +36,20 @@
   box-shadow: none;
 }
 
-/* Split hero: dark copy | family photo */
+/* Split hero: one grid system only. Do not reuse .mll-hero-inner (legacy max-width:820px). */
 .mll-hero-premium {
   background: #10213A;
   height: 380px;
-  max-height: 390px;
+  max-height: 400px;
   overflow: hidden;
 }
-.mll-hero-inner {
+.mll-hero-split {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 46%);
-  height: 380px;
-  max-height: 390px;
+  grid-template-columns: minmax(0, 56%) minmax(0, 44%);
   width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
   align-items: stretch;
 }
 .mll-hero-copy {
@@ -58,8 +59,10 @@
   justify-content: center;
   text-align: left;
   color: #fff;
-  padding: 18px 28px 16px max(24px, calc((100vw - 1260px) / 2 + 24px));
   min-width: 0;
+  width: auto;
+  padding: 18px 24px 16px max(24px, calc((100vw - 1260px) / 2 + 24px));
+  box-sizing: border-box;
 }
 .mll-hero-eyebrow {
   font-size: 10px;
@@ -68,13 +71,16 @@
   text-transform: uppercase;
   color: rgba(255,255,255,0.74);
   margin-bottom: 8px;
+  max-width: 600px;
+  white-space: nowrap;
 }
 .mll-hero-premium h1 {
-  font-size: clamp(38px, 3vw, 50px);
+  font-size: clamp(38px, 2.6vw, 48px);
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.02;
-  max-width: 620px;
+  max-width: 600px;
+  width: 100%;
   margin: 0 0 8px;
   text-align: left;
 }
@@ -82,41 +88,44 @@
   font-style: normal;
   color: #3B8AFF;
 }
-.mll-hero-line3 { white-space: nowrap; }
+.mll-hero-line3 { white-space: normal; }
 .mll-hero-lead {
   font-size: 14px;
   line-height: 1.45;
   color: rgba(255,255,255,0.86);
   max-width: 520px;
+  width: 100%;
   margin: 0 0 12px;
   text-align: left;
 }
-.mll-hero-image {
-  position: relative;
+.mll-hero-media {
+  min-width: 0;
+  width: auto;
   height: 100%;
   overflow: hidden;
+  position: relative;
 }
-.mll-hero-image img.mll-hero-bg,
-.mll-hero-premium img.mll-hero-bg {
+.mll-hero-media img.mll-hero-bg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 42% 28%;
+  object-position: center center;
   display: block;
 }
-.mll-hero-image::before {
+.mll-hero-media::before {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: 72px;
+  width: 56px;
   background: linear-gradient(90deg, #10213A 0%, rgba(16,33,58,0) 100%);
   z-index: 1;
+  pointer-events: none;
 }
 
-/* Compact search inside hero */
+/* Search stays inside the left copy column */
 .mll-hero-premium .v2-search-wrap,
 .mll-hero-search {
-  max-width: 820px;
+  max-width: 780px;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -125,9 +134,10 @@
 }
 .mll-hero-premium .v2-search {
   width: 100%;
+  max-width: 780px;
   height: 50px;
   border-radius: 12px;
-  grid-template-columns: 1fr 190px auto;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.55fr) 100px;
   box-shadow: 0 10px 24px rgba(0,0,0,0.18);
 }
 .mll-hero-premium .v2-search label {
@@ -135,16 +145,20 @@
   flex-direction: row;
   align-items: center;
   gap: 0;
+  min-width: 0;
 }
 .mll-hero-premium .v2-search span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
-.mll-hero-premium .v2-search input { font-size: 13px; }
+.mll-hero-premium .v2-search input { font-size: 13px; min-width: 0; width: 100%; }
 .mll-hero-premium .v2-search button {
-  padding: 0 18px;
+  padding: 0 12px;
   font-size: 13px;
   height: 50px;
 }
 .mll-hero-premium .v2-pills-row {
   align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 780px;
   gap: 6px;
   margin-top: 10px;
 }
@@ -356,29 +370,31 @@
 
 @media (max-width: 1240px) {
   .mll-voz-grid { grid-template-columns: repeat(3, 1fr); }
-  .mll-hero-copy { padding-left: 24px; }
 }
-@media (max-width: 1100px) {
+@media (max-width: 1099px) {
   .v2-home .v2-topnav-inner { padding: 8px 16px; }
-  .mll-hero-premium,
-  .mll-hero-inner { height: auto; max-height: none; min-height: 0; }
-  .mll-hero-inner { grid-template-columns: 1fr; }
+  .mll-hero-premium { height: auto; max-height: none; overflow: hidden; }
+  .mll-hero-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
   .mll-hero-copy { padding: 22px 16px 16px; }
-  .mll-hero-image { height: 220px; }
+  .mll-hero-eyebrow { white-space: normal; }
+  .mll-hero-media { height: 220px; width: auto; min-width: 0; }
   .mll-hero-premium h1 { font-size: clamp(30px, 4.2vw, 42px); max-width: 520px; }
-  .mll-hero-line3 { white-space: normal; }
   .mll-shortcuts { grid-template-columns: repeat(3, 1fr); }
   .v2-home .v2-featured-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mll-voz-grid { grid-template-columns: repeat(2, 1fr); }
   .mll-cta-row { flex-wrap: wrap; min-height: 0; }
 }
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .mll-container { padding-inline: 16px; }
-  .mll-hero-premium,
-  .mll-hero-inner { height: auto; max-height: none; }
+  .mll-hero-premium { height: auto; max-height: none; }
+  .mll-hero-split { grid-template-columns: minmax(0, 1fr); height: auto; }
   .mll-hero-copy { padding: 20px 16px 16px; }
-  .mll-hero-image { height: 200px; order: -1; }
-  .mll-hero-image::before {
+  .mll-hero-media { height: 200px; }
+  .mll-hero-media::before {
     width: 100%;
     background: linear-gradient(180deg, rgba(16,33,58,0) 40%, #10213A 100%);
   }
@@ -389,7 +405,7 @@
   .mll-hero-search { max-width: none; }
   .mll-hero-premium .v2-search {
     height: auto;
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr);
   }
   .mll-hero-premium .v2-search label { padding: 10px 14px; }
   .mll-hero-premium .v2-search button { height: 44px; }
