@@ -49,18 +49,18 @@
     currentLang = lang;          // set first so the initial apply does NOT dispatch
     applyLang(lang);
 
-    // --- HAMBURGER (full-nav pages) ---
+    bindMobileDrawer(document.getElementById('hamburger'), document.getElementById('nav-mobile'), document.getElementById('nav-mobile-backdrop'), document.getElementById('nav-mobile-close'));
     document.querySelectorAll('.hamburger').forEach(function (h) {
+      if (h.id === 'hamburger') return;
       h.addEventListener('click', function () {
         var menu = document.querySelector('.nav-mobile');
         if (menu) menu.classList.toggle('open');
       });
     });
-    // Close the mobile menu when a link inside it is tapped.
     document.querySelectorAll('.nav-mobile a').forEach(function (a) {
       a.addEventListener('click', function () {
         var menu = a.closest('.nav-mobile');
-        if (menu) menu.classList.remove('open');
+        if (menu) closeMobileDrawer(menu);
       });
     });
 
@@ -129,6 +129,68 @@
         var menu = a.closest('.nav-mobile');
         if (menu) menu.classList.remove('open');
       });
+    });
+  }
+
+  function closeMobileDrawer(menu) {
+    if (!menu) return;
+    menu.classList.remove('open');
+    var btn = document.getElementById('hamburger');
+    if (btn) {
+      btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'Open menu');
+    }
+    document.body.classList.remove('mll-nav-open');
+    var back = document.getElementById('nav-mobile-backdrop');
+    if (back) {
+      back.hidden = true;
+      back.classList.remove('is-open');
+    }
+  }
+
+  function openMobileDrawer(menu) {
+    if (!menu) return;
+    menu.classList.add('open');
+    var btn = document.getElementById('hamburger');
+    if (btn) {
+      btn.setAttribute('aria-expanded', 'true');
+      btn.setAttribute('aria-label', 'Close menu');
+    }
+    document.body.classList.add('mll-nav-open');
+    var back = document.getElementById('nav-mobile-backdrop');
+    if (back) {
+      back.hidden = false;
+      back.classList.add('is-open');
+    }
+    var closeBtn = document.getElementById('nav-mobile-close');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function bindMobileDrawer(btn, menu, backdrop, closeBtn) {
+    if (!btn || !menu) return;
+    btn.addEventListener('click', function () {
+      if (menu.classList.contains('open')) closeMobileDrawer(menu);
+      else openMobileDrawer(menu);
+    });
+    if (closeBtn) closeBtn.addEventListener('click', function () { closeMobileDrawer(menu); });
+    if (backdrop) backdrop.addEventListener('click', function () { closeMobileDrawer(menu); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menu.classList.contains('open')) {
+        closeMobileDrawer(menu);
+        btn.focus();
+      }
+      if (e.key !== 'Tab' || !menu.classList.contains('open')) return;
+      var focusable = menu.querySelectorAll('a, button');
+      if (!focusable.length) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     });
   }
 

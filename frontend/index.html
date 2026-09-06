@@ -67,11 +67,16 @@
         <a href="pages/login.html" class="v2-btn-ghost" id="nav-signin" data-en="Sign In" data-es="Iniciar sesión">Sign In</a>
         <a href="pages/enroll.html" class="v2-btn-primary" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>
       </div>
-      <button class="v2-hamburger hamburger" id="hamburger" aria-label="Menu">
+      <button type="button" class="v2-hamburger hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="nav-mobile">
         <span></span><span></span><span></span>
       </button>
     </div>
+    <div class="mll-nav-backdrop" id="nav-mobile-backdrop" hidden></div>
     <div class="nav-mobile" id="nav-mobile">
+      <div class="mll-nav-drawer-head">
+        <strong data-en="Menu" data-es="Menú">Menu</strong>
+        <button type="button" class="mll-nav-close" id="nav-mobile-close" aria-label="Close menu">×</button>
+      </div>
       <a href="/" data-en="Home" data-es="Inicio">Home</a>
       <a href="pages/directory.html" data-en="Businesses" data-es="Negocios">Businesses</a>
       <a href="pages/jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
@@ -80,15 +85,12 @@
       <a href="/pages/partners" data-en="Partners" data-es="Socios">Partners</a>
       <a href="pages/enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>
       <a href="pages/affiliates.html" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
-      <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
-      <div class="lang-toggle" style="margin:4px 12px 8px;">
-        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
-        <span>|</span>
-        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
-      </div>
-      <a href="pages/login.html" id="mob-signin" style="color:var(--coral);font-weight:500;" data-en="Sign in to dashboard" data-es="Acceder al panel">Sign in to dashboard</a>
-      <a href="pages/dashboard.html" id="mob-dashboard" style="display:none;color:var(--coral);font-weight:500;" data-en="My dashboard →" data-es="Mi panel →">My dashboard →</a>
-      <a href="pages/enroll.html" class="v2-btn-primary" style="margin-top:8px;text-align:center;" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>
+      <div class="mll-nav-sep" role="separator"></div>
+      <a href="pages/directory.html" data-en="Search" data-es="Buscar">Search</a>
+      <a href="pages/directory.html#saved" data-en="Saved" data-es="Guardados">Saved</a>
+      <a href="pages/login.html" id="mob-signin" data-en="Sign In" data-es="Iniciar sesión">Sign In</a>
+      <a href="pages/dashboard.html" id="mob-dashboard" style="display:none;" data-en="Account" data-es="Cuenta">Account</a>
+      <a href="pages/enroll.html" class="v2-btn-primary mll-nav-cta" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>
     </div>
   </nav>
 

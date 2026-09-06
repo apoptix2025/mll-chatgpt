@@ -122,6 +122,13 @@ assert('Worker AI never invents businesses', /Never invent businesses/.test(aiAp
 assert('quota entitlements are stubbed not billed', /visitor: 3/.test(aiJs) && /auth: 10/.test(aiJs) && /AUTH_LIMIT = 10/.test(aiApi) && !/create-checkout-session/.test(aiApi) && !/STRIPE/.test(aiApi))
 assert('Affiliates stays out of desktop shortcuts', !/affiliates\.html/.test(between(index, 'id="mll-shortcuts"', '</section>')))
 assert('homepage hamburger still has Affiliates', /pages\/affiliates\.html/.test(homeMobile))
+assert('mobile menu button exists', /id="hamburger"/.test(index) && /aria-label="Open menu"/.test(index) && /aria-expanded/.test(index) && /aria-controls="nav-mobile"/.test(index))
+assert('mobile drawer/menu exists', /id="nav-mobile"/.test(index) && /id="nav-mobile-backdrop"/.test(index) && /aria-label="Close menu"/.test(index) && /mll-nav-open/.test(navJs) && /Escape/.test(navJs))
+assert('mobile drawer keeps Search Saved Sign In', /data-en="Search"/.test(homeMobile) && /data-en="Saved"/.test(homeMobile) && /id="mob-signin"/.test(homeMobile) && /id="mob-dashboard"/.test(homeMobile))
+assert('desktop shortcuts remain 6 columns', /grid-template-columns: repeat\(6, 1fr\)/.test(themeCss))
+assert('tablet shortcuts use 3 columns', /repeat\(3, minmax\(0, 1fr\)\)/.test(themeCss))
+assert('mobile shortcuts use 2-column grid not horizontal scroll', /repeat\(2, minmax\(0, 1fr\)\)/.test(themeCss) && !/\.mll-shortcuts \{ display: flex; overflow-x: auto/.test(themeCss))
+assert('mobile Popular Searches uses grid', /@media \(max-width: 767px\)[\s\S]*\.mll-hero-popular \{[\s\S]*display: grid/.test(themeCss) && /max-width: 360px/.test(themeCss))
 
 if (failed) {
   console.error('mll ai theme tests FAIL ' + failed)
