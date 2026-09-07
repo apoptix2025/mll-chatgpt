@@ -78,6 +78,7 @@ body:has(.v2-topnav) { padding-top: 0 !important; }
   align-items: center;
   white-space: nowrap;
   flex-shrink: 0;
+  min-width: max-content;
   line-height: 1;
 }
 .v2-btn-ghost:hover { background: var(--blue-50); }

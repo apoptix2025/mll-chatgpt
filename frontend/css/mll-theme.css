@@ -28,14 +28,17 @@
 .v2-home .v2-links { gap: 0; }
 .v2-home .v2-links a { font-size: 13px; padding: 6px 8px; }
 .v2-home .v2-top-actions { gap: 6px; flex-shrink: 0; align-items: center; }
+.v2-home .v2-top-actions .lang-toggle { margin: 0; }
 .v2-home .v2-icon-btn { width: 34px; height: 34px; }
-.v2-home .v2-btn-ghost {
+.v2-home .v2-btn-ghost,
+.v2-home .v2-top-actions #nav-signin {
   font-size: 13px;
   padding: 7px 10px;
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
   flex-shrink: 0;
+  min-width: max-content;
   line-height: 1;
 }
 .v2-home .v2-btn-primary {
