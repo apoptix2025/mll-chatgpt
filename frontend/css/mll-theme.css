@@ -27,13 +27,26 @@
 .v2-home .v2-topnav .logo-text { font-size: 19px; font-weight: 600; }
 .v2-home .v2-links { gap: 0; }
 .v2-home .v2-links a { font-size: 13px; padding: 6px 8px; }
-.v2-home .v2-top-actions { gap: 6px; }
+.v2-home .v2-top-actions { gap: 6px; flex-shrink: 0; align-items: center; }
 .v2-home .v2-icon-btn { width: 34px; height: 34px; }
-.v2-home .v2-btn-ghost { font-size: 13px; padding: 7px 10px; }
+.v2-home .v2-btn-ghost {
+  font-size: 13px;
+  padding: 7px 10px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+}
 .v2-home .v2-btn-primary {
   font-size: 13px;
   padding: 7px 14px;
   box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
 }
 .v2-home .mll-ai-toolbar,
 .v2-home .mll-toolbar-auth { display: none; }
