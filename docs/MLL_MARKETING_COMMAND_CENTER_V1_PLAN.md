@@ -53,13 +53,9 @@ Keys:
 
 ## Analytics Engine
 
-Add dataset binding `ANALYTICS` → `mll_marketing_events` on **staging and production config**.
+**Not enabled on this Cloudflare account** (deploy returned code 10089). Phase 1 does **not** bind Analytics Engine, so we do not require a dashboard paid-feature toggle.
 
-- Writes: `writeDataPoint` (blobs = event name + optional public path/slug).
-- Reads: **not** via Cloudflare GraphQL (would need a new API token). Dashboard reads **KV daily counters** written by the same helper.
-- Traffic category remains `not_connected` until at least one first-party event is stored.
-
-Incremental cost: ~$0 at this volume on the existing Workers plan (Analytics Engine writes are not a new vendor).
+Reads and dashboard scores use **KV daily counters** (`mkt:events:{date}`) written by `trackMarketingEvent`. `env.ANALYTICS?.writeDataPoint` remains optional if AE is enabled later.
 
 ## API routes
 
