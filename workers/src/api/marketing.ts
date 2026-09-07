@@ -56,8 +56,22 @@ type ListingRow = {
   website: string | null
   logo_url: string | null
   plan: string | null
+  is_featured?: boolean
   social_links: Record<string, string> | null
 }
+
+export type PromotionCandidate = {
+  name: string
+  slug: string
+  category: string
+  city: string | null
+  state: string | null
+  reason: string
+}
+
+export const EMPTY_PROMOTE_MESSAGE = 'No eligible grounded listings available for this pack.'
+const QA_SLUGS = new Set(['mll-qa-test-business'])
+const UNGROUNDED_CLAIM = /#1\b|\bbest\b|\btop-rated\b|\bleading\b|testimonial|followers|revenue|ranking|\d+\s*%/i
 
 function hasSocial(links: Record<string, string> | null | undefined, key: string): boolean {
   const value = links && typeof links === 'object' ? String(links[key] || links[key.toLowerCase()] || '') : ''
@@ -153,6 +167,298 @@ export function filterPackToGrounded(
   return pack
 }
 
+export function isEligibleListing(row: { name?: string; slug?: string; category?: string }): boolean {
+  const name = String(row.name || '').trim()
+  const slug = String(row.slug || '').trim()
+  const category = String(row.category || '').trim()
+  if (!name || !slug || !category) return false
+  if (QA_SLUGS.has(slug.toLowerCase())) return false
+  if (/^mll[\s-]?qa/i.test(name) || /(?:^|-)qa(?:-|$)/i.test(slug) && /test/i.test(slug)) return false
+  return true
+}
+
+export function selectPromotionCandidates(
+  listings: Array<{
+    name: string
+    slug: string
+    category: string
+    city?: string | null
+    state?: string | null
+    plan?: string | null
+    is_featured?: boolean
+  }>,
+  limit = 3
+): PromotionCandidate[] {
+  const eligible = listings.filter(isEligibleListing)
+  const scored = eligible.map((b) => {
+    const plan = String(b.plan || '')
+    let score = 0
+    if (b.is_featured) score += 25
+    if (plan === 'featured') score += 20
+    else if (plan === 'pro') score += 12
+    else if (plan === 'admin') score += 6
+    if (b.city && b.state) score += 10
+    return { b, score }
+  }).sort((a, c) => c.score - a.score)
+
+  const picked: PromotionCandidate[] = []
+  const used = new Set<string>()
+  const usedCat = new Set<string>()
+
+  function add(b: (typeof scored)[number]['b']) {
+    if (used.has(b.slug) || picked.length >= limit) return
+    used.add(b.slug)
+    usedCat.add(b.category.toLowerCase())
+    const loc = [b.city, b.state].filter(Boolean).join(', ')
+    picked.push({
+      name: b.name,
+      slug: b.slug,
+      category: b.category,
+      city: b.city || null,
+      state: b.state || null,
+      reason: loc
+        ? `Active ${b.category} listing on My Latino List in ${loc}.`
+        : `Active ${b.category} listing on My Latino List.`,
+    })
+  }
+
+  for (const { b } of scored) {
+    if (usedCat.has(b.category.toLowerCase()) && picked.length < limit && scored.length > limit) continue
+    add(b)
+  }
+  for (const { b } of scored) add(b)
+  return picked.slice(0, limit)
+}
+
+function asStringList(raw: unknown, max: number): string[] {
+  if (!Array.isArray(raw)) return []
+  return raw.map((item) => {
+    if (typeof item === 'string') return item.trim()
+    if (item && typeof item === 'object') {
+      const row = item as Record<string, unknown>
+      return String(row.text || row.caption || row.post || row.keyword || '').trim()
+    }
+    return ''
+  }).filter(Boolean).slice(0, max)
+}
+
+function asTiktokList(raw: unknown, max: number): Array<Record<string, string>> {
+  if (!Array.isArray(raw)) return []
+  const out: Array<Record<string, string>> = []
+  for (const item of raw) {
+    if (typeof item === 'string') {
+      const text = item.trim()
+      if (text) out.push({ hook: text, visual: '', talking_point: text, cta: 'Discover more on My Latino List.' })
+      continue
+    }
+    if (!item || typeof item !== 'object') continue
+    const row = item as Record<string, unknown>
+    const hook = String(row.hook || row.title || '').trim()
+    const visual = String(row.visual || row.video || row.video_idea || '').trim()
+    const talking = String(row.talking_point || row.talking || row.script || '').trim()
+    const cta = String(row.cta || row.call_to_action || '').trim()
+    if (!hook && !talking) continue
+    out.push({
+      hook: hook || talking,
+      visual,
+      talking_point: talking || hook,
+      cta: cta || 'Search My Latino List and open a listing.',
+    })
+  }
+  return out.slice(0, max)
+}
+
+function asSpotlight(raw: unknown): { en: string; es: string } {
+  if (!raw || typeof raw !== 'object') return { en: '', es: '' }
+  const row = raw as Record<string, unknown>
+  return { en: String(row.en || '').trim(), es: String(row.es || '').trim() }
+}
+
+function asLaVoz(raw: unknown): { title: string; angle: string } {
+  if (typeof raw === 'string') return { title: raw.trim(), angle: '' }
+  if (!raw || typeof raw !== 'object') return { title: '', angle: '' }
+  const row = raw as Record<string, unknown>
+  return {
+    title: String(row.title || '').trim(),
+    angle: String(row.angle || row.description || '').trim(),
+  }
+}
+
+function asNewsletter(raw: unknown): { subject: string; purpose: string } {
+  if (typeof raw === 'string') return { subject: raw.trim(), purpose: '' }
+  if (!raw || typeof raw !== 'object') return { subject: '', purpose: '' }
+  const row = raw as Record<string, unknown>
+  return {
+    subject: String(row.subject || row.title || '').trim(),
+    purpose: String(row.purpose || row.angle || row.description || '').trim(),
+  }
+}
+
+export function normalizePackShape(pack: Record<string, unknown>): Record<string, unknown> {
+  pack.facebook_posts = asStringList(pack.facebook_posts, 3)
+  pack.instagram_captions = asStringList(pack.instagram_captions, 3)
+  pack.tiktok_concepts = asTiktokList(pack.tiktok_concepts, 2)
+  pack.keywords = asStringList(pack.keywords, 5)
+  pack.bilingual_spotlight = asSpotlight(pack.bilingual_spotlight)
+  pack.la_voz_idea = asLaVoz(pack.la_voz_idea)
+  pack.newsletter = asNewsletter(pack.newsletter)
+  pack.auto_post = false
+  return pack
+}
+
+export function applyDeterministicPromote(
+  pack: Record<string, unknown>,
+  candidates: PromotionCandidate[]
+): Record<string, unknown> {
+  const modelPromote = Array.isArray(pack.promote) ? pack.promote : []
+  const reasons = new Map<string, string>()
+  for (const item of modelPromote) {
+    if (!item || typeof item !== 'object') continue
+    const row = item as Record<string, unknown>
+    const reason = String(row.reason || '').trim()
+    if (!reason || UNGROUNDED_CLAIM.test(reason)) continue
+    const slug = String(row.slug || '').toLowerCase()
+    const name = String(row.name || '').toLowerCase()
+    if (slug) reasons.set(slug, reason)
+    if (name) reasons.set(name, reason)
+  }
+  if (!candidates.length) {
+    pack.promote = []
+    pack.promote_empty_message = EMPTY_PROMOTE_MESSAGE
+    return pack
+  }
+  pack.promote = candidates.map((c) => ({
+    name: c.name,
+    slug: c.slug,
+    category: c.category,
+    city: c.city,
+    state: c.state,
+    reason: reasons.get(c.slug.toLowerCase()) || reasons.get(c.name.toLowerCase()) || c.reason,
+  }))
+  pack.promote_empty_message = null
+  return pack
+}
+
+export function buildFallbackPack(
+  candidates: PromotionCandidate[],
+  resources: Array<{ title: string }>
+): Record<string, unknown> {
+  const first = candidates[0]
+  const loc = first ? [first.city, first.state].filter(Boolean).join(', ') : ''
+  const name = first?.name || ''
+  const cat = first?.category || 'local services'
+  return {
+    facebook_posts: [
+      `Need a Latino-owned restaurant, contractor, or professional nearby? Search the My Latino List directory and open a listing in your community.`,
+      `My Latino List brings Latino-owned business listings, jobs, marketplace items, and La Voz Latino resources together so you can take the next step today.`,
+      name
+        ? `${name} is listed on My Latino List${loc ? ` in ${loc}` : ''}. Browse the directory to discover this ${cat.toLowerCase()} listing and other Latino-owned businesses.`
+        : `Browse My Latino List to discover Latino-owned businesses, open jobs, and community resources — then visit a listing that fits what you need.`,
+    ],
+    instagram_captions: [
+      `Search My Latino List for Latino-owned businesses near you. Directory + jobs + La Voz Latino. #MyLatinoList #LatinoOwned #ApoyaLoLocal`,
+      name
+        ? `${name} · ${cat}${loc ? ` · ${loc}` : ''}. Find this listing on My Latino List and keep exploring your community. #LatinoBusiness #MyLatinoList`
+        : `Looking for a Latino-owned pro? Start on My Latino List and discover listings in your city. #MyLatinoList #Comunidad`,
+      `Jobs, marketplace, and La Voz Latino live next to the directory. Explore My Latino List today. #LaVozLatino #MyLatinoList`,
+    ],
+    tiktok_concepts: [
+      {
+        hook: 'Need a Latino-owned business nearby?',
+        visual: 'Quick cuts of the MLL directory search and a real listing profile.',
+        talking_point: 'My Latino List helps you discover local Latino-owned listings, jobs, and community resources.',
+        cta: 'Search My Latino List and open a listing near you.',
+      },
+      {
+        hook: name ? `A listing already on My Latino List: ${name}` : 'Your community directory is already live.',
+        visual: 'Screen recording of a listing card, then jobs or a La Voz Latino resource.',
+        talking_point: 'MLL is built for Latino-owned businesses and the people looking for them.',
+        cta: 'Browse My Latino List and tap a business that matches what you need.',
+      },
+    ],
+    bilingual_spotlight: {
+      en: name
+        ? `${name} is a ${cat} listing on My Latino List${loc ? ` in ${loc}` : ''}. Open the directory to discover this business and other Latino-owned listings nearby.`
+        : 'My Latino List helps you discover Latino-owned businesses, jobs, marketplace items, and La Voz Latino resources in one place.',
+      es: name
+        ? `${name} aparece en My Latino List como un negocio de ${cat.toLowerCase()}${loc ? ` en ${loc}` : ''}. Entra al directorio para descubrir este y otros negocios de dueños latinos cerca de ti.`
+        : 'My Latino List te ayuda a descubrir negocios de dueños latinos, empleos, el marketplace y recursos de La Voz Latino en un solo lugar.',
+    },
+    la_voz_idea: {
+      title: 'How to find a Latino-owned business on My Latino List this week',
+      angle: 'Show readers how to search the directory, open a listing, then use jobs, marketplace, and La Voz Latino resources. No invented success stats.',
+    },
+    keywords: [
+      'Latino-owned businesses near me',
+      'My Latino List directory',
+      'empleos para latinos',
+      'La Voz Latino resources',
+      'marketplace negocios latinos',
+    ],
+    newsletter: {
+      subject: 'Find Latino-owned businesses on My Latino List',
+      purpose: 'Invite readers to search the directory, check open jobs, and read La Voz Latino — linking only to real MLL pages.',
+    },
+    promote: [],
+    grounded_resource_titles: resources.map((r) => r.title).slice(0, 8),
+    auto_post: false,
+    fallback: true,
+    disclaimer: 'Drafts only. Review before publishing. No performance claims.',
+  }
+}
+
+export function buildMarketingPackPrompt(input: {
+  candidates: PromotionCandidate[]
+  resources: Array<{ title: string; category?: string }>
+}): string {
+  const grounded = {
+    promote_these_only: input.candidates.map((c) => ({
+      name: c.name,
+      slug: c.slug,
+      category: c.category,
+      city: c.city,
+      state: c.state,
+    })),
+    resources: input.resources.slice(0, 6).map((r) => ({ title: r.title, category: r.category || '' })),
+    mll_capabilities: [
+      'discovering Latino-owned businesses',
+      'business listings',
+      'jobs',
+      'marketplace',
+      'La Voz Latino',
+      'community resources',
+      'local community discovery',
+    ],
+  }
+  return [
+    'You generate DRAFT marketing copy for My Latino List (MLL), operated by AP Optix.',
+    'MLL is a directory where people discover Latino-owned businesses, jobs, marketplace items, La Voz Latino, and community resources.',
+    'Write specifically about My Latino List. Be useful, action oriented, and natural — not corporate slogans.',
+    'Encourage real MLL discovery: search the directory, open a listing, check jobs, marketplace, or La Voz Latino.',
+    'Do not write generic lines like “¡Vive la diversidad y la inclusión!” or “The power of community-driven initiatives.”',
+    'Quality direction (do not copy verbatim): a post that asks people to find a Latino-owned restaurant, contractor, or professional on My Latino List.',
+    'Return ONLY JSON with keys: facebook_posts, instagram_captions, tiktok_concepts, bilingual_spotlight, la_voz_idea, keywords, newsletter, promote.',
+    'Platform rules:',
+    '- facebook_posts: 3 conversational, community-focused strings with a clear CTA. Mention My Latino List.',
+    '- instagram_captions: 3 short, visually oriented strings with useful hashtags and a discovery CTA.',
+    '- tiktok_concepts: 2 objects {hook, visual, talking_point, cta}. Not a topic title only.',
+    '- bilingual_spotlight: {en, es} same core message. Spanish must be natural Latin American Spanish, culturally appropriate, independently written rather than a literal English translation, grammatically correct, and concise.',
+    '- la_voz_idea: {title, angle} a useful article idea with a specific title and short description, not a generic business-growth phrase.',
+    '- newsletter: {subject, purpose} subject/concept plus a short purpose/angle.',
+    '- keywords: 5 MLL discovery phrases.',
+    '- promote: copy only the supplied listings (name, slug, category, reason). Never invent a business.',
+    'Rules:',
+    '- Do not fabricate businesses, stats, testimonials, traffic, rankings, followers, reviews, sales, or results.',
+    '- Only reference businesses/resources supplied in grounded context.',
+    '- Never fabricate customers, revenue, growth percentages, awards, partnerships, locations, services, or promotions unless supplied.',
+    '- Avoid unsupported superlatives such as best, #1, leading, or top-rated unless grounded.',
+    '- Produce English and Spanish in bilingual_spotlight.',
+    '- Generate marketing drafts, not factual performance claims.',
+    '- Nothing auto-posts. Drafts require human approval.',
+    'Grounded context: ' + JSON.stringify(grounded),
+  ].join('\n')
+}
+
 async function requireAdmin(request: Request, env: Env): Promise<{ ok: true; email: string; userId: string } | { ok: false; response: Response }> {
   const auth = await withAuth(request, env)
   if (!auth.ok) return { ok: false, response: Response.json({ error: 'Unauthorized' }, { status: 401 }) }
@@ -189,7 +495,7 @@ async function readPacks(env: Env): Promise<Array<Record<string, unknown>>> {
 async function loadDirectory(env: Env) {
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
   const [biz, resources, profiles, leads, jobs, products] = await Promise.all([
-    supabase.from('businesses').select('id,name,slug,category,city,state,description,phone,website,logo_url,plan,social_links,status').eq('status', 'active'),
+    supabase.from('businesses').select('id,name,slug,category,city,state,description,phone,website,logo_url,plan,is_featured,social_links,status').eq('status', 'active'),
     supabase.from('resources').select('id,title,category,created_at,status').eq('status', 'active').order('created_at', { ascending: false }),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('leads').select('id', { count: 'exact', head: true }),
@@ -282,17 +588,25 @@ async function packRateLimited(env: Env): Promise<string | null> {
   return null
 }
 
-function groundedContext(listings: ListingRow[], resources: Array<{ title: string; category: string }>) {
+function persistPack(env: Env, email: string, pack: Record<string, unknown>, fallback: boolean) {
   return {
-    businesses: listings.slice(0, 12).map((b) => ({
-      name: b.name,
-      slug: b.slug,
-      category: b.category,
-      city: b.city,
-      state: b.state,
-    })),
-    resources: resources.slice(0, 8).map((r) => ({ title: r.title, category: r.category })),
+    id: crypto.randomUUID(),
+    created_at: new Date().toISOString(),
+    created_by: email,
+    model: MLL_AI_MODEL,
+    auto_post: false,
+    fallback,
+    pack,
   }
+}
+
+async function storePack(env: Env, stored: Record<string, unknown>): Promise<number> {
+  const packs = await readPacks(env)
+  packs.unshift(stored)
+  const next = packs.slice(0, MAX_PACKS)
+  await env.SESSION_CACHE.put(PACK_KEY, JSON.stringify(next))
+  await trackMarketingEvent(env, { event: 'ai_marketing_pack_generated' })
+  return next.length
 }
 
 async function generatePack(env: Env, email: string) {
@@ -300,44 +614,38 @@ async function generatePack(env: Env, email: string) {
   const limited = await packRateLimited(env)
   if (limited) return { error: limited, status: 429 as const }
   const dir = await loadDirectory(env)
-  const context = groundedContext(dir.listings, dir.resourceRows)
-  const prompt = [
-    'You generate DRAFT marketing copy for My Latino List (MLL), operated by AP Optix.',
-    'Return ONLY JSON with keys: facebook_posts (3 strings), instagram_captions (3 strings), tiktok_concepts (2 strings), bilingual_spotlight (object with en, es), la_voz_idea (string), keywords (5 strings), newsletter (string), promote (up to 3 objects with name, slug, category, reason).',
-    'Rules:',
-    '- Do not fabricate businesses, stats, testimonials, traffic, rankings, followers, reviews, sales, or results.',
-    '- Only reference businesses/resources supplied in grounded context.',
-    '- Produce English and Spanish in bilingual_spotlight.',
-    '- Generate marketing drafts, not factual performance claims.',
-    '- Nothing auto-posts. Drafts require human approval.',
-    'Grounded context: ' + JSON.stringify(context),
-  ].join('\n')
+  const candidates = selectPromotionCandidates(dir.listings, 3)
+  const resources = dir.resourceRows.slice(0, 8)
+  const prompt = buildMarketingPackPrompt({ candidates, resources })
 
   const result = await env.AI.run(MLL_AI_MODEL, {
     messages: [
-      { role: 'system', content: 'Return valid JSON only. Never invent listings or metrics.' },
-      { role: 'user', content: prompt.slice(0, 4000) },
+      { role: 'system', content: 'Return valid JSON only. Never invent listings or metrics. One JSON object.' },
+      { role: 'user', content: prompt },
     ],
-    max_tokens: 900,
+    max_tokens: 1100,
   }) as { response?: string }
 
   const text = typeof result === 'string' ? result : String(result?.response || '')
   const parsed = parseMarketingPack(text)
-  if (!parsed) return { error: 'pack_parse_failed', status: 503 as const }
-  const pack = filterPackToGrounded(parsed, context.businesses, context.resources)
-  const stored = {
-    id: crypto.randomUUID(),
-    created_at: new Date().toISOString(),
-    created_by: email,
-    model: MLL_AI_MODEL,
-    auto_post: false,
-    pack,
+  const groundedListings = candidates.length ? candidates : dir.listings
+  let pack: Record<string, unknown>
+  let fallback = false
+  if (parsed) {
+    pack = normalizePackShape(parsed)
+  } else {
+    pack = normalizePackShape(buildFallbackPack(candidates, resources))
+    fallback = true
   }
-  const packs = await readPacks(env)
-  packs.unshift(stored)
-  await env.SESSION_CACHE.put(PACK_KEY, JSON.stringify(packs.slice(0, MAX_PACKS)))
-  await trackMarketingEvent(env, { event: 'ai_marketing_pack_generated' })
-  return { stored }
+  applyDeterministicPromote(pack, candidates)
+  filterPackToGrounded(pack, groundedListings, resources)
+  if (!Array.isArray(pack.promote) || pack.promote.length === 0) {
+    pack.promote = []
+    pack.promote_empty_message = EMPTY_PROMOTE_MESSAGE
+  }
+  const stored = persistPack(env, email, pack, fallback)
+  const stored_count = await storePack(env, stored)
+  return { stored, stored_count }
 }
 
 export async function handleMarketing(request: Request, env: Env): Promise<Response> {
@@ -484,7 +792,7 @@ export async function handleMarketing(request: Request, env: Env): Promise<Respo
     if ('error' in result) {
       return Response.json({ error: result.error, message: 'Marketing pack unavailable. Public MLL AI search is unchanged.' }, { status: result.status })
     }
-    return Response.json({ pack: result.stored, auto_post: false })
+    return Response.json({ pack: result.stored, stored_count: result.stored_count, auto_post: false })
   }
 
   if (path === '/api/admin/marketing/collect' && request.method === 'POST') {

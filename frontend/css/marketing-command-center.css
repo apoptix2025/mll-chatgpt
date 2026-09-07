@@ -31,6 +31,8 @@ body.mcc-page { background: var(--surface-soft, var(--surface-2)); padding-top: 
 .mcc-draft { border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
 .mcc-draft h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); margin: 0 0 8px; }
 .mcc-draft p, .mcc-draft li { font-size: 13px; color: var(--ink-soft); }
+.mcc-struct { margin-bottom: 10px; line-height: 1.45; }
+.mcc-struct strong { color: var(--ink); }
 .mcc-table-wrap { overflow-x: auto; }
 .mcc-table { width: 100%; border-collapse: collapse; }
 .mcc-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }

@@ -60,6 +60,52 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
   }
 
+  function copyable(text) {
+    return ' <button type="button" class="mcc-btn" data-copy="' + encodeURIComponent(text) + '">Copy</button>';
+  }
+  function listStrings(title, arr) {
+    var items = (arr || []).map(function (x) {
+      var text = typeof x === 'string' ? x : JSON.stringify(x);
+      return '<li>' + escapeHtml(text) + copyable(text) + '</li>';
+    }).join('');
+    return '<div class="mcc-draft"><h3>' + title + '</h3><ul>' + items + '</ul></div>';
+  }
+  function renderTiktok(arr) {
+    if (!arr || !arr.length) return '<div class="mcc-draft"><h3>TikTok / Reel concepts</h3><div class="mcc-empty">No concepts yet.</div></div>';
+    var items = arr.map(function (x) {
+      if (typeof x === 'string') return '<li>' + escapeHtml(x) + copyable(x) + '</li>';
+      var hook = x.hook || '';
+      var visual = x.visual || '';
+      var talking = x.talking_point || '';
+      var cta = x.cta || '';
+      var text = [hook, visual, talking, cta].filter(Boolean).join('\n');
+      return '<li class="mcc-struct"><strong>Hook:</strong> ' + escapeHtml(hook) +
+        '<br><strong>Visual:</strong> ' + escapeHtml(visual) +
+        '<br><strong>Talking point:</strong> ' + escapeHtml(talking) +
+        '<br><strong>CTA:</strong> ' + escapeHtml(cta) +
+        copyable(text) + '</li>';
+    }).join('');
+    return '<div class="mcc-draft"><h3>TikTok / Reel concepts</h3><ul>' + items + '</ul></div>';
+  }
+  function renderPromote(p) {
+    var rows = p.promote || [];
+    if (!rows.length) {
+      var msg = p.promote_empty_message || 'No eligible grounded listings available for this pack.';
+      return '<div class="mcc-draft"><h3>Promote (grounded listings/categories only)</h3><div class="mcc-empty">' + escapeHtml(msg) + '</div></div>';
+    }
+    var items = rows.map(function (x) {
+      if (typeof x === 'string') return '<li>' + escapeHtml(x) + copyable(x) + '</li>';
+      var loc = [x.city, x.state].filter(Boolean).join(', ');
+      var line = (x.name || '') + (x.category ? ' · ' + x.category : '') + (loc ? ' · ' + loc : '');
+      var reason = x.reason || '';
+      var text = line + (reason ? ' — ' + reason : '');
+      return '<li class="mcc-struct"><strong>' + escapeHtml(x.name || '') + '</strong>' +
+        '<br>' + escapeHtml([x.category, loc].filter(Boolean).join(' · ')) +
+        (reason ? '<br>' + escapeHtml(reason) : '') +
+        copyable(text) + '</li>';
+    }).join('');
+    return '<div class="mcc-draft"><h3>Promote (grounded listings/categories only)</h3><ul>' + items + '</ul></div>';
+  }
   function renderPack(stored) {
     var box = $('mcc-pack');
     if (!stored || !stored.pack) {
@@ -67,24 +113,23 @@
       return;
     }
     var p = stored.pack;
-    function list(title, arr) {
-      var items = (arr || []).map(function (x) {
-        var text = typeof x === 'string' ? x : JSON.stringify(x);
-        return '<li>' + escapeHtml(text) + ' <button type="button" class="mcc-btn" data-copy="' + encodeURIComponent(text) + '">Copy</button></li>';
-      }).join('');
-      return '<div class="mcc-draft"><h3>' + title + '</h3><ul>' + items + '</ul></div>';
-    }
     var spotlight = p.bilingual_spotlight || {};
+    var voz = typeof p.la_voz_idea === 'object' && p.la_voz_idea
+      ? p.la_voz_idea
+      : { title: p.la_voz_idea || '', angle: '' };
+    var mail = typeof p.newsletter === 'object' && p.newsletter
+      ? p.newsletter
+      : { subject: p.newsletter || '', purpose: '' };
     box.innerHTML =
-      '<p class="mcc-empty">Generated ' + escapeHtml(stored.created_at || '') + ' · Drafts only · Approve/copy before publishing</p>' +
-      list('Facebook posts', p.facebook_posts) +
-      list('Instagram captions', p.instagram_captions) +
-      list('TikTok / Reel concepts', p.tiktok_concepts) +
+      '<p class="mcc-empty">Generated ' + escapeHtml(stored.created_at || '') + ' · Drafts only · Approve/copy before publishing' + (stored.fallback ? ' · Grounded fallback used' : '') + '</p>' +
+      listStrings('Facebook posts', p.facebook_posts) +
+      listStrings('Instagram captions', p.instagram_captions) +
+      renderTiktok(p.tiktok_concepts) +
       '<div class="mcc-draft"><h3>Bilingual business spotlight</h3><p><strong>EN:</strong> ' + escapeHtml(spotlight.en || '') + '</p><p><strong>ES:</strong> ' + escapeHtml(spotlight.es || '') + '</p></div>' +
-      '<div class="mcc-draft"><h3>La Voz Latino article idea</h3><p>' + escapeHtml(p.la_voz_idea || '') + '</p></div>' +
-      list('SEO / keyword opportunities', p.keywords) +
-      '<div class="mcc-draft"><h3>Email / newsletter concept</h3><p>' + escapeHtml(p.newsletter || '') + '</p></div>' +
-      list('Promote (grounded listings/categories only)', p.promote);
+      '<div class="mcc-draft"><h3>La Voz Latino article idea</h3><p><strong>' + escapeHtml(voz.title || '') + '</strong></p><p>' + escapeHtml(voz.angle || '') + '</p></div>' +
+      listStrings('SEO / keyword opportunities', p.keywords) +
+      '<div class="mcc-draft"><h3>Email / newsletter concept</h3><p><strong>' + escapeHtml(mail.subject || '') + '</strong></p><p>' + escapeHtml(mail.purpose || '') + '</p></div>' +
+      renderPromote(p);
   }
 
   function renderCampaigns(rows) {
@@ -175,6 +220,8 @@
       }
       $('mcc-pack-status').textContent = 'Draft ready. Nothing was posted.';
       renderPack(out.data.pack);
+      var report = await api('/api/admin/marketing/report');
+      if (report.res.ok) renderReport(report.data);
     });
     $('btn-create-campaign').addEventListener('click', async function () {
       var payload = {
