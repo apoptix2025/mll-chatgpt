@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Env } from '../index'
 import { notifyEnrollment } from './notify'
+import { trackMarketingEvent } from '../lib/analytics'
 
 // ── Price IDs (must match stripe.ts) ─────────────────────────────────────────────
 const PRICE_IDS: Record<string, string> = {
@@ -236,6 +237,8 @@ export async function handleEnroll(request: Request, env: Env, ctx: ExecutionCon
       const session = await stripeRes.json() as { url?: string; error?: { message: string } }
 
       if (stripeRes.ok && session.url) {
+        await trackMarketingEvent(env, { event: 'signup_completed' })
+        await trackMarketingEvent(env, { event: 'checkout_started' })
         return Response.json({
           success: true,
           business_id: business.id,
@@ -249,6 +252,7 @@ export async function handleEnroll(request: Request, env: Env, ctx: ExecutionCon
     }
 
     // 7. Free plan — return normally
+    await trackMarketingEvent(env, { event: 'signup_completed' })
     return Response.json({
       success: true,
       business_id: business.id,

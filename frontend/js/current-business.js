@@ -62,12 +62,20 @@
     health.setAttribute('data-mll-admin-nav', '1');
     health.textContent = 'System Health';
 
+    var mcc = document.createElement('a');
+    mcc.href = 'marketing-command-center.html';
+    mcc.className = 'sb-link';
+    mcc.setAttribute('data-mll-admin-nav', '1');
+    mcc.textContent = 'Command Center';
+
     if (signOut && signOut.parentNode) {
       signOut.parentNode.insertBefore(admin, signOut);
       signOut.parentNode.insertBefore(health, signOut);
+      signOut.parentNode.insertBefore(mcc, signOut);
     } else {
       sidebar.appendChild(admin);
       sidebar.appendChild(health);
+      sidebar.appendChild(mcc);
     }
   }
 

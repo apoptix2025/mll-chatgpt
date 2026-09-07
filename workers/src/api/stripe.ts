@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { Env } from '../index'
 import { resolveAssignedBusiness } from '../lib/billing-business'
 import { notifyPlanUpgrade, notifyPlanCancellation } from './notify'
+import { trackMarketingEvent } from '../lib/analytics'
 
 // ── Price IDs ─────────────────────────────────────────────────────────────────────
 const PRICE_IDS: Record<string, string> = {
@@ -159,6 +160,7 @@ async function createCheckoutSession(request: Request, env: Env, userId: string)
     return Response.json({ error: session.error?.message || 'Stripe error' }, { status: 500 })
   }
 
+  await trackMarketingEvent(env, { event: 'checkout_started' })
   return Response.json({ url: session.url })
 }
 
@@ -187,6 +189,8 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
     const customerId = session.customer
 
     if (!businessId || !plan) return Response.json({ received: true })
+
+    await trackMarketingEvent(env, { event: 'paid_subscription_created' })
 
     // Update business plan
     await supabase

@@ -74,6 +74,12 @@
       ai.setAttribute('data-mll-ai', '1');
       document.body.appendChild(ai);
     }
+    if (!document.querySelector('script[data-mll-analytics]')) {
+      var analytics = document.createElement('script');
+      analytics.src = '/js/mll-analytics.js';
+      analytics.setAttribute('data-mll-analytics', '1');
+      document.body.appendChild(analytics);
+    }
   });
 
   function bindToolbarAi(btn) {
