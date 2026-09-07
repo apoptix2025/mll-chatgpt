@@ -60,51 +60,123 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
   }
 
-  function copyable(text) {
-    return ' <button type="button" class="mcc-btn" data-copy="' + encodeURIComponent(text) + '">Copy</button>';
+  function pad2(n) {
+    return (n < 10 ? '0' : '') + String(n);
   }
-  function listStrings(title, arr) {
-    var items = (arr || []).map(function (x) {
+  function copyBtn(text, label) {
+    var aria = label || 'Copy';
+    return '<button type="button" class="mcc-copy" data-copy="' + encodeURIComponent(text || '') + '" aria-label="' + escapeHtml(aria) + '"><span class="mcc-copy-label">Copy</span></button>';
+  }
+  function packSection(title, count, body) {
+    var countHtml = count != null ? '<span class="mcc-pack-count"> · ' + count + '</span>' : '';
+    return '<section class="mcc-pack-section"><h3 class="mcc-pack-h">' + escapeHtml(title) + countHtml + '</h3>' + body + '</section>';
+  }
+  function reportCard(label, bodyHtml, text, copyLabel) {
+    return '<article class="mcc-report-card"><div class="mcc-report-top"><span class="mcc-report-label">' + escapeHtml(label) + '</span>' + copyBtn(text, copyLabel || ('Copy ' + label)) + '</div>' + bodyHtml + '</article>';
+  }
+  function fieldBlock(label, text) {
+    if (!text) return '';
+    return '<div class="mcc-field"><span class="mcc-field-lbl">' + escapeHtml(label) + '</span><p class="mcc-field-body">' + escapeHtml(text) + '</p></div>';
+  }
+  function renderFacebook(arr) {
+    var rows = arr || [];
+    if (!rows.length) return packSection('Facebook Posts', 0, '<div class="mcc-empty">No Facebook drafts yet.</div>');
+    var cards = rows.map(function (x, i) {
       var text = typeof x === 'string' ? x : JSON.stringify(x);
-      return '<li>' + escapeHtml(text) + copyable(text) + '</li>';
+      return reportCard('POST ' + pad2(i + 1), '<p class="mcc-report-body">' + escapeHtml(text) + '</p>', text, 'Copy Facebook post ' + (i + 1));
     }).join('');
-    return '<div class="mcc-draft"><h3>' + title + '</h3><ul>' + items + '</ul></div>';
+    return packSection('Facebook Posts', rows.length, cards);
+  }
+  function renderInstagram(arr) {
+    var rows = arr || [];
+    if (!rows.length) return packSection('Instagram Captions', 0, '<div class="mcc-empty">No Instagram drafts yet.</div>');
+    var cards = rows.map(function (x, i) {
+      var text = typeof x === 'string' ? x : JSON.stringify(x);
+      return reportCard('CAPTION ' + pad2(i + 1), '<p class="mcc-report-body">' + escapeHtml(text) + '</p>', text, 'Copy Instagram caption ' + (i + 1));
+    }).join('');
+    return packSection('Instagram Captions', rows.length, cards);
   }
   function renderTiktok(arr) {
-    if (!arr || !arr.length) return '<div class="mcc-draft"><h3>TikTok / Reel concepts</h3><div class="mcc-empty">No concepts yet.</div></div>';
-    var items = arr.map(function (x) {
-      if (typeof x === 'string') return '<li>' + escapeHtml(x) + copyable(x) + '</li>';
-      var hook = x.hook || '';
-      var visual = x.visual || '';
-      var talking = x.talking_point || '';
-      var cta = x.cta || '';
-      var text = [hook, visual, talking, cta].filter(Boolean).join('\n');
-      return '<li class="mcc-struct"><strong>Hook:</strong> ' + escapeHtml(hook) +
-        '<br><strong>Visual:</strong> ' + escapeHtml(visual) +
-        '<br><strong>Talking point:</strong> ' + escapeHtml(talking) +
-        '<br><strong>CTA:</strong> ' + escapeHtml(cta) +
-        copyable(text) + '</li>';
+    var rows = arr || [];
+    if (!rows.length) return packSection('TikTok / Reel Concepts', 0, '<div class="mcc-empty">No reel concepts yet.</div>');
+    var cards = rows.map(function (x, i) {
+      var hook = '';
+      var visual = '';
+      var talking = '';
+      var cta = '';
+      var text = '';
+      if (typeof x === 'string') {
+        hook = x;
+        talking = x;
+        text = x;
+      } else {
+        hook = x.hook || '';
+        visual = x.visual || '';
+        talking = x.talking_point || '';
+        cta = x.cta || '';
+        text = [hook, visual, talking, cta].filter(Boolean).join('\n');
+      }
+      var body = fieldBlock('HOOK', hook) + fieldBlock('VISUAL', visual) + fieldBlock('TALKING POINT', talking) + fieldBlock('CTA', cta);
+      return reportCard('REEL CONCEPT ' + pad2(i + 1), body, text, 'Copy reel concept ' + (i + 1));
     }).join('');
-    return '<div class="mcc-draft"><h3>TikTok / Reel concepts</h3><ul>' + items + '</ul></div>';
+    return packSection('TikTok / Reel Concepts', rows.length, cards);
+  }
+  function renderSpotlight(spotlight) {
+    var en = (spotlight && spotlight.en) || '';
+    var es = (spotlight && spotlight.es) || '';
+    var body =
+      '<div class="mcc-report-top"><span class="mcc-report-label">BUSINESS SPOTLIGHT</span><span class="mcc-copy-row">' +
+      copyBtn(en, 'Copy English spotlight') +
+      copyBtn(es, 'Copy Spanish spotlight') +
+      '</span></div>' +
+      fieldBlock('ENGLISH', en) +
+      fieldBlock('ESPAÑOL', es);
+    return packSection('Bilingual Business Spotlight', null, '<article class="mcc-report-card">' + body + '</article>');
+  }
+  function renderLaVoz(voz) {
+    var title = (voz && voz.title) || '';
+    var angle = (voz && voz.angle) || '';
+    var text = [title, angle].filter(Boolean).join('\n');
+    var body = '<p class="mcc-report-title">' + escapeHtml(title) + '</p>' + fieldBlock('ANGLE', angle);
+    return packSection('La Voz Latino Article Idea', null, reportCard('ARTICLE IDEA', body, text, 'Copy La Voz article idea'));
+  }
+  function renderKeywords(arr) {
+    var rows = arr || [];
+    if (!rows.length) return packSection('SEO / Keyword Opportunities', 0, '<div class="mcc-empty">No keyword opportunities yet.</div>');
+    var chips = rows.map(function (x, i) {
+      var text = typeof x === 'string' ? x : JSON.stringify(x);
+      return '<button type="button" class="mcc-chip" data-copy="' + encodeURIComponent(text) + '" aria-label="Copy keyword ' + (i + 1) + '"><span class="mcc-chip-text">' + escapeHtml(text) + '</span><span class="mcc-copy-label">Copy</span></button>';
+    }).join('');
+    return packSection('SEO / Keyword Opportunities', rows.length, '<div class="mcc-chip-row">' + chips + '</div>');
+  }
+  function renderEmail(mail) {
+    var subject = (mail && mail.subject) || '';
+    var purpose = (mail && mail.purpose) || '';
+    var text = [subject, purpose].filter(Boolean).join('\n');
+    var body = fieldBlock('SUBJECT / CONCEPT', subject) + fieldBlock('CAMPAIGN ANGLE', purpose);
+    return packSection('Email / Newsletter Concept', null, reportCard('EMAIL CAMPAIGN IDEA', body, text, 'Copy email campaign idea'));
   }
   function renderPromote(p) {
     var rows = p.promote || [];
     if (!rows.length) {
       var msg = p.promote_empty_message || 'No eligible grounded listings available for this pack.';
-      return '<div class="mcc-draft"><h3>Promote (grounded listings/categories only)</h3><div class="mcc-empty">' + escapeHtml(msg) + '</div></div>';
+      return packSection('Grounded Promotion Candidates', 0, '<div class="mcc-empty">' + escapeHtml(msg) + '</div>');
     }
-    var items = rows.map(function (x) {
-      if (typeof x === 'string') return '<li>' + escapeHtml(x) + copyable(x) + '</li>';
+    var cards = rows.map(function (x, i) {
+      if (typeof x === 'string') {
+        return reportCard('PROMOTION CANDIDATE ' + pad2(i + 1), '<p class="mcc-report-body">' + escapeHtml(x) + '</p>', x, 'Copy promotion candidate ' + (i + 1));
+      }
       var loc = [x.city, x.state].filter(Boolean).join(', ');
-      var line = (x.name || '') + (x.category ? ' · ' + x.category : '') + (loc ? ' · ' + loc : '');
       var reason = x.reason || '';
-      var text = line + (reason ? ' — ' + reason : '');
-      return '<li class="mcc-struct"><strong>' + escapeHtml(x.name || '') + '</strong>' +
-        '<br>' + escapeHtml([x.category, loc].filter(Boolean).join(' · ')) +
-        (reason ? '<br>' + escapeHtml(reason) : '') +
-        copyable(text) + '</li>';
+      var text = [x.name, x.category, loc, reason].filter(Boolean).join('\n');
+      var body =
+        '<p class="mcc-report-title">' + escapeHtml(x.name || '') + '</p>' +
+        (x.category ? '<p class="mcc-report-meta">' + escapeHtml(x.category) + '</p>' : '') +
+        (loc ? '<p class="mcc-report-meta">' + escapeHtml(loc) + '</p>' : '') +
+        (reason ? '<p class="mcc-report-body">' + escapeHtml(reason) + '</p>' : '');
+      return reportCard('PROMOTION CANDIDATE ' + pad2(i + 1), body, text, 'Copy promotion candidate ' + (i + 1));
     }).join('');
-    return '<div class="mcc-draft"><h3>Promote (grounded listings/categories only)</h3><ul>' + items + '</ul></div>';
+    return packSection('Grounded Promotion Candidates', rows.length, cards);
   }
   function renderPack(stored) {
     var box = $('mcc-pack');
@@ -122,13 +194,13 @@
       : { subject: p.newsletter || '', purpose: '' };
     box.innerHTML =
       '<p class="mcc-empty">Generated ' + escapeHtml(stored.created_at || '') + ' · Drafts only · Approve/copy before publishing' + (stored.fallback ? ' · Grounded fallback used' : '') + '</p>' +
-      listStrings('Facebook posts', p.facebook_posts) +
-      listStrings('Instagram captions', p.instagram_captions) +
+      renderFacebook(p.facebook_posts) +
+      renderInstagram(p.instagram_captions) +
       renderTiktok(p.tiktok_concepts) +
-      '<div class="mcc-draft"><h3>Bilingual business spotlight</h3><p><strong>EN:</strong> ' + escapeHtml(spotlight.en || '') + '</p><p><strong>ES:</strong> ' + escapeHtml(spotlight.es || '') + '</p></div>' +
-      '<div class="mcc-draft"><h3>La Voz Latino article idea</h3><p><strong>' + escapeHtml(voz.title || '') + '</strong></p><p>' + escapeHtml(voz.angle || '') + '</p></div>' +
-      listStrings('SEO / keyword opportunities', p.keywords) +
-      '<div class="mcc-draft"><h3>Email / newsletter concept</h3><p><strong>' + escapeHtml(mail.subject || '') + '</strong></p><p>' + escapeHtml(mail.purpose || '') + '</p></div>' +
+      renderSpotlight(spotlight) +
+      renderLaVoz(voz) +
+      renderKeywords(p.keywords) +
+      renderEmail(mail) +
       renderPromote(p);
   }
 
@@ -207,7 +279,17 @@
     $('mcc-pack-form').addEventListener('click', function (e) {
       var btn = e.target.closest('[data-copy]');
       if (!btn) return;
-      copyText(decodeURIComponent(btn.getAttribute('data-copy') || ''));
+      var raw = btn.getAttribute('data-copy') || '';
+      try { copyText(decodeURIComponent(raw)); } catch (err) { copyText(raw); }
+      var label = btn.querySelector('.mcc-copy-label');
+      if (!label) return;
+      btn.classList.add('is-copied');
+      label.textContent = 'Copied';
+      clearTimeout(btn._mccCopied);
+      btn._mccCopied = setTimeout(function () {
+        btn.classList.remove('is-copied');
+        label.textContent = 'Copy';
+      }, 1600);
     });
     $('btn-generate-pack').addEventListener('click', async function () {
       $('btn-generate-pack').disabled = true;

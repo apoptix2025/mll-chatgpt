@@ -71,7 +71,7 @@ export type PromotionCandidate = {
 
 export const EMPTY_PROMOTE_MESSAGE = 'No eligible grounded listings available for this pack.'
 const QA_SLUGS = new Set(['mll-qa-test-business'])
-const UNGROUNDED_CLAIM = /#1\b|\bbest\b|\btop-rated\b|\bleading\b|testimonial|followers|revenue|ranking|\d+\s*%/i
+const UNGROUNDED_CLAIM = /#1\b|\bbest\b|\btop(?:-rated)?\b|\bleading\b|\btrusted\b|\bmejor(?:es)?\b|m[aá]s confiable|testimonial|followers|revenue|ranking|\d+\s*%/i
 
 function hasSocial(links: Record<string, string> | null | undefined, key: string): boolean {
   const value = links && typeof links === 'object' ? String(links[key] || links[key.toLowerCase()] || '') : ''
@@ -451,7 +451,7 @@ export function buildMarketingPackPrompt(input: {
     '- Do not fabricate businesses, stats, testimonials, traffic, rankings, followers, reviews, sales, or results.',
     '- Only reference businesses/resources supplied in grounded context.',
     '- Never fabricate customers, revenue, growth percentages, awards, partnerships, locations, services, or promotions unless supplied.',
-    '- Avoid unsupported superlatives such as best, #1, leading, or top-rated unless grounded.',
+    '- Avoid unsupported superlatives such as best, #1, leading, top, top-rated, trusted, mejor, mejores, or más confiable unless grounded. Prefer discover, explore, find, featured on My Latino List, Latino-owned business, or active listing.',
     '- Produce English and Spanish in bilingual_spotlight.',
     '- Generate marketing drafts, not factual performance claims.',
     '- Nothing auto-posts. Drafts require human approval.',
