@@ -20,12 +20,15 @@ import { withAuth } from './middleware/auth'
 import { handleScheduled } from './cron'
 import { handlePublicMedia } from './lib/media'
 import { handleAiSearch } from './api/ai-search'
+import { handleMarketing } from './api/marketing'
+import { handleAnalyticsEvent } from './lib/analytics'
 
 export interface Env {
   // KV
   SESSION_CACHE: KVNamespace
   // R2
   MEDIA: R2Bucket
+  ANALYTICS?: { writeDataPoint: (event: { blobs?: string[]; doubles?: number[]; indexes?: string[] }) => void }
   // Secrets
   SUPABASE_URL: string
   SUPABASE_ANON_KEY: string
@@ -68,6 +71,10 @@ export default {
       }
 
       // ── Admin routes (auth enforced inside handler) ────────
+      if (path.startsWith('/api/admin/marketing')) {
+        response = await handleMarketing(request, env)
+        return withCors(response, request)
+      }
       if (path === '/api/admin/test-drip' && request.method === 'POST') {
         response = await handleTestDrip(request, env)
         return withCors(response, request)
@@ -107,6 +114,8 @@ export default {
                                                   response = await handleAiSearch(request, env)
       else if (path === '/api/ai/search' && request.method === 'POST')
                                                   response = await handleAiSearch(request, env)
+      else if (path === '/api/analytics/event' && request.method === 'POST')
+                                                  response = await handleAnalyticsEvent(request, env)
 
       // ── Protected routes (auth required) ──────────────────
       else {

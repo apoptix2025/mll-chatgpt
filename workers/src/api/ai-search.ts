@@ -2,6 +2,8 @@ import { createClient } from '@supabase/supabase-js'
 import type { Env } from '../index'
 import { withAuth } from '../middleware/auth'
 
+import { trackMarketingEvent } from '../lib/analytics'
+
 /** Small instruct model: cheap bilingual JSON intent extraction. Never used to invent listings. */
 export const MLL_AI_MODEL = '@cf/meta/llama-3.2-3b-instruct'
 
@@ -411,6 +413,7 @@ export async function handleAiSearch(request: Request, env: Env): Promise<Respon
 
   await bumpMetric(env, 'requests')
   const reserved = await consumeQuota(env, quota)
+  void trackMarketingEvent(env, { event: 'ai_search' })
 
   try {
     const extracted = await extractIntent(env, query)

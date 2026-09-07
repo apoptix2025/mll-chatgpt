@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MLL Marketing Command Center — Powered by AP Optix</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/marketing-command-center.css">
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/current-business.js"></script>
+</head>
+<body class="mcc-page">
+  <nav class="nav has-mobile" id="nav"></nav>
+  <div id="mcc-loading" class="mcc-loading">Loading Command Center…</div>
+  <div id="mcc-denied" class="mcc-denied" style="display:none;">
+    <h1>MLL Marketing Command Center</h1>
+    <p id="mcc-denied-msg">Admin access required.</p>
+    <p><a href="login.html">Sign in</a> · <a href="dashboard.html">Dashboard</a></p>
+  </div>
+  <div id="mcc-app" class="mcc-wrap" style="display:none;">
+    <header class="mcc-hero">
+      <div>
+        <div class="mcc-powered">Powered by AP Optix</div>
+        <h1 class="mcc-title">MLL Marketing Command Center</h1>
+        <p class="mcc-sub">Internal growth intelligence for My Latino List. Drafts only — nothing auto-posts.</p>
+      </div>
+      <a class="mcc-btn" href="admin.html">Admin panel</a>
+    </header>
+    <p class="mcc-callout">AP Optix powers the digital marketing intelligence and automation behind MLL.</p>
+    <section class="mcc-kpis">
+      <article class="mcc-kpi" id="kpi-score"><div class="mcc-kpi-lbl">Digital Footprint Score</div><div class="mcc-kpi-num">—</div><div class="mcc-kpi-note"></div></article>
+      <article class="mcc-kpi" id="kpi-web"><div class="mcc-kpi-lbl">Website Activity</div><div class="mcc-kpi-num">—</div><div class="mcc-kpi-note"></div></article>
+      <article class="mcc-kpi" id="kpi-signups"><div class="mcc-kpi-lbl">Business Signups</div><div class="mcc-kpi-num">—</div><div class="mcc-kpi-note"></div></article>
+      <article class="mcc-kpi" id="kpi-ai"><div class="mcc-kpi-lbl">AI Search Activity</div><div class="mcc-kpi-num">—</div><div class="mcc-kpi-note"></div></article>
+      <article class="mcc-kpi" id="kpi-conv"><div class="mcc-kpi-lbl">Conversion Activity</div><div class="mcc-kpi-num">—</div><div class="mcc-kpi-note"></div></article>
+    </section>
+    <div class="mcc-grid">
+      <section class="mcc-card">
+        <h2>Digital Footprint Breakdown</h2>
+        <div id="mcc-score-total" class="mcc-kpi-num" style="font-size:22px;margin-bottom:12px;"></div>
+        <div id="mcc-score-breakdown"></div>
+      </section>
+      <section class="mcc-card">
+        <h2>Growth Opportunities</h2>
+        <div class="mcc-list" id="mcc-opps"></div>
+      </section>
+    </div>
+    <section class="mcc-card" id="mcc-pack-form">
+      <h2>AI Marketing Pack</h2>
+      <p class="mcc-empty">One grounded draft pack at a time. Copy/approve before publishing. Public MLL AI search quotas are unchanged.</p>
+      <div class="mcc-actions">
+        <button type="button" class="mcc-btn mcc-btn-primary" id="btn-generate-pack">Generate weekly pack</button>
+        <span id="mcc-pack-status" class="mcc-empty"></span>
+      </div>
+      <div id="mcc-pack"></div>
+    </section>
+    <section class="mcc-card">
+      <h2>Campaign Tracker</h2>
+      <div class="mcc-form">
+        <input id="c-name" placeholder="Campaign name" maxlength="80">
+        <select id="c-channel">
+          <option value="facebook">facebook</option>
+          <option value="instagram">instagram</option>
+          <option value="tiktok">tiktok</option>
+          <option value="email">email</option>
+          <option value="seo">seo</option>
+          <option value="la_voz">la_voz</option>
+          <option value="mll_internal">mll_internal</option>
+          <option value="other">other</option>
+        </select>
+        <input class="full" id="c-objective" placeholder="Objective" maxlength="200">
+        <select id="c-status">
+          <option value="draft">draft</option>
+          <option value="active">active</option>
+          <option value="paused">paused</option>
+          <option value="complete">complete</option>
+        </select>
+        <input type="date" id="c-start">
+        <input type="date" id="c-end">
+        <input class="full" id="c-url" placeholder="Optional destination URL">
+        <textarea class="full" id="c-notes" rows="2" maxlength="500" placeholder="Notes"></textarea>
+      </div>
+      <div class="mcc-actions">
+        <button type="button" class="mcc-btn mcc-btn-primary" id="btn-create-campaign">Save campaign</button>
+        <span id="c-status-msg" class="mcc-empty"></span>
+      </div>
+      <div class="mcc-table-wrap" id="mcc-campaign-table"></div>
+      <div class="mcc-campaign-cards" id="mcc-campaign-cards"></div>
+    </section>
+    <div class="mcc-grid">
+      <section class="mcc-card">
+        <h2>Latest Growth Activity</h2>
+        <p class="mcc-empty">Activity is first-party MLL data only. No fabricated KPIs.</p>
+        <div id="mcc-activity-note"></div>
+      </section>
+      <section class="mcc-card">
+        <h2>30-Day Progress</h2>
+        <div id="mcc-report"></div>
+      </section>
+    </div>
+  </div>
+  <script src="/js/nav.js"></script>
+  <script src="/js/marketing-command-center.js"></script>
+</body>
+</html>

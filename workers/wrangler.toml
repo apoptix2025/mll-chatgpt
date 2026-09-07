@@ -138,6 +138,10 @@ MLL_AI_ENABLED = "true"
 [env.production.ai]
 binding = "AI"
 
+[[env.production.analytics_engine_datasets]]
+binding = "ANALYTICS"
+dataset = "mll_marketing_events"
+
 
 # ── Production API route ────────────────────────────────────
 # Same hostname already owned by Worker mll-api. Deploy --env
@@ -202,6 +206,10 @@ SUPABASE_URL = "https://bjtfrmkhishoadjtpzgg.supabase.co"
 
 [env.staging.ai]
 binding = "AI"
+
+[[env.staging.analytics_engine_datasets]]
+binding = "ANALYTICS"
+dataset = "mll_marketing_events"
 
 
 # ── Staging KV ──────────────────────────────────────────────

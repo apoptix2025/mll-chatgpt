@@ -27,6 +27,7 @@ const pages = [
   'pages/business.html',
   'pages/reset-password.html',
   'pages/pricing.html',
+  'pages/marketing-command-center.html',
   'js/config.js',
   'js/current-business.js',
   'js/safe-return.js',
