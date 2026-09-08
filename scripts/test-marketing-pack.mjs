@@ -201,6 +201,22 @@ const malformed = await pack.generateCustomerMarketingPack({
 })
 assert('malformed AI response uses grounded fallback', malformed.fallback === true && pack.isCustomerPackComplete(malformed.pack))
 
+const invented = await pack.generateCustomerMarketingPack({
+  listing,
+  runAi: async () => JSON.stringify({
+    facebook_posts: ['We offer software testing and quality assurance.', 'Book a consultation today!'],
+    instagram_captions: ['Best QA shop', 'Trusted software bugs gone'],
+    tiktok_concepts: [
+      { hook: 'Software bugs?', visual: 'Code', talking_point: 'Quality assurance experts', cta: 'Book a consultation' },
+      { hook: 'Top rated', visual: 'Trophy', talking_point: 'Years in business', cta: 'Call now' },
+    ],
+    seo: { keywords: ['software testing'], local_discovery: ['QA software Miami'] },
+    bilingual_spotlight: { en: '[Business Name] is trusted.', es: 'El mejor software.' },
+    email_campaign: { subject: 'Software testing', preview: 'QA', body: '[Business Name] fixes bugs.', cta: 'Book a consultation' },
+  }),
+})
+assert('invented services and missing name fall back to grounded listing copy', invented.fallback === true && JSON.stringify(invented.pack).includes(listing.name) && !/software testing|quality assurance|book a consultation/i.test(JSON.stringify(invented.pack)))
+
 let timeoutHit = false
 try {
   await pack.generateCustomerMarketingPack({

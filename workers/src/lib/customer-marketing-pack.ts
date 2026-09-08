@@ -11,7 +11,7 @@ export const CUSTOMER_PACK_MAX_TOKENS = 1400
 export const CUSTOMER_PACK_TABLE = 'customer_marketing_packs'
 
 export const CUSTOMER_UNGROUNDED_CLAIM =
-  /#1\b|\bbest\b|\btop(?:-rated)?\b|\bleading\b|\btrusted\b|\baward(?:s|ed|-winning)?\b|\bcertified\b|\btestimonials?\b|\b\d+\s+reviews?\b|\bstar ratings?\b|\b\d+(?:\.\d+)?\s*stars?\b|\bfollowers\b|\brevenue\b|\branking|\d+\s*%|\$\d+|\bsince\s+\d{4}\b|\byears in business\b|\bmejor(?:es)?\b|m[aá]s confiable|el mejor|la mejor|n[uú]mero\s*1/i
+  /#1\b|\bbest\b|\btop(?:-rated)?\b|\bleading\b|\btrusted\b|\baward(?:s|ed|-winning)?\b|\bcertified\b|\btestimonials?\b|\b\d+\s+reviews?\b|\bstar ratings?\b|\b\d+(?:\.\d+)?\s*stars?\b|\bfollowers\b|\brevenue\b|\branking|\d+\s*%|\$\d+|\bsince\s+\d{4}\b|\byears in business\b|\bcalificaci[oó]n(?:es)?\b|\bmejor(?:es)?\b|m[aá]s confiable|el mejor|la mejor|n[uú]mero\s*1/i
 
 export type GroundedListing = {
   name: string
@@ -208,10 +208,22 @@ function asTiktokList(raw: unknown, max: number): CustomerTiktokConcept[] {
   return out.slice(0, max)
 }
 
+function asText(raw: unknown): string {
+  if (typeof raw === 'string') {
+    const text = raw.trim()
+    return text === '[object Object]' ? '' : text
+  }
+  if (raw && typeof raw === 'object') {
+    const row = raw as Record<string, unknown>
+    return asText(row.text || row.body || row.content || row.caption || '')
+  }
+  return ''
+}
+
 function asSpotlight(raw: unknown): { en: string; es: string } {
   if (!raw || typeof raw !== 'object') return { en: '', es: '' }
   const row = raw as Record<string, unknown>
-  return { en: String(row.en || row.english || '').trim(), es: String(row.es || row.spanish || row.espanol || '').trim() }
+  return { en: asText(row.en || row.english), es: asText(row.es || row.spanish || row.espanol) }
 }
 
 function asEmail(raw: unknown): CustomerMarketingPack['email_campaign'] {
@@ -263,29 +275,26 @@ export function normalizeCustomerPack(raw: Record<string, unknown>): CustomerMar
 
 export function filterCustomerPackToGrounded(pack: CustomerMarketingPack, listing: GroundedListing): CustomerMarketingPack {
   const concepts = pack.tiktok_concepts.map((row) => ({
-    hook: stripUngroundedClaims(row.hook),
-    visual: stripUngroundedClaims(row.visual),
-    talking_point: stripUngroundedClaims(row.talking_point),
-    cta: stripUngroundedClaims(row.cta) || 'Visit this listing on My Latino List.',
+    hook: cleanGroundedText(row.hook, listing),
+    visual: cleanGroundedText(row.visual, listing),
+    talking_point: cleanGroundedText(row.talking_point, listing),
+    cta: cleanGroundedText(row.cta, listing) || 'Visit this listing on My Latino List.',
   })).filter((row) => row.hook || row.talking_point)
 
   return {
-    facebook_posts: cleanList(pack.facebook_posts).slice(0, 2),
-    instagram_captions: cleanList(pack.instagram_captions).slice(0, 2),
+    facebook_posts: cleanList(pack.facebook_posts.map((text) => cleanGroundedText(text, listing))).slice(0, 2),
+    instagram_captions: cleanList(pack.instagram_captions.map((text) => cleanGroundedText(text, listing))).slice(0, 2),
     tiktok_concepts: concepts.slice(0, 2),
-    seo: {
-      keywords: cleanList(pack.seo.keywords).slice(0, 8),
-      local_discovery: cleanList(pack.seo.local_discovery).slice(0, 8),
-    },
+    seo: deterministicSeo(listing),
     bilingual_spotlight: {
-      en: stripUngroundedClaims(pack.bilingual_spotlight.en),
-      es: stripUngroundedClaims(pack.bilingual_spotlight.es),
+      en: cleanGroundedText(pack.bilingual_spotlight.en, listing),
+      es: cleanGroundedText(pack.bilingual_spotlight.es, listing),
     },
     email_campaign: {
-      subject: stripUngroundedClaims(pack.email_campaign.subject),
-      preview: stripUngroundedClaims(pack.email_campaign.preview),
-      body: stripUngroundedClaims(pack.email_campaign.body),
-      cta: stripUngroundedClaims(pack.email_campaign.cta),
+      subject: cleanGroundedText(pack.email_campaign.subject, listing),
+      preview: cleanGroundedText(pack.email_campaign.preview, listing),
+      body: cleanGroundedText(pack.email_campaign.body, listing),
+      cta: cleanGroundedText(pack.email_campaign.cta, listing) || 'View this listing on My Latino List',
     },
     auto_post: false,
     disclaimer: pack.disclaimer || 'Drafts only. Review before publishing. Nothing auto-posts. No performance claims.',
@@ -306,6 +315,79 @@ export function isCustomerPackComplete(pack: CustomerMarketingPack): boolean {
 
 function locLabel(listing: GroundedListing): string {
   return [listing.city, listing.state].filter(Boolean).join(', ')
+}
+
+function groundedBlob(listing: GroundedListing): string {
+  return [
+    listing.name,
+    listing.category,
+    listing.description,
+    listing.city,
+    listing.state,
+    listing.website,
+    listing.phone,
+    listing.email,
+    listing.address,
+    ...listing.tags,
+  ].filter(Boolean).join(' ').toLowerCase()
+}
+
+const INVENTED_VERTICAL =
+  /\bsoftware\b|\bapps?\b|\bbugs?\b|\bquality assurance\b|\btesting\b|\bpruebas?\b|\bcalificaci[oó]n(?:es)?\b|\bqa testing\b|\bqa game\b|\brestaurant\b|\bplumb(?:er|ing)\b|\battorney\b|\bdentist\b|\bconsultations?\b|\bbook a consultation\b/i
+
+function fillNamePlaceholders(text: string, name: string): string {
+  return String(text || '').replace(/\[(?:business name|nombre(?: del negocio)?)\]/gi, name)
+}
+
+function stripInventedServices(text: string, blob: string): string {
+  if (!text) return ''
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .filter((sentence) => {
+      const matches = sentence.toLowerCase().match(INVENTED_VERTICAL)
+      if (!matches) return true
+      return matches.every((term) => blob.includes(term.trim()))
+    })
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function cleanGroundedText(text: string, listing: GroundedListing): string {
+  const blob = groundedBlob(listing)
+  return stripInventedServices(stripUngroundedClaims(fillNamePlaceholders(text, listing.name)), blob)
+}
+
+function deterministicSeo(listing: GroundedListing): CustomerMarketingPack['seo'] {
+  const loc = locLabel(listing)
+  const cat = listing.category || ''
+  return {
+    keywords: [
+      listing.name,
+      cat,
+      loc && cat ? `${cat} ${loc}` : '',
+      loc,
+      cat ? `Latino-owned ${cat}` : 'My Latino List',
+    ].filter(Boolean).slice(0, 8),
+    local_discovery: [
+      loc && cat ? `${cat} in ${loc}` : cat,
+      listing.city && cat ? `${cat} ${listing.city}` : '',
+      `${listing.name} My Latino List`,
+    ].filter(Boolean).slice(0, 8),
+  }
+}
+
+export function packMentionsBusinessName(pack: CustomerMarketingPack, listing: GroundedListing): boolean {
+  if (!listing.name) return true
+  const content = [
+    ...pack.facebook_posts,
+    ...pack.instagram_captions,
+    pack.bilingual_spotlight.en,
+    pack.bilingual_spotlight.es,
+    pack.email_campaign.subject,
+    pack.email_campaign.body,
+  ].join(' ')
+  return content.includes(listing.name)
 }
 
 export function buildCustomerFallbackPack(listing: GroundedListing): CustomerMarketingPack {
@@ -399,7 +481,9 @@ export function buildCustomerPackPrompt(listing: GroundedListing): string {
   return [
     'You generate DRAFT customer marketing copy for one My Latino List listing.',
     'Write useful, natural, action-oriented drafts. Nothing auto-posts.',
-    'Use ONLY the grounded listing fields supplied below. If a field is null or missing, omit it.',
+    'Use the exact supplied business name. Never write [Business Name] or omit the name.',
+    'The only service type you may mention is the supplied category. Do not infer extra services from the business name, including the letters QA.',
+    'Do not mention software, testing, bugs, consultations, prices, discounts, or other offerings unless those exact words appear in the grounded listing.',
     'Never invent reviews, ratings, awards, rankings, years in business, customer counts, prices, discounts, services not present in the listing, certifications, or testimonials.',
     'Never use unsupported claims such as best, #1, leading, top, top-rated, trusted, award-winning, certified, mejor, mejores, or más confiable.',
     'Do not mention businesses that are not this listing. Do not mention AP Optix Marketing Command Center.',
@@ -436,22 +520,7 @@ function isMissingTable(error: { code?: string; message?: string } | null | unde
 function asStoredPack(raw: unknown): CustomerMarketingPack | null {
   if (!raw || typeof raw !== 'object') return null
   try {
-    return filterCustomerPackToGrounded(normalizeCustomerPack(raw as Record<string, unknown>), {
-      name: '',
-      category: null,
-      description: null,
-      city: null,
-      state: null,
-      website: null,
-      phone: null,
-      email: null,
-      address: null,
-      zip: null,
-      tags: [],
-      facebook_url: null,
-      instagram_url: null,
-      other_social: {},
-    })
+    return normalizeCustomerPack(raw as Record<string, unknown>)
   } catch {
     return null
   }
@@ -637,30 +706,9 @@ export async function generateCustomerMarketingPack(input: {
   }
 
   const pack = filterCustomerPackToGrounded(normalizeCustomerPack(parsed), input.listing)
-  if (!isCustomerPackComplete(pack)) {
-    const fallback = filterCustomerPackToGrounded(buildCustomerFallbackPack(input.listing), input.listing)
+  if (!isCustomerPackComplete(pack) || !packMentionsBusinessName(pack, input.listing)) {
     return {
-      pack: {
-        facebook_posts: pack.facebook_posts.length === 2 ? pack.facebook_posts : fallback.facebook_posts,
-        instagram_captions: pack.instagram_captions.length === 2 ? pack.instagram_captions : fallback.instagram_captions,
-        tiktok_concepts: pack.tiktok_concepts.length === 2 ? pack.tiktok_concepts : fallback.tiktok_concepts,
-        seo: {
-          keywords: pack.seo.keywords.length ? pack.seo.keywords : fallback.seo.keywords,
-          local_discovery: pack.seo.local_discovery.length ? pack.seo.local_discovery : fallback.seo.local_discovery,
-        },
-        bilingual_spotlight: {
-          en: pack.bilingual_spotlight.en || fallback.bilingual_spotlight.en,
-          es: pack.bilingual_spotlight.es || fallback.bilingual_spotlight.es,
-        },
-        email_campaign: {
-          subject: pack.email_campaign.subject || fallback.email_campaign.subject,
-          preview: pack.email_campaign.preview || fallback.email_campaign.preview,
-          body: pack.email_campaign.body || fallback.email_campaign.body,
-          cta: pack.email_campaign.cta || fallback.email_campaign.cta,
-        },
-        auto_post: false,
-        disclaimer: fallback.disclaimer,
-      },
+      pack: filterCustomerPackToGrounded(buildCustomerFallbackPack(input.listing), input.listing),
       fallback: true,
       model,
     }
