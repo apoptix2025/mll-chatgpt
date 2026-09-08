@@ -139,6 +139,7 @@
           '<a href="' + p + 'enroll.html" class="v2-btn-primary" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>' +
         '</div>' +
         '<button class="v2-hamburger hamburger" aria-label="Menu"><span></span><span></span><span></span></button>' +
+        '<a href="' + p + 'enroll.html" class="mll-mobile-list-cta" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>' +
       '</div>' +
       '<div class="nav-mobile" id="nav-mobile">' +
         '<a href="' + home + '" data-en="Home" data-es="Inicio">Home</a>' +
