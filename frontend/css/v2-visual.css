@@ -478,6 +478,7 @@ body:has(.v2-topnav) { padding-top: 0 !important; }
   .v2-top-actions .v2-btn-primary,
   .v2-icon-btn { display: none; }
   .v2-hamburger { display: flex; }
+  .v2-topnav .logo-slogan { display: none; }
 }
 
 @media (max-width: 1024px) {
@@ -489,6 +490,13 @@ body:has(.v2-topnav) { padding-top: 0 !important; }
 }
 
 @media (max-width: 768px) {
+  .v2-topnav { width: 100%; max-width: 100%; }
+  .v2-topnav-inner {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
   .v2-topnav-inner, .v2-hero-grid, .v2-search-wrap, .v2-wrap { padding-left: 16px; padding-right: 16px; }
   .v2-search { grid-template-columns: 1fr; }
   .v2-search label + label { border-left: 0; border-top: 1px solid var(--border-line); }

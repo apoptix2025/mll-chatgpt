@@ -526,8 +526,12 @@ body.mll-nav-open { overflow: hidden; }
   }
 }
 @media (max-width: 1099px) {
-  .v2-home .v2-topnav-inner { padding: 8px 16px; }
+  .v2-home .v2-topnav-inner { padding: 8px 16px; max-width: 100%; box-sizing: border-box; }
   .v2-home .logo-slogan { display: none; }
+  .v2-home .v2-top-actions .v2-icon-btn,
+  .v2-home .v2-top-actions .v2-btn-ghost,
+  .v2-home .v2-top-actions .v2-btn-primary,
+  .v2-home .v2-top-actions #nav-signin { display: none; }
   .v2-home .v2-top-actions .lang-toggle { display: flex; margin: 0 4px 0 0; }
   .v2-home .v2-hamburger {
     display: flex;
@@ -577,6 +581,10 @@ body.mll-nav-open { overflow: hidden; }
   .mll-cta-row { flex-wrap: wrap; min-height: 0; }
 }
 @media (max-width: 767px) {
+  .v2-home .v2-topnav {
+    width: 100%;
+    max-width: 100%;
+  }
   .v2-home .v2-topnav-inner {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px;
@@ -586,13 +594,21 @@ body.mll-nav-open { overflow: hidden; }
     row-gap: 0;
     gap: unset;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
     min-height: 54px;
     height: 56px;
     max-height: 58px;
     padding: 6px 10px;
+    overflow-x: hidden;
   }
   .v2-home .v2-links { display: none; }
   .v2-home .v2-top-actions { display: contents; }
+  .v2-home .v2-top-actions .v2-icon-btn,
+  .v2-home .v2-top-actions .v2-btn-ghost,
+  .v2-home .v2-top-actions .v2-btn-primary,
+  .v2-home .v2-top-actions #nav-signin { display: none; }
   .v2-home .v2-topnav-inner .logo {
     min-width: 0;
     max-width: 115px;
