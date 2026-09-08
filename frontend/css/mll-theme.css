@@ -53,7 +53,9 @@
 }
 .v2-home .mll-ai-toolbar,
 .v2-home .mll-toolbar-auth { display: none; }
-.v2-home .mll-mobile-list-cta { display: none; }
+@media (min-width: 768px) {
+  .v2-home .mll-mobile-list-cta { display: none; }
+}
 
 .mll-nav-backdrop {
   display: none;
@@ -589,11 +591,10 @@ body.mll-nav-open { overflow: hidden; }
   .v2-home .v2-topnav-inner {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px;
+    grid-template-rows: auto auto;
     align-items: center;
     justify-content: start;
-    column-gap: 8px;
-    row-gap: 6px;
-    gap: unset;
+    gap: 6px 8px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -602,7 +603,7 @@ body.mll-nav-open { overflow: hidden; }
     height: auto;
     max-height: none;
     padding: 6px 10px 10px;
-    overflow-x: hidden;
+    overflow: visible;
   }
   .v2-home .v2-links { display: none; }
   .v2-home .v2-top-actions { display: contents; }
@@ -612,11 +613,18 @@ body.mll-nav-open { overflow: hidden; }
   .v2-home .v2-top-actions #nav-signin { display: none; }
   .v2-home .mll-mobile-list-cta {
     display: inline-flex;
+    visibility: visible;
+    opacity: 1;
+    position: static;
     grid-column: 1 / -1;
+    grid-row: 2;
     justify-self: center;
     align-items: center;
+    justify-content: center;
+    flex: none;
     width: auto;
     max-width: calc(100% - 8px);
+    height: auto;
     margin: 0 auto 2px;
     min-height: 36px;
     padding: 8px 16px;
@@ -629,6 +637,7 @@ body.mll-nav-open { overflow: hidden; }
     white-space: nowrap;
     text-decoration: none;
     box-sizing: border-box;
+    overflow: visible;
   }
   .v2-home .v2-topnav-inner .logo {
     min-width: 0;

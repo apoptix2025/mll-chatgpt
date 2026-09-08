@@ -118,7 +118,9 @@ body:has(.v2-topnav) { padding-top: 0 !important; }
 .v2-hamburger span {
   width: 22px; height: 2px; background: var(--navy-900); border-radius: 2px; display: block;
 }
-.mll-mobile-list-cta { display: none; }
+@media (min-width: 768px) {
+  .mll-mobile-list-cta { display: none; }
+}
 .v2-heart svg path { fill: none; }
 .v2-heart.is-saved svg path { fill: currentColor; }
 
