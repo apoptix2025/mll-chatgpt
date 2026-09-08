@@ -6,11 +6,16 @@ export type PilotBusiness = {
   id: string
   name: string
   slug: string | null
+  category: string | null
   description: string | null
   website: string | null
   phone: string | null
+  email: string | null
+  address: string | null
   city: string | null
   state: string | null
+  zip: string | null
+  tags: string[] | null
   social_links: Record<string, string> | null
   plan: string | null
   status: string | null
@@ -231,7 +236,7 @@ export async function authorizeMarketingPilot(
 
   const { data: businessRow } = await supabase
     .from('businesses')
-    .select('id, name, slug, description, website, phone, city, state, social_links, owner_id, plan, status')
+    .select('id, name, slug, category, description, website, phone, email, address, city, state, zip, tags, social_links, owner_id, plan, status')
     .eq('id', assignedId)
     .eq('owner_id', userId)
     .maybeSingle()
@@ -244,11 +249,16 @@ export async function authorizeMarketingPilot(
       id: String(businessRow.id),
       name: String(businessRow.name ?? ''),
       slug: (businessRow.slug as string | null) ?? null,
+      category: (businessRow.category as string | null) ?? null,
       description: (businessRow.description as string | null) ?? null,
       website: (businessRow.website as string | null) ?? null,
       phone: (businessRow.phone as string | null) ?? null,
+      email: (businessRow.email as string | null) ?? null,
+      address: (businessRow.address as string | null) ?? null,
       city: (businessRow.city as string | null) ?? null,
       state: (businessRow.state as string | null) ?? null,
+      zip: (businessRow.zip as string | null) ?? null,
+      tags: Array.isArray(businessRow.tags) ? (businessRow.tags as string[]) : null,
       social_links: (businessRow.social_links as Record<string, string> | null) ?? null,
       plan: (businessRow.plan as string | null) ?? null,
       status: (businessRow.status as string | null) ?? null,

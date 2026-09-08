@@ -68,6 +68,8 @@ assert('owner nav is injected only when server enabled flag is true', /injectMar
 assert('dashboard and listing use server flag not slug', /injectMarketingPilotLink/.test(dash) && /injectMarketingPilotLink/.test(listing) && !/slug === 'test-business'/.test(dash) && !/slug === 'test-business'/.test(listing))
 assert('owner page re-checks summary API', /\/api\/marketing\/pilot\/summary/.test(page) && /Marketing &amp; AI Growth/.test(page))
 assert('owner page renders V1 trial score opportunities progress upgrade', /30-Day Free Growth Trial/.test(page) && /Digital Footprint Score/.test(page) && /Growth Opportunities/.test(page) && /30-Day Growth Progress/.test(page) && /Keep Growing After Your Free Trial/.test(page) && /View Plans/.test(page) && /Powered by MLL \+ AP Optix/.test(page))
+assert('AI Marketing Pack sits between opportunities and progress', page.indexOf('Growth Opportunities') < page.indexOf('AI Marketing Pack') && page.indexOf('AI Marketing Pack') < page.indexOf('30-Day Growth Progress'))
+assert('customer pack CTA and disclosure are present', /Generate My Marketing Pack/.test(page) && /Powered by MLL \+ AP Optix AI\. Nothing auto-posts\./.test(page) && /Create ready-to-use marketing content personalized for your business\./.test(page))
 assert('owner page has no admin pack generator or global MCC metrics', !/Generate weekly pack/.test(page) && !/Business Signups/.test(page) && !/AI Search Activity/.test(page) && !/Marketing Command Center/.test(page))
 assert('public listing page still loads by slug query', /slug/.test(bizPage) && /api\/businesses/.test(bizPage))
 assert('admin command center stays admin-only', /requireAdmin/.test(adminMkt) && /isAdmin\(auth\.email\)/.test(adminMkt))
