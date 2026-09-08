@@ -165,10 +165,16 @@ async function load() {
 
   const trial = data.trial || {};
   const trialStatus = document.getElementById('mg-trial-status');
-  const statusLabel = trial.status === 'active' ? 'Active' : (trial.status === 'ended' ? 'Ended' : (trial.status || '—'));
+  let statusLabel = '—';
+  if (trial.status === 'active') statusLabel = 'Active';
+  else if (trial.status === 'expired' || trial.status === 'ended') statusLabel = 'Trial Complete';
+  else if (trial.status === 'cancelled') statusLabel = 'Cancelled';
+  else if (trial.status === 'converted') statusLabel = 'Converted';
+  else if (trial.status) statusLabel = String(trial.status);
   trialStatus.textContent = statusLabel;
   trialStatus.className = 'mg-status' + (trial.status === 'active' ? '' : ' is-ended');
-  document.getElementById('mg-trial-start').textContent = fmtDate(trial.starts_at);
+  const startedAt = trial.started_at || trial.starts_at;
+  document.getElementById('mg-trial-start').textContent = fmtDate(startedAt);
   document.getElementById('mg-trial-end').textContent = fmtDate(trial.ends_at);
   document.getElementById('mg-trial-remaining').textContent = trial.days_remaining != null ? String(trial.days_remaining) : '—';
 

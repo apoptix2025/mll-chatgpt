@@ -73,6 +73,9 @@ assert('public listing page still loads by slug query', /slug/.test(bizPage) && 
 assert('admin command center stays admin-only', /requireAdmin/.test(adminMkt) && /isAdmin\(auth\.email\)/.test(adminMkt))
 assert('pilot summary is scoped to authorized business only', /buildCustomerPilotSummary/.test(api) && /eq\('business_id', access\.business\.id\)/.test(api) && /business: \{ id: biz\.id, name: biz\.name \}/.test(lib))
 assert('pilot API ignores query auth', !/searchParams/.test(api))
+assert('trial is not derived from businesses.created_at', !/buildTrial\(/.test(lib) && !/biz\.created_at/.test(lib) && /activateMarketingTrial/.test(api))
+assert('owner page uses server started_at not created_at', /trial\.started_at/.test(page) && !/created_at/.test(page))
+assert('expired trial can display Trial Complete', /Trial Complete/.test(page))
 
 if (failed) {
   console.error('marketing pilot tests FAIL ' + failed)
