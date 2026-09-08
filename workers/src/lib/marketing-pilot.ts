@@ -1,5 +1,6 @@
+import { MARKETING_TRIAL_DURATION_DAYS, type MarketingTrialView } from './marketing-trial'
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-const TRIAL_DAYS = 30
 
 export type PilotBusiness = {
   id: string
@@ -13,7 +14,6 @@ export type PilotBusiness = {
   social_links: Record<string, string> | null
   plan: string | null
   status: string | null
-  created_at: string | null
 }
 
 export type PilotAccess =
@@ -80,22 +80,6 @@ export function listingFootprint(biz: PilotBusiness): ListingFootprint {
     has_facebook: hasFacebook,
     has_instagram: hasInstagram,
     opportunities,
-  }
-}
-
-export function buildTrial(createdAt: string | null, now = Date.now()) {
-  const startMs = createdAt ? Date.parse(createdAt) : now
-  const start = Number.isFinite(startMs) ? startMs : now
-  const end = start + TRIAL_DAYS * 24 * 60 * 60 * 1000
-  const active = now <= end
-  return {
-    title: '30-Day Free Growth Trial',
-    status: active ? 'active' : 'ended',
-    starts_at: new Date(start).toISOString(),
-    ends_at: new Date(end).toISOString(),
-    days_total: TRIAL_DAYS,
-    days_remaining: active ? Math.max(0, Math.ceil((end - now) / 86400000)) : 0,
-    days_elapsed: Math.min(TRIAL_DAYS, Math.max(0, Math.floor((now - start) / 86400000))),
   }
 }
 
@@ -172,7 +156,7 @@ export function buildListingScore(biz: PilotBusiness, leadCount: number) {
   return { total: clamp(total, 100), max: 100 as const, categories }
 }
 
-export function buildProgress(listing: ListingFootprint, trial: ReturnType<typeof buildTrial>, leadCount: number) {
+export function buildProgress(listing: ListingFootprint, trial: MarketingTrialView, leadCount: number) {
   const items = [
     { id: 'description', label: 'Listing description', done: listing.has_description },
     { id: 'website', label: 'Website', done: listing.has_website },
@@ -182,7 +166,7 @@ export function buildProgress(listing: ListingFootprint, trial: ReturnType<typeo
     { id: 'instagram', label: 'Instagram', done: listing.has_instagram },
   ]
   return {
-    window_days: TRIAL_DAYS,
+    window_days: MARKETING_TRIAL_DURATION_DAYS,
     completed: items.filter((item) => item.done).length,
     total: items.length,
     items,
@@ -204,9 +188,8 @@ export function buildUpgrade(plan: string | null) {
   }
 }
 
-export function buildCustomerPilotSummary(biz: PilotBusiness, leadCount: number) {
+export function buildCustomerPilotSummary(biz: PilotBusiness, leadCount: number, trial: MarketingTrialView) {
   const listing = listingFootprint(biz)
-  const trial = buildTrial(biz.created_at)
   const score = buildListingScore(biz, leadCount)
   const progress = buildProgress(listing, trial, leadCount)
   const upgrade = buildUpgrade(biz.plan)
@@ -248,7 +231,7 @@ export async function authorizeMarketingPilot(
 
   const { data: businessRow } = await supabase
     .from('businesses')
-    .select('id, name, slug, description, website, phone, city, state, social_links, owner_id, plan, status, created_at')
+    .select('id, name, slug, description, website, phone, city, state, social_links, owner_id, plan, status')
     .eq('id', assignedId)
     .eq('owner_id', userId)
     .maybeSingle()
@@ -269,7 +252,6 @@ export async function authorizeMarketingPilot(
       social_links: (businessRow.social_links as Record<string, string> | null) ?? null,
       plan: (businessRow.plan as string | null) ?? null,
       status: (businessRow.status as string | null) ?? null,
-      created_at: (businessRow.created_at as string | null) ?? null,
     },
   }
 }
