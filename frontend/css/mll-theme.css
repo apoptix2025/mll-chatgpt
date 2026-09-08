@@ -589,6 +589,7 @@ body.mll-nav-open { overflow: hidden; }
     max-width: 100%;
   }
   .v2-home .v2-topnav-inner {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px;
     grid-template-rows: auto auto;
@@ -640,6 +641,8 @@ body.mll-nav-open { overflow: hidden; }
     overflow: visible;
   }
   .v2-home .v2-topnav-inner .logo {
+    grid-column: 1;
+    grid-row: 1;
     min-width: 0;
     max-width: 115px;
     margin: 0;
@@ -648,13 +651,17 @@ body.mll-nav-open { overflow: hidden; }
   }
   .v2-home .v2-topnav .logo-text { font-size: 15px; }
   .v2-home .v2-top-actions .lang-toggle {
+    position: absolute;
+    left: 50%;
+    top: 6px;
+    z-index: 2;
     display: inline-flex;
     align-items: center;
-    justify-self: center;
+    justify-content: center;
     gap: 5px;
     margin: 0;
-    height: 34px;
-    transform: translateX(20px);
+    height: 44px;
+    transform: translateX(-50%);
   }
   .v2-home .v2-top-actions .lang-btn {
     min-height: 32px;
@@ -662,6 +669,8 @@ body.mll-nav-open { overflow: hidden; }
     padding: 4px 8px;
   }
   .v2-home .mll-toolbar-auth {
+    grid-column: 3;
+    grid-row: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -686,6 +695,8 @@ body.mll-nav-open { overflow: hidden; }
   }
   .v2-home .mll-ai-toolbar { display: none; }
   .v2-home .v2-hamburger {
+    grid-column: 4;
+    grid-row: 1;
     display: grid;
     place-items: center;
     justify-self: end;
@@ -833,5 +844,4 @@ body.mll-nav-open { overflow: hidden; }
   .v2-home .v2-topnav-inner .logo { max-width: 105px; }
   .v2-home .v2-topnav .logo-text { font-size: 14px; }
   .v2-home .mll-toolbar-auth { font-size: 11px; }
-  .v2-home .v2-top-actions .lang-toggle { transform: translateX(16px); }
 }
