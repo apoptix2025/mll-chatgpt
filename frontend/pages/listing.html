@@ -308,6 +308,10 @@ async function loadProfile() {
   const l   = d?.profile?.last_name  || '';
   window.MLL_CURRENT_BUSINESS.syncAssignedBusinessId(resolved.assignedId);
   window.MLL_CURRENT_BUSINESS.injectAdminSidebarLinks(document.querySelector('.sidebar'), resolved.isAdmin);
+  window.MLL_CURRENT_BUSINESS.injectMarketingPilotLink(
+    document.querySelector('.sidebar'),
+    window.MLL_CURRENT_BUSINESS.isMarketingPilotEnabled(d)
+  );
   if (!b) {
     document.querySelector('.page-sub').textContent = 'No business assigned to this account.';
     return;

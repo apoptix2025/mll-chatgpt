@@ -28,6 +28,7 @@ const pages = [
   'pages/reset-password.html',
   'pages/pricing.html',
   'pages/marketing-command-center.html',
+  'pages/marketing-growth.html',
   'js/config.js',
   'js/current-business.js',
   'js/safe-return.js',

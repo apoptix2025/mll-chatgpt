@@ -55,6 +55,8 @@ ENVIRONMENT = "production"
 FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
 MLL_AI_ENABLED = "false"
+# Comma-separated business UUIDs only. Do not use listing slugs.
+MLL_MARKETING_PILOT_BUSINESS_IDS = ""
 
 # Default (no --env) stays AI-disabled.
 # Production AI is enabled only under [env.production].
@@ -131,6 +133,8 @@ ENVIRONMENT = "production"
 FRONTEND_URL = "https://mylatinolist.io"
 SUPABASE_URL = "https://jhjdhmjkcnjtbojocjam.supabase.co"
 MLL_AI_ENABLED = "true"
+# Pilot Marketing & AI Growth for Test Business by business_id, never slug.
+MLL_MARKETING_PILOT_BUSINESS_IDS = "7e735f46-9dc1-4ecf-936b-7342e566978a"
 
 
 # ── Production Workers AI (do not copy staging KV/R2/Supabase) ──
@@ -189,6 +193,7 @@ routes = []
 
 ENVIRONMENT = "staging"
 MLL_AI_ENABLED = "true"
+MLL_MARKETING_PILOT_BUSINESS_IDS = ""
 
 # Cloudflare Pages staging frontend
 FRONTEND_URL = "https://staging.mylatinolist.pages.dev"
