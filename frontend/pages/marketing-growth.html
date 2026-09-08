@@ -42,7 +42,7 @@
     .mg-bar>span{display:block;height:8px;background:var(--coral);border-radius:99px;}
     .mg-reasons{margin:6px 0 0;padding-left:16px;color:var(--ink-muted);font-size:12px;}
     .mg-cta{display:inline-block;margin-top:12px;background:var(--coral);color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;max-width:100%;box-sizing:border-box;}
-    @media (max-width: 767px){.dash-layout{grid-template-columns:1fr}.sidebar{display:none}.main{padding:20px 16px 80px}.mg-score{font-size:28px}.mg-row{flex-wrap:wrap}}
+    @media (max-width: 767px){.dash-layout{grid-template-columns:1fr}.sidebar{display:none;position:fixed;top:var(--nav-h);left:0;bottom:0;z-index:200;width:220px;overflow:auto}.sidebar.mob-open{display:block}.main{padding:20px 16px 80px}.mg-score{font-size:28px}.mg-row{flex-wrap:wrap}}
   </style>
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
@@ -51,6 +51,36 @@
   <script src="/js/marketing-pack.js"></script>
 </head>
 <body>
+  <nav class="nav scrolled" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1L17 6V12L9 17L1 12V6L9 1Z" fill="white"/></svg></span><span class="logo-text">my<strong>latino</strong>list</span></a>
+      <button class="mob-menu-btn" onclick="toggleDashSidebar()" style="background:none;border:none;cursor:pointer;padding:8px;flex-direction:column;gap:5px;align-items:center;">
+        <span style="width:22px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+        <span style="width:22px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+        <span style="width:22px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+      </button>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">ES</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="mob-overlay" id="mob-overlay" onclick="toggleDashSidebar()"></div>
+  <div class="mob-back-bar">
+    <button class="mob-back-btn" onclick="history.back()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </button>
+    <span style="font-size:13px;font-weight:500;color:var(--ink);">Marketing &amp; AI Growth</span>
+    <button class="mob-menu-btn" onclick="toggleDashSidebar()" style="background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:4px;margin-left:auto;">
+      <span style="width:20px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+      <span style="width:20px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+      <span style="width:20px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+    </button>
+  </div>
   <div class="dash-layout">
     <aside class="sidebar">
       <div class="sb-biz">
@@ -134,6 +164,13 @@
 const token = sessionStorage.getItem('mll_token');
 if (!token) window.location.href = 'login.html';
 const API = window.MLL_CONFIG.API_URL;
+
+function toggleDashSidebar() {
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.getElementById('mob-overlay');
+  if (sidebar) sidebar.classList.toggle('mob-open');
+  if (overlay) overlay.classList.toggle('active');
+}
 
 function showDenied(msg) {
   document.getElementById('mg-app').style.display = 'none';

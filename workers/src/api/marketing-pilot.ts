@@ -82,6 +82,7 @@ export async function handleMarketingPilot(request: Request, env: Env, userId: s
             content_copy_events: 0,
             model: null,
             fallback: false,
+            generation_source: null,
           }, 'unavailable')
         } else {
           throw err
@@ -152,6 +153,7 @@ async function generatePack(
     return json({
       generated: true,
       fallback: generated.fallback,
+      generation_source: generated.generation_source,
       model: generated.model,
       pack: buildPackSummary(trial.status, stored, 'ready'),
     })
