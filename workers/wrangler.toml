@@ -193,7 +193,8 @@ routes = []
 
 ENVIRONMENT = "staging"
 MLL_AI_ENABLED = "true"
-MLL_MARKETING_PILOT_BUSINESS_IDS = ""
+# Staging-only QA listing mll-qa-test-business. Do not copy production IDs.
+MLL_MARKETING_PILOT_BUSINESS_IDS = "f38ce2e6-9dd0-462c-a4fb-fd14a3875648"
 
 # Cloudflare Pages staging frontend
 FRONTEND_URL = "https://staging.mylatinolist.pages.dev"

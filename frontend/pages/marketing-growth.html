@@ -19,10 +19,12 @@
     .sb-link{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;color:var(--ink-soft);cursor:pointer;transition:all 0.15s;border-right:2px solid transparent;text-decoration:none;}
     .sb-link:hover{color:var(--ink);background:var(--surface-2);}
     .sb-link.active{color:var(--coral-dark);background:var(--coral-light);border-right-color:var(--coral);font-weight:500;}
-    .main{padding:32px;max-width:760px;}
+    html,body{overflow-x:hidden;}
+    .main{padding:32px;max-width:860px;min-width:0;}
     .page-h{font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--ink);margin-bottom:4px;}
     .page-sub{font-size:14px;color:var(--ink-soft);margin-bottom:24px;line-height:1.5;}
-    .mg-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;}
+    .page-powered{font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--coral);margin:0 0 8px;}
+    .mg-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;min-width:0;overflow-wrap:anywhere;}
     .mg-card h2{font-size:15px;margin:0 0 12px;}
     .mg-row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border);}
     .mg-row:last-child{border-bottom:0;}
@@ -30,7 +32,16 @@
     .mg-opp{padding:10px 0;border-bottom:1px solid var(--border);}
     .mg-opp:last-child{border-bottom:0;}
     .mg-empty{font-size:13px;color:var(--ink-muted);}
-    @media (max-width: 767px){.dash-layout{grid-template-columns:1fr}.sidebar{display:none}}
+    .mg-status{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:var(--teal-light,#d1fae5);color:var(--teal-dark,#065f46);padding:3px 8px;border-radius:999px;}
+    .mg-status.is-ended{background:var(--surface-3);color:var(--ink-muted);}
+    .mg-score{font-family:var(--font-display);font-size:36px;font-weight:800;line-height:1;margin:0 0 8px;}
+    .mg-cat{margin-bottom:12px;}
+    .mg-cat-top{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:6px;}
+    .mg-bar{height:8px;background:var(--surface-3,#eef2f7);border-radius:99px;overflow:hidden;}
+    .mg-bar>span{display:block;height:8px;background:var(--coral);border-radius:99px;}
+    .mg-reasons{margin:6px 0 0;padding-left:16px;color:var(--ink-muted);font-size:12px;}
+    .mg-cta{display:inline-block;margin-top:12px;background:var(--coral);color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;max-width:100%;box-sizing:border-box;}
+    @media (max-width: 767px){.dash-layout{grid-template-columns:1fr}.sidebar{display:none}.main{padding:20px 16px 80px}.mg-score{font-size:28px}.mg-row{flex-wrap:wrap}}
   </style>
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
@@ -66,15 +77,39 @@
         <a href="dashboard.html">Back to dashboard</a>
       </div>
       <div id="mg-app" style="display:none;">
+        <p class="page-powered">Powered by MLL + AP Optix</p>
         <h1 class="page-h">Marketing &amp; AI Growth</h1>
         <p class="page-sub" id="mg-sub">Pilot tools for your listing on My Latino List. Nothing auto-posts.</p>
-        <section class="mg-card">
-          <h2>Listing footprint</h2>
-          <div id="mg-listing"></div>
+
+        <section class="mg-card" id="mg-trial-card">
+          <h2>30-Day Free Growth Trial</h2>
+          <div class="mg-row"><span>Status</span><strong id="mg-trial-status" class="mg-status">—</strong></div>
+          <div class="mg-row"><span>Trial starts</span><strong id="mg-trial-start">—</strong></div>
+          <div class="mg-row"><span>Trial ends</span><strong id="mg-trial-end">—</strong></div>
+          <div class="mg-row"><span>Days remaining</span><strong id="mg-trial-remaining">—</strong></div>
         </section>
-        <section class="mg-card">
-          <h2>Opportunities</h2>
+
+        <section class="mg-card" id="mg-score-card">
+          <h2>Digital Footprint Score</h2>
+          <div class="mg-score" id="mg-score-total">—</div>
+          <p class="mg-empty" id="mg-score-note">Score is calculated from this listing only.</p>
+          <div id="mg-score-cats"></div>
+        </section>
+
+        <section class="mg-card" id="mg-opps-card">
+          <h2>Growth Opportunities</h2>
           <div id="mg-opps"></div>
+        </section>
+
+        <section class="mg-card" id="mg-progress-card">
+          <h2>30-Day Growth Progress</h2>
+          <div id="mg-progress"></div>
+        </section>
+
+        <section class="mg-card" id="mg-upgrade-card">
+          <h2 id="mg-upgrade-title">Keep Growing After Your Free Trial</h2>
+          <p class="page-sub" id="mg-upgrade-copy" style="margin-bottom:0;">Review your plan when you are ready.</p>
+          <a class="mg-cta" id="mg-upgrade-cta" href="billing.html">View Plans</a>
         </section>
       </div>
     </main>
@@ -91,6 +126,19 @@ function showDenied(msg) {
 }
 
 function yn(v) { return v ? 'Ready' : 'Needs attention'; }
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, function (ch) {
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+  });
+}
 
 async function load() {
   const meRes = await fetch(API + '/api/auth/me', { headers: { Authorization: 'Bearer ' + token } });
@@ -114,24 +162,48 @@ async function load() {
   document.getElementById('mg-denied').style.display = 'none';
   document.getElementById('mg-app').style.display = 'block';
   document.getElementById('mg-sub').textContent = 'Pilot tools for ' + (data.business && data.business.name ? data.business.name : 'your listing') + '. Nothing auto-posts.';
-  const listing = data.listing || {};
-  const rows = [
-    ['Description', listing.has_description],
-    ['Website', listing.has_website],
-    ['Phone', listing.has_phone],
-    ['City and state', listing.has_city_state],
-    ['Facebook', listing.has_facebook],
-    ['Instagram', listing.has_instagram]
-  ];
-  document.getElementById('mg-listing').innerHTML = rows.map(function (r) {
-    return '<div class="mg-row"><span>' + r[0] + '</span><strong>' + yn(r[1]) + '</strong></div>';
+
+  const trial = data.trial || {};
+  const trialStatus = document.getElementById('mg-trial-status');
+  const statusLabel = trial.status === 'active' ? 'Active' : (trial.status === 'ended' ? 'Ended' : (trial.status || '—'));
+  trialStatus.textContent = statusLabel;
+  trialStatus.className = 'mg-status' + (trial.status === 'active' ? '' : ' is-ended');
+  document.getElementById('mg-trial-start').textContent = fmtDate(trial.starts_at);
+  document.getElementById('mg-trial-end').textContent = fmtDate(trial.ends_at);
+  document.getElementById('mg-trial-remaining').textContent = trial.days_remaining != null ? String(trial.days_remaining) : '—';
+
+  const score = data.score || {};
+  document.getElementById('mg-score-total').textContent = (score.total != null ? score.total : '—') + ' / ' + (score.max || 100);
+  const cats = score.categories || [];
+  document.getElementById('mg-score-cats').innerHTML = cats.map(function (c) {
+    const pct = c.max ? Math.round((c.score / c.max) * 100) : 0;
+    const reasons = (c.reasons || []).map(function (r) { return '<li>' + escapeHtml(r) + '</li>'; }).join('');
+    return '<div class="mg-cat"><div class="mg-cat-top"><span>' + escapeHtml(c.label) + '</span><strong>' + escapeHtml(String(c.score)) + ' / ' + escapeHtml(String(c.max)) + '</strong></div><div class="mg-bar"><span style="width:' + pct + '%"></span></div><ul class="mg-reasons">' + reasons + '</ul></div>';
   }).join('');
-  const opps = listing.opportunities || [];
+
+  const listing = data.listing || {};
+  const opps = data.opportunities || listing.opportunities || [];
   document.getElementById('mg-opps').innerHTML = opps.length
     ? opps.map(function (o) {
-        return '<div class="mg-opp"><strong>' + (o.title || '') + '</strong><p class="mg-empty">' + (o.detail || '') + '</p></div>';
+        return '<div class="mg-opp"><strong>' + escapeHtml(o.title || '') + '</strong><p class="mg-empty">' + escapeHtml(o.detail || '') + '</p></div>';
       }).join('')
     : '<p class="mg-empty">No gaps detected from your listing data.</p>';
+
+  const progress = data.progress || {};
+  const items = progress.items || [];
+  const progressRows = items.map(function (item) {
+    return '<div class="mg-row"><span>' + escapeHtml(item.label) + '</span><strong>' + yn(item.done) + '</strong></div>';
+  }).join('');
+  document.getElementById('mg-progress').innerHTML =
+    '<div class="mg-row"><span>Completed</span><strong>' + escapeHtml(String(progress.completed || 0)) + ' / ' + escapeHtml(String(progress.total || items.length || 0)) + '</strong></div>' +
+    '<div class="mg-row"><span>Days remaining in trial</span><strong>' + escapeHtml(String(progress.trial_days_remaining != null ? progress.trial_days_remaining : '—')) + '</strong></div>' +
+    '<div class="mg-row"><span>Leads for this listing</span><strong>' + escapeHtml(String(progress.listing_leads != null ? progress.listing_leads : 0)) + '</strong></div>' +
+    progressRows;
+
+  const upgrade = data.upgrade || {};
+  document.getElementById('mg-upgrade-title').textContent = upgrade.headline || 'Keep Growing After Your Free Trial';
+  document.getElementById('mg-upgrade-copy').textContent = upgrade.detail || 'Review your plan when you are ready.';
+  document.getElementById('mg-upgrade-cta').textContent = upgrade.cta_label || 'View Plans';
 }
 load();
 </script>

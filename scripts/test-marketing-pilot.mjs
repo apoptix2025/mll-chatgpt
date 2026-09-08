@@ -52,13 +52,27 @@ assert('pilot routes require Worker auth first', /path\.startsWith\('\/api\/mark
 assert('unauthenticated users cannot reach pilot handler without withAuth', /else if \(path\.startsWith\('\/api\/marketing\/pilot'\)\)/.test(indexTs))
 assert('auth/me exposes marketing_pilot.enabled from helper', /marketing_pilot/.test(auth) && /authorizeMarketingPilot/.test(auth) && !/slug === 'test-business'/.test(auth))
 assert('production flag is the Test Business UUID not slug', /\[env\.production\.vars\][\s\S]*MLL_MARKETING_PILOT_BUSINESS_IDS = "7e735f46-9dc1-4ecf-936b-7342e566978a"/.test(wrangler) && !/MLL_MARKETING_PILOT_BUSINESS_IDS = "test-business"/.test(wrangler))
-assert('staging flag stays empty', /\[env\.staging\.vars\][\s\S]*MLL_MARKETING_PILOT_BUSINESS_IDS = ""/.test(wrangler))
+const defaultVars = wrangler.split('[env.production.vars]')[0]
+const prodVars = (wrangler.split('[env.production.vars]')[1] || '').split('[env.staging')[0]
+const stagingVars = wrangler.split('[env.staging.vars]')[1] || ''
+const defaultFlag = (defaultVars.match(/MLL_MARKETING_PILOT_BUSINESS_IDS = "([^"]*)"/) || [])[1]
+const prodFlag = (prodVars.match(/MLL_MARKETING_PILOT_BUSINESS_IDS = "([^"]*)"/) || [])[1]
+const stagingFlag = (stagingVars.match(/MLL_MARKETING_PILOT_BUSINESS_IDS = "([^"]*)"/) || [])[1]
+assert('default application flag is empty', defaultFlag === '')
+assert('staging flag is the staging QA business UUID', stagingFlag === 'f38ce2e6-9dd0-462c-a4fb-fd14a3875648')
+assert('staging flag is not the production Test Business UUID', stagingFlag !== TEST_ID)
+assert('production flag is not the staging QA UUID', prodFlag === TEST_ID && !prodVars.includes('f38ce2e6-9dd0-462c-a4fb-fd14a3875648'))
+assert('app source does not hardcode environment business UUIDs', !/f38ce2e6-9dd0-462c-a4fb-fd14a3875648/.test(lib + api + auth + indexTs + helper + page) && !/7e735f46-9dc1-4ecf-936b-7342e566978a/.test(lib + api + auth + indexTs + helper + page))
+assert('authorization reads MLL_MARKETING_PILOT_BUSINESS_IDS from env', /env\.MLL_MARKETING_PILOT_BUSINESS_IDS/.test(api) && /env\.MLL_MARKETING_PILOT_BUSINESS_IDS/.test(auth) && /MLL_MARKETING_PILOT_BUSINESS_IDS\?:/.test(indexTs))
 assert('owner nav is injected only when server enabled flag is true', /injectMarketingPilotLink/.test(helper) && /isMarketingPilotEnabled/.test(helper) && /Marketing & AI Growth/.test(helper) && /marketing-growth\.html/.test(helper))
 assert('dashboard and listing use server flag not slug', /injectMarketingPilotLink/.test(dash) && /injectMarketingPilotLink/.test(listing) && !/slug === 'test-business'/.test(dash) && !/slug === 'test-business'/.test(listing))
 assert('owner page re-checks summary API', /\/api\/marketing\/pilot\/summary/.test(page) && /Marketing &amp; AI Growth/.test(page))
+assert('owner page renders V1 trial score opportunities progress upgrade', /30-Day Free Growth Trial/.test(page) && /Digital Footprint Score/.test(page) && /Growth Opportunities/.test(page) && /30-Day Growth Progress/.test(page) && /Keep Growing After Your Free Trial/.test(page) && /View Plans/.test(page) && /Powered by MLL \+ AP Optix/.test(page))
+assert('owner page has no admin pack generator or global MCC metrics', !/Generate weekly pack/.test(page) && !/Business Signups/.test(page) && !/AI Search Activity/.test(page) && !/Marketing Command Center/.test(page))
 assert('public listing page still loads by slug query', /slug/.test(bizPage) && /api\/businesses/.test(bizPage))
 assert('admin command center stays admin-only', /requireAdmin/.test(adminMkt) && /isAdmin\(auth\.email\)/.test(adminMkt))
-assert('pilot summary is scoped to authorized business only', /business: \{ id: access\.business\.id, name: access\.business\.name \}/.test(api) && !/from\('businesses'\)[\s\S]*slug/.test(api))
+assert('pilot summary is scoped to authorized business only', /buildCustomerPilotSummary/.test(api) && /eq\('business_id', access\.business\.id\)/.test(api) && /business: \{ id: biz\.id, name: biz\.name \}/.test(lib))
+assert('pilot API ignores query auth', !/searchParams/.test(api))
 
 if (failed) {
   console.error('marketing pilot tests FAIL ' + failed)
