@@ -21,6 +21,7 @@ import { handleScheduled } from './cron'
 import { handlePublicMedia } from './lib/media'
 import { handleAiSearch } from './api/ai-search'
 import { handleMarketing } from './api/marketing'
+import { handleMarketingPilot } from './api/marketing-pilot'
 import { handleAnalyticsEvent } from './lib/analytics'
 
 export interface Env {
@@ -44,6 +45,7 @@ export interface Env {
   ENVIRONMENT: string
   FRONTEND_URL: string
   MLL_AI_ENABLED?: string
+  MLL_MARKETING_PILOT_BUSINESS_IDS?: string
   AI?: { run: (model: string, input: Record<string, unknown>) => Promise<unknown> }
 }
 
@@ -134,6 +136,7 @@ export default {
         else if (path.startsWith('/api/leads'))       response = await handleLeads(request, env, authResult.userId)
         else if (path.startsWith('/api/uploads'))     response = await handleUploads(request, env, authResult.userId, ctx)
         else if (path.startsWith('/api/stripe'))      response = await handleStripe(request, env, ctx, authResult.userId)
+        else if (path.startsWith('/api/marketing/pilot')) response = await handleMarketingPilot(request, env, authResult.userId)
         else response = Response.json({ error: 'Not found' }, { status: 404 })
       }
 

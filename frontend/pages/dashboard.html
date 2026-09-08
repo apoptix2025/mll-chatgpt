@@ -487,6 +487,10 @@ async function loadDashboard() {
 
   const isAdmin = resolved.isAdmin;
   window.MLL_CURRENT_BUSINESS.injectAdminSidebarLinks(document.querySelector('.sidebar'), isAdmin);
+  window.MLL_CURRENT_BUSINESS.injectMarketingPilotLink(
+    document.querySelector('.sidebar'),
+    window.MLL_CURRENT_BUSINESS.isMarketingPilotEnabled(me)
+  );
 
   if (!biz) {
     document.getElementById('dash-greeting').textContent = `Welcome back, ${fname}! 👋`;

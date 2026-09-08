@@ -321,6 +321,10 @@ fetch(`${API}/api/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
         document.querySelector('.sidebar'),
         window.MLL_CURRENT_BUSINESS.isAdminEmail(d?.user?.email || d?.profile?.email)
       );
+      window.MLL_CURRENT_BUSINESS.injectMarketingPilotLink(
+        document.querySelector('.sidebar'),
+        window.MLL_CURRENT_BUSINESS.isMarketingPilotEnabled(d)
+      );
     }
     if (!b) return;
     document.getElementById('sb-biz-avatar').textContent  = b.emoji || '🏢';

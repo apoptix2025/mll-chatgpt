@@ -79,10 +79,40 @@
     }
   }
 
+  function isMarketingPilotEnabled(me) {
+    return !!(me && me.marketing_pilot && me.marketing_pilot.enabled);
+  }
+
+  function injectMarketingPilotLink(sidebar, enabled) {
+    if (!sidebar) return;
+    var existing = sidebar.querySelectorAll('[data-mll-marketing-pilot]');
+    for (var i = 0; i < existing.length; i++) existing[i].remove();
+    if (!enabled) return;
+
+    var link = document.createElement('a');
+    link.href = 'marketing-growth.html';
+    link.className = 'sb-link';
+    link.setAttribute('data-mll-marketing-pilot', '1');
+    link.textContent = 'Marketing & AI Growth';
+
+    var coming = null;
+    var sections = sidebar.querySelectorAll('.sb-section');
+    for (var s = 0; s < sections.length; s++) {
+      if (/coming soon/i.test(sections[s].textContent || '')) {
+        coming = sections[s];
+        break;
+      }
+    }
+    if (coming && coming.parentNode) coming.parentNode.insertBefore(link, coming);
+    else sidebar.appendChild(link);
+  }
+
   global.MLL_CURRENT_BUSINESS = {
     isAdminEmail: isAdminEmail,
     resolveAssignedBusiness: resolveAssignedBusiness,
     syncAssignedBusinessId: syncAssignedBusinessId,
     injectAdminSidebarLinks: injectAdminSidebarLinks,
+    isMarketingPilotEnabled: isMarketingPilotEnabled,
+    injectMarketingPilotLink: injectMarketingPilotLink,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Env } from '../index'
 import { handleDetailedHealth } from './health'
+import { authorizeMarketingPilot } from '../lib/marketing-pilot'
 
 export const ADMIN_EMAILS = ['info@apoptix.io']
 
@@ -66,6 +67,9 @@ export async function handleAuth(request: Request, env: Env): Promise<Response> 
       .eq('id', user.id)
       .single()
 
+    const pilot = await authorizeMarketingPilot(serviceSupabase, user.id, env.MLL_MARKETING_PILOT_BUSINESS_IDS)
+    const marketing_pilot = { enabled: pilot.ok }
+
     // Force admin plan for root admin email regardless of DB state
     if (isAdmin(user.email) && profile) {
       const bizArr = Array.isArray(profile.businesses)
@@ -74,10 +78,10 @@ export async function handleAuth(request: Request, env: Env): Promise<Response> 
       const adminBiz = bizArr.map((b: Record<string, unknown>) => ({
         ...b, plan: 'admin', expires_at: null, status: 'active',
       }))
-      return Response.json({ user, profile: { ...profile, plan: 'admin', businesses: adminBiz } })
+      return Response.json({ user, profile: { ...profile, plan: 'admin', businesses: adminBiz }, marketing_pilot })
     }
 
-    return Response.json({ user, profile })
+    return Response.json({ user, profile, marketing_pilot })
   }
 
   // POST /api/auth/update-password — set new password after reset
