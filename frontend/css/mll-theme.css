@@ -654,7 +654,7 @@ body.mll-nav-open { overflow: hidden; }
     gap: 5px;
     margin: 0;
     height: 34px;
-    transform: translateX(10px);
+    transform: translateX(20px);
   }
   .v2-home .v2-top-actions .lang-btn {
     min-height: 32px;
@@ -833,5 +833,5 @@ body.mll-nav-open { overflow: hidden; }
   .v2-home .v2-topnav-inner .logo { max-width: 105px; }
   .v2-home .v2-topnav .logo-text { font-size: 14px; }
   .v2-home .mll-toolbar-auth { font-size: 11px; }
-  .v2-home .v2-top-actions .lang-toggle { transform: translateX(4px); }
+  .v2-home .v2-top-actions .lang-toggle { transform: translateX(16px); }
 }
