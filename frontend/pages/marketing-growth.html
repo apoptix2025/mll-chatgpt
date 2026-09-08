@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/marketing-pack.css">
   <style>
     body{background:var(--surface-2);padding-top:var(--nav-h);}
     .dash-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - var(--nav-h));}
@@ -46,6 +47,8 @@
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/current-business.js"></script>
+  <script src="/js/date-only.js"></script>
+  <script src="/js/marketing-pack.js"></script>
 </head>
 <body>
   <div class="dash-layout">
@@ -101,6 +104,19 @@
           <div id="mg-opps"></div>
         </section>
 
+        <section class="mg-card" id="mg-pack-card">
+          <h2>AI Marketing Pack</h2>
+          <p class="page-sub" id="mg-pack-sub">Create ready-to-use marketing content personalized for your business.</p>
+          <p class="mg-pack-disclosure">Powered by MLL + AP Optix AI. Nothing auto-posts.</p>
+          <div id="mg-pack-lock" class="mg-pack-lock" hidden>
+            <p id="mg-pack-lock-msg">Your free Growth Trial is complete.</p>
+            <a class="mg-cta" id="mg-pack-plans" href="billing.html">View Plans</a>
+          </div>
+          <button type="button" class="mg-cta mg-pack-cta" id="mg-pack-generate" hidden>Generate My Marketing Pack</button>
+          <p class="mg-empty" id="mg-pack-status"></p>
+          <div id="mg-pack-report"></div>
+        </section>
+
         <section class="mg-card" id="mg-progress-card">
           <h2>30-Day Growth Progress</h2>
           <div id="mg-progress"></div>
@@ -128,16 +144,80 @@ function showDenied(msg) {
 function yn(v) { return v ? 'Ready' : 'Needs attention'; }
 
 function fmtDate(iso) {
+  if (window.MLL_DATE && typeof window.MLL_DATE.formatUtcDateOnly === 'function') {
+    return window.MLL_DATE.formatUtcDateOnly(iso);
+  }
   if (!iso) return '—';
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  var m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return '—';
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[Number(m[2]) - 1] + ' ' + Number(m[3]) + ', ' + m[1];
 }
 
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, function (ch) {
     return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
   });
+}
+
+function renderPackState(pack) {
+  var generate = document.getElementById('mg-pack-generate');
+  var lock = document.getElementById('mg-pack-lock');
+  var lockMsg = document.getElementById('mg-pack-lock-msg');
+  var status = document.getElementById('mg-pack-status');
+  var report = document.getElementById('mg-pack-report');
+  pack = pack || {};
+  var canGenerate = !!pack.can_generate;
+  generate.hidden = !canGenerate;
+  generate.disabled = !canGenerate;
+  if (canGenerate) {
+    lock.hidden = true;
+  } else {
+    lock.hidden = false;
+    lockMsg.textContent = pack.lock_message || (pack.lock_reason === 'trial_expired' ? 'Your free Growth Trial is complete.' : 'Generation is not available.');
+    document.getElementById('mg-pack-plans').hidden = pack.lock_reason === 'cooldown' || pack.lock_reason === 'storage_unavailable';
+  }
+  var meta = [];
+  if (pack.packs_generated) meta.push(pack.packs_generated + ' pack' + (pack.packs_generated === 1 ? '' : 's') + ' generated');
+  if (pack.remaining != null && canGenerate) meta.push(pack.remaining + ' remaining in this pilot');
+  status.textContent = meta.join(' · ');
+  if (window.MLL_MARKETING_PACK && pack.last_pack) {
+    report.innerHTML = window.MLL_MARKETING_PACK.render(pack.last_pack);
+  } else if (!pack.last_pack) {
+    report.innerHTML = '<div class="mcc-empty">No pack generated yet. Drafts only — nothing auto-posts.</div>';
+  }
+}
+
+function recordCopyEvent() {
+  fetch(API + '/api/marketing/pilot/pack/copy', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token },
+  }).catch(function () {});
+}
+
+async function generatePack() {
+  var btn = document.getElementById('mg-pack-generate');
+  var status = document.getElementById('mg-pack-status');
+  btn.disabled = true;
+  status.textContent = 'Generating your Marketing Pack…';
+  try {
+    var res = await fetch(API + '/api/marketing/pilot/pack', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    var data = await res.json().catch(function () { return {}; });
+    if (res.ok && data.pack) {
+      renderPackState(data.pack);
+      status.textContent = data.fallback ? 'Grounded fallback draft is ready. Review before publishing.' : 'Your Marketing Pack is ready. Review before publishing.';
+      return;
+    }
+    if (data.pack) renderPackState(data.pack);
+    status.textContent = data.error || 'Could not generate a Marketing Pack.';
+  } catch (err) {
+    status.textContent = 'Could not generate a Marketing Pack.';
+  } finally {
+    if (!btn.hidden) btn.disabled = false;
+  }
 }
 
 async function load() {
@@ -210,6 +290,12 @@ async function load() {
   document.getElementById('mg-upgrade-title').textContent = upgrade.headline || 'Keep Growing After Your Free Trial';
   document.getElementById('mg-upgrade-copy').textContent = upgrade.detail || 'Review your plan when you are ready.';
   document.getElementById('mg-upgrade-cta').textContent = upgrade.cta_label || 'View Plans';
+
+  renderPackState(data.pack);
+  if (window.MLL_MARKETING_PACK) {
+    window.MLL_MARKETING_PACK.bindCopy(document.getElementById('mg-pack-report'), recordCopyEvent);
+  }
+  document.getElementById('mg-pack-generate').onclick = generatePack;
 }
 load();
 </script>
