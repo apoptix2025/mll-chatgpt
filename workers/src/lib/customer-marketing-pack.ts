@@ -2,6 +2,20 @@ import { MLL_AI_MODEL } from '../api/ai-search'
 import { parseMarketingPack } from '../api/marketing'
 import type { PilotBusiness } from './marketing-pilot'
 import type { MarketingTrialStatus } from './marketing-trial'
+import {
+  CUSTOMER_UNSUPPORTED_HYPE,
+  channelSpecificFallbackPack,
+  isLowInformationDescription,
+  marketingFactsBlob,
+  marketingListingFrom,
+  neutralizeUnsupportedSentences,
+  packHasCrossChannelReuse,
+  packHasInvalidSubject,
+  packHasPhysicalAssumptions,
+  packHasPlaceholderText,
+  polishCustomerPack,
+  type FallbackReason,
+} from './customer-marketing-pack-quality'
 
 /** Conservative V2 staging-pilot limit. Not a paid-plan entitlement. */
 export const CUSTOMER_PACK_PILOT_LIMIT = 3
@@ -10,8 +24,8 @@ export const CUSTOMER_PACK_AI_TIMEOUT_MS = 20_000
 export const CUSTOMER_PACK_MAX_TOKENS = 1800
 export const CUSTOMER_PACK_TABLE = 'customer_marketing_packs'
 
-export const CUSTOMER_UNGROUNDED_CLAIM =
-  /#1\b|\bbest\b|\btop(?:-rated)?\b|\bleading\b|\btrusted\b|\baward(?:s|ed|-winning)?\b|\bcertified\b|\btestimonials?\b|\b\d+\s+reviews?\b|\bstar ratings?\b|\b\d+(?:\.\d+)?\s*stars?\b|\bfollowers\b|\brevenue\b|\branking|\d+\s*%|\$\d+|\bsince\s+\d{4}\b|\byears in business\b|\bcalificaci[oó]n(?:es)?\b|\bmejor(?:es)?\b|m[aá]s confiable|el mejor|la mejor|n[uú]mero\s*1/i
+export const CUSTOMER_UNGROUNDED_CLAIM = CUSTOMER_UNSUPPORTED_HYPE
+export type { FallbackReason }
 
 export type GroundedListing = {
   name: string
@@ -107,24 +121,34 @@ export function generationSourceFromFallback(fallback: boolean): GenerationSourc
   return fallback ? 'deterministic_fallback' : 'ai_grounded'
 }
 
+export {
+  evaluatePackQuality,
+  isLowInformationDescription,
+  isPlaceholderDescription,
+  rewriteUnsupportedHype,
+  polishCustomerPack,
+  channelSpecificFallbackPack,
+} from './customer-marketing-pack-quality'
+
 export function allowedFactsFromListing(listing: GroundedListing): Record<string, unknown> {
+  const safe = marketingListingFrom(listing)
   const facts: Record<string, unknown> = {
-    business_name: listing.name || null,
+    business_name: safe.name || null,
   }
   const optional: Record<string, unknown> = {
-    category: listing.category,
-    description: listing.description,
-    city: listing.city,
-    state: listing.state,
-    website: listing.website,
-    phone: listing.phone,
-    email: listing.email,
-    address: listing.address,
-    zip: listing.zip,
-    tags: listing.tags.length ? listing.tags : null,
-    facebook_url: listing.facebook_url,
-    instagram_url: listing.instagram_url,
-    other_social: Object.keys(listing.other_social).length ? listing.other_social : null,
+    category: safe.category,
+    description: safe.description,
+    city: safe.city,
+    state: safe.state,
+    website: safe.website,
+    phone: safe.phone,
+    email: safe.email,
+    address: safe.address,
+    zip: safe.zip,
+    tags: safe.tags.length ? safe.tags : null,
+    facebook_url: safe.facebook_url,
+    instagram_url: safe.instagram_url,
+    other_social: Object.keys(safe.other_social).length ? safe.other_social : null,
   }
   for (const [key, value] of Object.entries(optional)) {
     if (value == null || value === '') continue
@@ -278,8 +302,9 @@ function asSeo(pack: Record<string, unknown>): CustomerMarketingPack['seo'] {
   return { keywords, local_discovery: local }
 }
 
-export function stripUngroundedClaims(text: string): string {
+export function stripUngroundedClaims(text: string, listing?: GroundedListing): string {
   if (!text) return ''
+  if (listing) return neutralizeUnsupportedSentences(text, listing)
   return neutralizeClaimPhrases(text)
     .split(/(?<=[.!?])\s+/)
     .filter((sentence) => !CUSTOMER_UNGROUNDED_CLAIM.test(sentence))
@@ -315,8 +340,8 @@ function neutralizeClaimPhrases(text: string): string {
     .trim()
 }
 
-function cleanList(items: string[]): string[] {
-  return items.map(stripUngroundedClaims).filter(Boolean)
+function cleanList(items: string[], listing: GroundedListing): string[] {
+  return items.map((text) => stripUngroundedClaims(text, listing)).filter(Boolean)
 }
 
 export function normalizeCustomerPack(raw: Record<string, unknown>): CustomerMarketingPack {
@@ -343,8 +368,8 @@ export function filterCustomerPackToGrounded(pack: CustomerMarketingPack, listin
   })).filter((row) => row.hook || row.talking_point)
 
   return {
-    facebook_posts: cleanList(pack.facebook_posts.map((text) => cleanGroundedText(text, listing))).slice(0, 2),
-    instagram_captions: cleanList(pack.instagram_captions.map((text) => cleanGroundedText(text, listing))).slice(0, 2),
+    facebook_posts: cleanList(pack.facebook_posts.map((text) => cleanGroundedText(text, listing)), listing).slice(0, 2),
+    instagram_captions: cleanList(pack.instagram_captions.map((text) => cleanGroundedText(text, listing)), listing).slice(0, 2),
     tiktok_concepts: concepts.slice(0, 2),
     seo: deterministicSeo(listing),
     bilingual_spotlight: {
@@ -379,18 +404,7 @@ function locLabel(listing: GroundedListing): string {
 }
 
 function groundedBlob(listing: GroundedListing): string {
-  return [
-    listing.name,
-    listing.category,
-    listing.description,
-    listing.city,
-    listing.state,
-    listing.website,
-    listing.phone,
-    listing.email,
-    listing.address,
-    ...listing.tags,
-  ].filter(Boolean).join(' ').toLowerCase()
+  return marketingFactsBlob(listing)
 }
 
 const INVENTED_VERTICAL =
@@ -450,7 +464,7 @@ function stripInventedServices(text: string, blob: string): string {
 function cleanGroundedText(text: string, listing: GroundedListing): string {
   const blob = groundedBlob(listing)
   const rewritten = rewriteInventedPhrases(fillNamePlaceholders(text, listing.name), listing)
-  return stripInventedServices(stripUngroundedClaims(rewritten), blob)
+  return stripInventedServices(stripUngroundedClaims(rewritten, listing), blob)
 }
 
 function deterministicSeo(listing: GroundedListing): CustomerMarketingPack['seo'] {
@@ -517,13 +531,18 @@ export function packHasInventedServices(pack: CustomerMarketingPack, listing: Gr
 }
 
 export function isCustomerPackGrounded(pack: CustomerMarketingPack, listing: GroundedListing): boolean {
+  const safe = marketingListingFrom(listing)
   return (
     isCustomerPackComplete(pack)
-    && packMentionsBusinessName(pack, listing)
-    && packMentionsCategory(pack, listing)
-    && packMentionsLocation(pack, listing)
+    && packMentionsBusinessName(pack, safe)
+    && packMentionsCategory(pack, safe)
+    && packMentionsLocation(pack, safe)
     && !packHasUnsupportedClaims(pack)
-    && !packHasInventedServices(pack, listing)
+    && !packHasInventedServices(pack, safe)
+    && !packHasPlaceholderText(pack, listing)
+    && !packHasPhysicalAssumptions(pack, safe)
+    && !packHasCrossChannelReuse(pack, safe)
+    && !packHasInvalidSubject(pack)
   )
 }
 
@@ -578,106 +597,41 @@ export function repairCustomerPackFacts(pack: CustomerMarketingPack, listing: Gr
 }
 
 export function buildCustomerFallbackPack(listing: GroundedListing): CustomerMarketingPack {
-  const name = listing.name || 'This business'
-  const cat = listing.category || 'local business'
-  const loc = locLabel(listing)
-  const locBit = loc ? ` in ${loc}` : ''
-  const locEs = loc ? ` en ${loc}` : ''
-  const desc = listing.description ? listing.description.slice(0, 180) : ''
-  const site = listing.website ? ` Learn more at ${listing.website}.` : ''
-  const phone = listing.phone ? ` Call ${listing.phone}.` : ''
-  const fb = listing.facebook_url ? ' Find them on Facebook from the listing.' : ''
-  const ig = listing.instagram_url ? ' Find them on Instagram from the listing.' : ''
-
-  const facebook1 = `${name} is a ${cat} listing on My Latino List${locBit}. Open the listing to see what they offer and how to get in touch.`
-  const facebook2 = desc
-    ? `${name} on My Latino List: ${desc} Visit the listing to connect${phone}`
-    : `Looking for ${cat}${locBit}? ${name} is listed on My Latino List. Open the profile to review their listing details.${site}`
-
-  const ig1 = `${name} · ${cat}${loc ? ` · ${loc}` : ''}. Discover this listing on My Latino List. Nothing auto-posts from here. #MyLatinoList #LatinoOwned${loc ? ' #ApoyaLoLocal' : ''}`
-  const ig2 = desc
-    ? `${name}: ${desc.slice(0, 120)} Find the listing on My Latino List.${ig} #MyLatinoList`
-    : `${name} is listed on My Latino List${locBit}. Browse the directory and open this ${cat.toLowerCase()} profile. #MyLatinoList #LatinoBusiness`
-
-  return {
-    facebook_posts: [facebook1, facebook2],
-    instagram_captions: [ig1, ig2],
-    tiktok_concepts: [
-      {
-        hook: `Meet ${name} on My Latino List`,
-        visual: `Show the My Latino List listing card for ${name}${locBit}.`,
-        talking_point: `${name} is a ${cat} listing${locBit}. Use only the details on the listing.`,
-        cta: 'Open this listing on My Latino List.',
-      },
-      {
-        hook: loc ? `Looking for ${cat} in ${loc}?` : `Looking for ${cat}?`,
-        visual: 'Screen recording of the directory search opening this listing.',
-        talking_point: `${name} appears on My Latino List. Share the listing, not invented reviews or prices.`,
-        cta: 'Search My Latino List and open this profile.',
-      },
-    ],
-    seo: {
-      keywords: [
-        name,
-        cat,
-        loc ? `${cat} ${loc}` : `${cat} near me`,
-        loc ? `${name} ${loc}` : `${name} My Latino List`,
-        `Latino-owned ${cat}`,
-      ].filter(Boolean),
-      local_discovery: [
-        loc ? `${cat} in ${loc}` : cat,
-        loc ? `Latino-owned ${cat} ${listing.city}` : `Latino-owned ${cat}`,
-        `${name} My Latino List`,
-        listing.city && listing.state ? `${listing.city} ${listing.state} ${cat}` : '',
-      ].filter(Boolean),
-    },
-    bilingual_spotlight: {
-      en: `${name} is a ${cat} listing on My Latino List${locBit}.${desc ? ` ${desc}` : ''}${site}${phone}${fb}`,
-      es: `${name} aparece en My Latino List como un negocio de ${cat.toLowerCase()}${locEs}.${desc ? ` ${desc}` : ''} Entra al directorio para ver esta ficha y contactar al negocio.`,
-    },
-    email_campaign: {
-      subject: `${name} is on My Latino List`,
-      preview: loc ? `${cat} in ${loc}` : `${cat} listing on My Latino List`,
-      body: `${name} is listed on My Latino List${locBit}. Open the listing to review their profile and reach out directly.${site}${phone}`,
-      cta: 'View this listing on My Latino List',
-    },
-    auto_post: false,
-    disclaimer: 'Drafts only. Review before publishing. Nothing auto-posts. No performance claims.',
-  }
+  return channelSpecificFallbackPack(marketingListingFrom(listing))
 }
 
 export function buildCustomerPackPrompt(listing: GroundedListing): string {
   const facts = allowedFactsFromListing(listing)
+  const sparse = isLowInformationDescription(listing.description)
   return [
-    'Generate marketing copy only from the ALLOWED FACTS below.',
-    'Anything not in ALLOWED FACTS must be treated as unknown.',
+    'Generate marketing content ONLY from ALLOWED_FACTS.',
+    'Anything not present in ALLOWED_FACTS must be treated as unknown.',
+    'Do not infer services, qualities, achievements, facilities, products, experience, popularity, or customer sentiment.',
     'ALLOWED_FACTS: ' + JSON.stringify(facts),
-    'Write useful, natural, action-oriented DRAFT copy for this My Latino List listing. Nothing auto-posts.',
+    sparse
+      ? 'The listing description is missing or low-information. Use only business name, category, city/state, website, phone, and verified social URLs. Do not invent services.'
+      : 'Use only explicitly stated facts and themes from the description. Do not add anything else.',
     'business_name is mandatory in Facebook posts, the English spotlight, the Spanish spotlight, and the email subject or body. Never write [Business Name] or omit the name.',
-    'category is authoritative. It is a directory classification, not a menu of services. You may say the listing is in that category. DO NOT infer services from category.',
-    'description, city, state, website, phone, and social links are authoritative when present. Use them when they help. If a field is null, omit it.',
-    'DO NOT infer services from the business name, including the letters QA. QA and Test in a name are letters only, not quality assurance or software testing.',
-    'DO NOT add services, offerings, or specialties that are not explicitly present in ALLOWED FACTS. Do not write QA testing, quality assurance, software, or pruebas unless those exact words are in ALLOWED FACTS.',
-    'facebook_posts and instagram_captions must be arrays of strings, never objects.',
-    'Write discovery/awareness copy: name + category + city/state + My Latino List. Do not invent a service menu.',
-    'Never invent reviews, ratings, awards, rankings, years in business, customer counts, prices, discounts, services not present in the listing, certifications, or testimonials.',
-    'DO NOT invent reviews, awards, ratings, rankings, pricing, certifications, discounts, customer counts, or years in business.',
-    'DO NOT use best, top, trusted, #1, leading, award-winning, certified, mejor, mejores, or más confiable unless those exact words appear in ALLOWED FACTS.',
-    'If listing details are sparse, write discovery/awareness copy using only the known fields instead of guessing.',
+    'category is a directory classification, not a menu of services. You may say the listing is in that category. DO NOT infer services from category or from letters like QA.',
+    'Write useful, natural, action-oriented DRAFT copy for this My Latino List listing. Nothing auto-posts.',
+    'Safe language includes: Discover [Business], Explore [Business], Learn more about [Business], Find [category] businesses in [location], Connect with [Business], View the listing on My Latino List.',
+    'NEVER write: latest, go-to, perfect place, el lugar perfecto, pushing the boundaries, at the forefront, leading, industry-leading, innovative, premier, exceptional, best, top, trusted, #1, number one, award-winning, highly rated, popular — unless those exact words appear in ALLOWED_FACTS.',
+    'Never invent reviews, ratings, awards, rankings, years in business, customer counts, prices, discounts, services not present in ALLOWED_FACTS, certifications, testimonials, specialties, employees, storefronts, or promotions.',
+    'Facebook: two distinct community/discovery posts, somewhat longer than Instagram, different openings and structure, grounded CTA. Do not paraphrase the same sentence twice.',
+    'Instagram: two distinct shorter social captions. Preserve the exact business name. Natural hashtags. Do not truncate Facebook posts. Avoid awkward category insertion and mechanical Spanish-English mixtures.',
+    'Reel/TikTok: two concepts with HOOK, VISUAL, TALKING POINT, CTA. Hooks must be engaging but factual. VISUAL may use logo, MLL listing card, website screen if website exists, category/location text, directory search, or a verified social profile. Do not invent storefront, interior, employees, customers, products, equipment, or an office unless ALLOWED_FACTS support it.',
+    'SEO: deterministic phrases using only business name, category, city, state, and My Latino List. No ranking claims. No unsupported service keywords.',
+    'English Spotlight: neutral editorial introduction. Do NOT duplicate Facebook copy.',
+    'Spanish Spotlight: independently written natural Latin American Spanish. Preserve the business name exactly. Avoid el mejor, de confianza, líder, el lugar perfecto, lo último, número uno unless those words are in ALLOWED_FACTS.',
+    'Email: SUBJECT, PREVIEW TEXT, BODY, CTA. Informative discovery tone, different from Facebook and Spotlight. No duplicated words like Services Services. CTA must match an actual destination (listing, website if present).',
+    'Each channel must be meaningfully different. Do not reuse the same primary sentence across Facebook, Spotlight, and Email.',
     'Do not mention businesses that are not this listing. Do not mention AP Optix Marketing Command Center.',
-    'English and Spanish must sound natural. Spanish should be independently written Latin American Spanish, not a mechanical translation.',
-    'Each channel must feel native to that platform. Do not repeat the same sentence across Facebook, Instagram, Reel/TikTok, SEO, Spotlight, and Email.',
-    'Facebook: conversational posts with a clear CTA to the listing or My Latino List.',
-    'Instagram: shorter captions. Hashtags only from name, category, or city.',
-    'Reel/TikTok: video concepts, not copied captions.',
-    'SEO: phrases using only name, category, city, and state.',
-    'Spotlight: directory-style paragraphs. Email: a short campaign, not a social post.',
     'Return ONLY one JSON object. No markdown. No preface. No trailing explanation. Keys:',
-    '- facebook_posts: exactly 2 conversational strings with a clear CTA to the listing or My Latino List.',
+    '- facebook_posts: exactly 2 conversational strings with a clear CTA to the listing, website, or My Latino List.',
     '- instagram_captions: exactly 2 short captions with grounded hashtags.',
     '- tiktok_concepts: exactly 2 objects {hook, visual, talking_point, cta}.',
     '- seo: {keywords: string[], local_discovery: string[] } using only name, category, city, and state.',
-    '- bilingual_spotlight: {en, es} same core facts, independently written.',
+    '- bilingual_spotlight: {en, es} independently written.',
     '- email_campaign: {subject, preview, body, cta}.',
   ].join('\n')
 }
@@ -884,12 +838,12 @@ export function describeAiResult(result: unknown): { keys: string; excerpt: stri
   return { keys, excerpt: (text || JSON.stringify(result)).slice(0, 400) }
 }
 
-function listingOnlyResult(listing: GroundedListing, model: string, reason: 'parse_failed' | 'ungrounded'): {
+function listingOnlyResult(listing: GroundedListing, model: string, reason: FallbackReason): {
   pack: CustomerMarketingPack
   fallback: true
   model: string
   generation_source: 'deterministic_fallback'
-  fallback_reason: 'parse_failed' | 'ungrounded'
+  fallback_reason: FallbackReason
 } {
   return {
     pack: filterCustomerPackToGrounded(buildCustomerFallbackPack(listing), listing),
@@ -898,6 +852,16 @@ function listingOnlyResult(listing: GroundedListing, model: string, reason: 'par
     generation_source: 'deterministic_fallback',
     fallback_reason: reason,
   }
+}
+
+function fallbackReasonFor(pack: CustomerMarketingPack, listing: GroundedListing): FallbackReason {
+  if (!packMentionsBusinessName(pack, listing)) return 'missing_business_name'
+  if (packHasUnsupportedClaims(pack)) return 'unsupported_claim'
+  if (packHasInventedServices(pack, listing)) return 'invented_service'
+  if (packHasInvalidSubject(pack)) return 'invalid_subject'
+  if (packHasCrossChannelReuse(pack, listing)) return 'excessive_duplication'
+  if (packHasPlaceholderText(pack, listing)) return 'low_information_description'
+  return 'other_validation_failure'
 }
 
 export async function generateCustomerMarketingPack(input: {
@@ -909,9 +873,10 @@ export async function generateCustomerMarketingPack(input: {
   fallback: boolean
   model: string
   generation_source: GenerationSource
-  fallback_reason: 'parse_failed' | 'ungrounded' | null
+  fallback_reason: FallbackReason | null
 }> {
   const model = MLL_AI_MODEL
+  const listing = marketingListingFrom(input.listing)
   const prompt = buildCustomerPackPrompt(input.listing)
   let parsed: Record<string, unknown> | null = null
   try {
@@ -920,7 +885,7 @@ export async function generateCustomerMarketingPack(input: {
         messages: [
           {
             role: 'system',
-            content: 'Generate marketing copy only from the ALLOWED FACTS below. Anything not in ALLOWED FACTS must be treated as unknown. Return one JSON object only. No markdown. No preface. No trailing explanation.',
+            content: 'Generate marketing content ONLY from ALLOWED_FACTS. Anything not present in ALLOWED_FACTS must be treated as unknown. Do not infer services, qualities, achievements, facilities, products, experience, popularity, or customer sentiment. Return one JSON object only. No markdown. No preface. No trailing explanation.',
           },
           { role: 'user', content: prompt },
         ],
@@ -935,14 +900,25 @@ export async function generateCustomerMarketingPack(input: {
     throw new Error('ai_failed')
   }
 
-  if (!parsed) return listingOnlyResult(input.listing, model, 'parse_failed')
+  if (!parsed) return listingOnlyResult(listing, model, 'malformed_json')
 
-  const pack = repairCustomerPackFacts(
-    filterCustomerPackToGrounded(normalizeCustomerPack(parsed), input.listing),
-    input.listing,
+  const polished = polishCustomerPack(
+    repairCustomerPackFacts(
+      filterCustomerPackToGrounded(normalizeCustomerPack(parsed), listing),
+      listing,
+    ),
+    listing,
   )
-  if (!isCustomerPackGrounded(pack, input.listing)) return listingOnlyResult(input.listing, model, 'ungrounded')
-  return { pack, fallback: false, model, generation_source: 'ai_grounded', fallback_reason: null }
+  if (isCustomerPackGrounded(polished.pack, listing)) {
+    return {
+      pack: polished.pack,
+      fallback: false,
+      model,
+      generation_source: 'ai_grounded',
+      fallback_reason: null,
+    }
+  }
+  return listingOnlyResult(listing, model, fallbackReasonFor(polished.pack, listing))
 }
 
 /** Client identity fields must never authorize or override the server business. */

@@ -58,7 +58,7 @@ assert('migration proposes customer_marketing_packs and is unapplied', /CREATE T
 assert('migration does not alter marketing_trials', !/ALTER TABLE public\.marketing_trials/.test(migration) && !/INSERT INTO public\.marketing_trials/.test(migration))
 assert('migration has no environment UUIDs', !/f38ce2e6-9dd0-462c-a4fb-fd14a3875648/.test(migration) && !/7e735f46-9dc1-4ecf-936b-7342e566978a/.test(migration))
 assert('app source does not hardcode environment business UUIDs', !/f38ce2e6-9dd0-462c-a4fb-fd14a3875648/.test(packLib + api + page + packJs) && !/7e735f46-9dc1-4ecf-936b-7342e566978a/.test(packLib + api + page + packJs))
-assert('hallucination guards in prompt', /Never invent reviews, ratings, awards/.test(packLib) && /ALLOWED_FACTS/.test(packLib) && /Anything not in ALLOWED FACTS must be treated as unknown/.test(packLib) && /DO NOT infer services from category/.test(packLib) && /independently written Latin American Spanish/.test(packLib))
+assert('hallucination guards in prompt', /Never invent reviews, ratings, awards/.test(packLib) && /ALLOWED_FACTS/.test(packLib) && /Anything not present in ALLOWED_FACTS must be treated as unknown/.test(packLib) && /DO NOT infer services from category/.test(packLib) && /independently written natural Latin American Spanish/.test(packLib))
 assert('generation_source is returned for QA metadata', /generation_source/.test(packLib) && /ai_grounded/.test(packLib) && /deterministic_fallback/.test(packLib) && /generation_source/.test(api))
 assert('structured pack schema in prompt', /facebook_posts: exactly 2/.test(packLib) && /instagram_captions: exactly 2/.test(packLib) && /tiktok_concepts: exactly 2 objects \{hook, visual, talking_point, cta\}/.test(packLib) && /email_campaign: \{subject, preview, body, cta\}/.test(packLib))
 assert('UI uses report cards and Copy/Copied', /mcc-report-card/.test(packJs) && /Post /.test(packJs) && /Caption /.test(packJs) && /Concept /.test(packJs) && /SEO & LOCAL DISCOVERY/.test(packJs) && /BUSINESS SPOTLIGHT/.test(packJs) && /EMAIL CAMPAIGN/.test(packJs) && /Copied/.test(packJs) && /mcc-report-card/.test(packCss))
@@ -95,9 +95,11 @@ for (const zone of zones) {
   assert(zone + ' date-only helper stays Sep 8 / Oct 8', fixedStart === 'Sep 8, 2026' && fixedEnd === 'Oct 8, 2026')
 }
 
+const qualityLib = readFileSync(join(root, 'workers/src/lib/customer-marketing-pack-quality.ts'), 'utf8')
+writeFileSync(join(tmp, 'customer-marketing-pack-quality.mjs'), transpile(qualityLib, 'customer-marketing-pack-quality.ts'))
 const stubbed = transpile(packLib, 'customer-marketing-pack.ts', (src) => src
-  .replace("import { MLL_AI_MODEL } from '../api/ai-search'\n", "const MLL_AI_MODEL = '@cf/meta/llama-3.2-3b-instruct'\n")
-  .replace("import { parseMarketingPack } from '../api/marketing'\n", `
+  .replace(/import \{ MLL_AI_MODEL \} from '\.\.\/api\/ai-search'\r?\n/, "const MLL_AI_MODEL = '@cf/meta/llama-3.2-3b-instruct'\n")
+  .replace(/import \{ parseMarketingPack \} from '\.\.\/api\/marketing'\r?\n/, `
 function parseMarketingPack(text) {
   const trimmed = String(text || '').trim()
   const fenced = trimmed.match(/\`\`\`(?:json)?\\s*([\\s\\S]*?)\`\`\`/i)
@@ -113,8 +115,9 @@ function parseMarketingPack(text) {
   }
 }
 `)
-  .replace("import type { PilotBusiness } from './marketing-pilot'\n", '')
-  .replace("import type { MarketingTrialStatus } from './marketing-trial'\n", '')
+  .replace(/import type \{ PilotBusiness \} from '\.\/marketing-pilot'\r?\n/, '')
+  .replace(/import type \{ MarketingTrialStatus \} from '\.\/marketing-trial'\r?\n/, '')
+  .replaceAll("from './customer-marketing-pack-quality'", "from './customer-marketing-pack-quality.mjs'")
 )
 writeFileSync(join(tmp, 'customer-marketing-pack.mjs'), stubbed)
 const pack = await import(pathToFileURL(join(tmp, 'customer-marketing-pack.mjs')).href)
@@ -235,7 +238,7 @@ const malformed = await pack.generateCustomerMarketingPack({
   listing,
   runAi: async () => 'sorry, here is some prose instead of JSON',
 })
-assert('malformed AI response uses grounded fallback', malformed.fallback === true && malformed.generation_source === 'deterministic_fallback' && malformed.fallback_reason === 'parse_failed' && pack.isCustomerPackComplete(malformed.pack))
+assert('malformed AI response uses grounded fallback', malformed.fallback === true && malformed.generation_source === 'deterministic_fallback' && malformed.fallback_reason === 'malformed_json' && pack.isCustomerPackComplete(malformed.pack))
 
 const invented = await pack.generateCustomerMarketingPack({
   listing,
@@ -254,7 +257,7 @@ const invented = await pack.generateCustomerMarketingPack({
 const inventedText = JSON.stringify(invented.pack)
 assert('invented services are rewritten or dropped', inventedText.includes(listing.name) && !/software testing|quality assurance|book a consultation/i.test(inventedText))
 assert('invented services never survive as software claims', pack.isCustomerPackComplete(invented.pack) && !pack.packHasInventedServices(invented.pack, listing) && !pack.packHasUnsupportedClaims(invented.pack))
-assert('prompt forbids inferring services and unsupported claims', /DO NOT add services/.test(pack.buildCustomerPackPrompt(listing)) && /DO NOT use best, top, trusted, #1/.test(pack.buildCustomerPackPrompt(listing)) && JSON.stringify(pack.allowedFactsFromListing(listing)).includes('MLL QA Test Business'))
+assert('prompt forbids inferring services and unsupported claims', /Do not infer services/.test(pack.buildCustomerPackPrompt(listing)) && /NEVER write: latest/.test(pack.buildCustomerPackPrompt(listing)) && JSON.stringify(pack.allowedFactsFromListing(listing)).includes('MLL QA Test Business'))
 
 let timeoutHit = false
 try {
