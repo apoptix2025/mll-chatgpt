@@ -1,3 +1,5 @@
+export type PackPrimaryLanguage = 'en' | 'es'
+
 export type QualityListing = {
   name: string
   category: string | null
@@ -13,6 +15,8 @@ export type QualityListing = {
   facebook_url: string | null
   instagram_url: string | null
   other_social: Record<string, string>
+  language?: string | null
+  ownership_claims?: string[] | null
 }
 
 export type QualityTiktokConcept = {
@@ -69,6 +73,25 @@ const AWKWARD_COPY =
 
 const STREET_LINE =
   /\b\d{1,6}\s+[\w.'-]+\s+(?:ave(?:nue)?|st(?:reet)?|rd|road|blvd|boulevard|dr(?:ive)?|ln|lane|way|ct|court)\.?(?:,?\s+[A-Za-z .]+)?(?:,?\s+[A-Z]{2})?(?:\s+\d{5}(?:-\d{4})?)?/gi
+
+const OWNERSHIP_CLAIM =
+  /\b(?:latino|hispanic|minority|woman|women|veteran|family)[- ]owned\b|#(?:Latino|Hispanic|Minority|Woman|Women|Veteran|Family)Owned\b|\bde propiedad (?:latina|latino|hispana|hispano)\b|\bpropiedad (?:latina|hispana)\b/gi
+
+const OWNERSHIP_LABELS = [
+  'latino-owned',
+  'hispanic-owned',
+  'minority-owned',
+  'woman-owned',
+  'women-owned',
+  'veteran-owned',
+  'family-owned',
+] as const
+
+const DISTINCTIVE_SPANISH =
+  /[¿¡]|\b(?:encontrar|encuentra|encuentran|necesitas|necesita|conecta|con[eé]ctate|el tuyo|como el tuyo|para encontrar|servicios profesionales|qui[eé]nes buscan|est[aá] publicado)\b/i
+
+const SPANISH_FUNCTION =
+  /\b(?:encontrar|encuentra|encuentran|necesitas|necesita|conecta|con[eé]ctate|tuyo|tuyos|tuya|nuestros?|nuestras?|qui[eé]nes|est[aá]n?|publicado|descubre|descubra|busca|buscas|buscan|servicios|profesionales|m[aá]s|como|para|una|unos|unas|del|los|las|este|esta|estos|estas|hay|son|pero|por|con|el|la)\b/gi
 
 export const CUSTOMER_UNSUPPORTED_HYPE =
   /#1\b|\bnumber\s*one\b|\bn[uú]mero\s*1\b|\bbest\b|\btop(?:-rated)?\b|\bleading\b|\bindustry-leading\b|\btrusted\b|\baward(?:s|ed|-winning)?\b|\bcertified\b|\btestimonials?\b|\bhighly rated\b|\bpopular\b|\bpremier\b|\bexceptional\b|\binnovative\b|\binnovators?\b|\blatest\b|\bgo-to\b|\bgo to\b|\bperfect place\b|\bel lugar perfecto\b|\blo [uú]ltimo\b|\bde confianza\b|\bl[ií]der(?:es)?\b|\bcutting[- ]edge\b|\bstate[- ]of[- ]the[- ]art\b|\bworld-class\b|\bunparalleled\b|\bpushing the boundaries\b|\bat the forefront\b|\bcalificaci[oó]n(?:es)?\b|\bmejor(?:es)?\b|m[aá]s confiable|el mejor|la mejor|\b\d+\s+reviews?\b|\bstar ratings?\b|\b\d+(?:\.\d+)?\s*stars?\b|\bfollowers\b|\brevenue\b|\branking|\d+\s*%|\$\d+|\bsince\s+\d{4}\b|\byears in business\b/i
@@ -153,11 +176,102 @@ export function isLowInformationDescription(text: string | null | undefined): bo
   return false
 }
 
+function normalizeOwnershipLabel(value: string): string {
+  const compact = String(value || '').trim().toLowerCase().replace(/^#/, '').replace(/[-_ ]+/g, '')
+  const mapped: Record<string, string> = {
+    latinowned: 'latino-owned',
+    latinoowned: 'latino-owned',
+    hispanicowned: 'hispanic-owned',
+    minorityowned: 'minority-owned',
+    womanowned: 'woman-owned',
+    womenowned: 'woman-owned',
+    veteranowned: 'veteran-owned',
+    familyowned: 'family-owned',
+    depropiedadlatina: 'latino-owned',
+    depropiedadlatino: 'latino-owned',
+    propiedadlatina: 'latino-owned',
+    propiedadhispana: 'hispanic-owned',
+  }
+  return mapped[compact] || compact
+}
+
+export function verifiedOwnershipClaims(listing: QualityListing): Set<string> {
+  const claims = new Set<string>()
+  const raw = listing.ownership_claims
+  if (!Array.isArray(raw)) return claims
+  for (const item of raw) {
+    const label = normalizeOwnershipLabel(String(item || ''))
+    if ((OWNERSHIP_LABELS as readonly string[]).includes(label)) {
+      claims.add(label === 'women-owned' ? 'woman-owned' : label)
+    }
+  }
+  return claims
+}
+
+export function packPrimaryLanguage(listing: QualityListing): PackPrimaryLanguage {
+  const raw = String(listing.language || '').trim().toLowerCase()
+  if (/^(es|spa|spanish|espa[nñ]ol|espanol)$/.test(raw)) return 'es'
+  return 'en'
+}
+
+function maskAuthoritativeSpanish(text: string, listing: QualityListing): string {
+  let next = String(text || '')
+  const facts = [
+    listing.name,
+    listing.city,
+    listing.state,
+    listing.address,
+    listing.category,
+    listing.website,
+    listing.phone,
+    listing.email,
+    listing.zip,
+    listing.description,
+    'My Latino List',
+    ...(listing.tags || []),
+  ].filter(Boolean).sort((a, b) => String(b).length - String(a).length)
+  for (const fact of facts) {
+    const value = String(fact)
+    if (!value) continue
+    next = next.split(value).join(' ')
+  }
+  return next.replace(/https?:\/\/\S+/g, ' ').replace(/#[A-Za-z0-9_]+/g, ' ')
+}
+
+export function hasSubstantialSpanish(text: string, listing: QualityListing): boolean {
+  const masked = maskAuthoritativeSpanish(text, listing).replace(/\s+/g, ' ').trim()
+  if (!masked) return false
+  if (DISTINCTIVE_SPANISH.test(masked)) return true
+  const hits = masked.toLowerCase().match(SPANISH_FUNCTION) || []
+  return hits.length >= 3
+}
+
+export function ownershipClaimKey(match: string): string {
+  return normalizeOwnershipLabel(match.replace(/[- ]owned/i, '-owned'))
+}
+
+export function stripUngroundedOwnershipClaims(text: string, listing: QualityListing): string {
+  if (!text) return ''
+  const verified = verifiedOwnershipClaims(listing)
+  return String(text)
+    .replace(OWNERSHIP_CLAIM, (match) => (verified.has(ownershipClaimKey(match)) ? match : ''))
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .trim()
+}
+
+export function hasUngroundedOwnershipClaim(text: string, listing: QualityListing): boolean {
+  const verified = verifiedOwnershipClaims(listing)
+  const matches = String(text || '').match(OWNERSHIP_CLAIM) || []
+  return matches.some((match) => !verified.has(ownershipClaimKey(match)))
+}
+
 export function marketingListingFrom(listing: QualityListing): QualityListing {
   const social: Record<string, string> = {}
   for (const [key, value] of Object.entries(listing.other_social || {})) {
     if (!isPlaceholderUrl(value)) social[key] = value
   }
+  const ownership = [...verifiedOwnershipClaims(listing)]
   return {
     ...listing,
     description: isLowInformationDescription(listing.description) ? null : listing.description,
@@ -168,6 +282,8 @@ export function marketingListingFrom(listing: QualityListing): QualityListing {
     instagram_url: isPlaceholderUrl(listing.instagram_url) ? null : listing.instagram_url,
     other_social: social,
     tags: (listing.tags || []).filter((tag) => !isQaMetadataTag(tag)),
+    language: packPrimaryLanguage(listing) === 'es' ? 'Spanish' : 'English',
+    ownership_claims: ownership.length ? ownership : [],
   }
 }
 
@@ -355,17 +471,20 @@ export function neutralizeUnsupportedSentences(text: string, listing: QualityLis
     ),
     listing,
   )
-  return sanitizeHashtags(
-    rewritten
-      .split(/(?<=[.!?])\s+/)
-      .map((sentence) => rewriteAwkwardCopy(
-        rewriteMechanicalListingLanguage(rewriteUnsupportedHype(sentence, listing), listing),
-        listing,
-      ))
-      .filter((sentence) => sentence && !CUSTOMER_UNSUPPORTED_HYPE.test(sentence) && !AWKWARD_COPY.test(sentence))
-      .join(' ')
-      .replace(/\s+/g, ' ')
-      .trim(),
+  return stripUngroundedOwnershipClaims(
+    sanitizeHashtags(
+      rewritten
+        .split(/(?<=[.!?])\s+/)
+        .map((sentence) => rewriteAwkwardCopy(
+          rewriteMechanicalListingLanguage(rewriteUnsupportedHype(sentence, listing), listing),
+          listing,
+        ))
+        .filter((sentence) => sentence && !CUSTOMER_UNSUPPORTED_HYPE.test(sentence) && !AWKWARD_COPY.test(sentence))
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim(),
+    ),
+    listing,
   )
 }
 
@@ -440,9 +559,10 @@ function regionHashtag(listing: QualityListing): string | null {
 }
 
 function instagramTags(listing: QualityListing): string {
-  const tags = ['#MyLatinoList', '#LatinoOwned', regionHashtag(listing), categoryHashtag(listing)]
-    .filter((tag): tag is string => !!tag && !isQaMetadataTag(tag.replace('#', '')))
-  return tags.slice(0, 5).join(' ')
+  const tags = ['#MyLatinoList']
+  if (verifiedOwnershipClaims(listing).has('latino-owned')) tags.push('#LatinoOwned')
+  tags.push(regionHashtag(listing), categoryHashtag(listing))
+  return tags.filter((tag): tag is string => !!tag && !isQaMetadataTag(tag.replace('#', ''))).slice(0, 5).join(' ')
 }
 
 function facebookFallback(listing: QualityListing): [string, string] {
@@ -466,8 +586,8 @@ function instagramFallback(listing: QualityListing): [string, string] {
   const tags = instagramTags(listing)
   const one = `Explore the ${name} profile on My Latino List to learn more.\n\n${tags}`
   const two = city
-    ? `Know someone looking for ${cat.toLowerCase()} in ${city}? Share the ${name} profile on My Latino List.\n\n#MyLatinoList #LatinoOwned`
-    : `Share the ${name} profile on My Latino List.\n\n#MyLatinoList #LatinoOwned`
+    ? `Know someone looking for ${cat.toLowerCase()} in ${city}? Share the ${name} profile on My Latino List.\n\n${tags}`
+    : `Share the ${name} profile on My Latino List.\n\n${tags}`
   return [one, two]
 }
 
@@ -525,32 +645,53 @@ function emailFallback(listing: QualityListing): QualityPack['email_campaign'] {
   }
 }
 
+function groundedSeo(listing: QualityListing): QualityPack['seo'] {
+  const loc = locLabel(listing)
+  const cat = naturalCategory(listing.category)
+  const ownership = verifiedOwnershipClaims(listing).has('latino-owned') && cat
+    ? `Latino-owned ${cat}`
+    : 'My Latino List'
+  return {
+    keywords: [
+      listing.name,
+      cat,
+      loc && cat ? `${cat} ${loc}` : '',
+      loc,
+      ownership,
+    ].filter(Boolean).slice(0, 8),
+    local_discovery: [
+      loc && cat ? `${cat} in ${loc}` : cat,
+      listing.city && cat ? `${cat} ${listing.city}` : '',
+      `${listing.name} My Latino List`,
+    ].filter(Boolean).slice(0, 8),
+  }
+}
+
+export function sanitizeSeo(seo: QualityPack['seo'], listing: QualityListing): QualityPack['seo'] {
+  const fallback = groundedSeo(listing)
+  const clean = (items: string[]) => items
+    .map((text) => stripUngroundedOwnershipClaims(text, listing).replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .slice(0, 8)
+  const keywords = clean(seo.keywords || [])
+  const local = clean(seo.local_discovery || [])
+  return {
+    keywords: keywords.length ? keywords : fallback.keywords,
+    local_discovery: local.length ? local : fallback.local_discovery,
+  }
+}
+
 export function channelSpecificFallbackPack(listing: QualityListing): QualityPack {
   const safe = marketingListingFrom(listing)
   const [facebook1, facebook2] = facebookFallback(safe)
   const [ig1, ig2] = instagramFallback(safe)
   const spotlight = spotlightFallback(safe)
   const email = emailFallback(safe)
-  const loc = locLabel(safe)
-  const cat = naturalCategory(safe.category)
   return {
     facebook_posts: [facebook1, facebook2],
     instagram_captions: [ig1, ig2],
     tiktok_concepts: tiktokFallback(safe),
-    seo: {
-      keywords: [
-        safe.name,
-        cat,
-        loc && cat ? `${cat} ${loc}` : '',
-        loc,
-        cat ? `Latino-owned ${cat}` : 'My Latino List',
-      ].filter(Boolean).slice(0, 8),
-      local_discovery: [
-        loc && cat ? `${cat} in ${loc}` : cat,
-        safe.city && cat ? `${cat} ${safe.city}` : '',
-        `${safe.name} My Latino List`,
-      ].filter(Boolean).slice(0, 8),
-    },
+    seo: groundedSeo(safe),
     bilingual_spotlight: spotlight,
     email_campaign: email,
     auto_post: false,
@@ -656,6 +797,33 @@ export function packHasPhysicalAssumptions(pack: QualityPack, listing: QualityLi
   return matches.some((term) => !blob.includes(term.toLowerCase().trim()))
 }
 
+function packOwnershipBlob(pack: QualityPack): string {
+  return [
+    packBlob(pack),
+    ...(pack.seo?.keywords || []),
+    ...(pack.seo?.local_discovery || []),
+  ].join(' ')
+}
+
+export function packHasUngroundedOwnershipClaims(pack: QualityPack, listing: QualityListing): boolean {
+  return hasUngroundedOwnershipClaim(packOwnershipBlob(pack), listing)
+}
+
+export function packHasUnexpectedLanguageSwitch(pack: QualityPack, listing: QualityListing): boolean {
+  if (packPrimaryLanguage(listing) !== 'en') return false
+  const facebook = pack.facebook_posts.join(' ')
+  const instagram = pack.instagram_captions.join(' ')
+  const reel = pack.tiktok_concepts.flatMap((row) => [row.hook, row.visual, row.talking_point, row.cta]).join(' ')
+  const email = [pack.email_campaign.subject, pack.email_campaign.preview, pack.email_campaign.body, pack.email_campaign.cta].join(' ')
+  return (
+    hasSubstantialSpanish(facebook, listing)
+    || hasSubstantialSpanish(instagram, listing)
+    || hasSubstantialSpanish(reel, listing)
+    || hasSubstantialSpanish(email, listing)
+    || hasSubstantialSpanish(pack.bilingual_spotlight.en, listing)
+  )
+}
+
 function packBlob(pack: QualityPack): string {
   return [
     ...pack.facebook_posts,
@@ -757,18 +925,47 @@ export function polishCustomerPack(pack: QualityPack, listing: QualityListing): 
     }
   }
 
+  if (packPrimaryLanguage(safe) === 'en') {
+    if (facebook.some((text) => hasSubstantialSpanish(text, safe))) {
+      replaced.push('facebook_language')
+      facebook[0] = fallback.facebook_posts[0]
+      facebook[1] = fallback.facebook_posts[1]
+    }
+    if (instagram.some((text) => hasSubstantialSpanish(text, safe))) {
+      replaced.push('instagram_language')
+      instagram[0] = fallback.instagram_captions[0]
+      instagram[1] = fallback.instagram_captions[1]
+    }
+    if (concepts.some((row) => hasSubstantialSpanish([row.hook, row.visual, row.talking_point, row.cta].join(' '), safe))) {
+      replaced.push('tiktok_language')
+      concepts[0] = fallback.tiktok_concepts[0]
+      concepts[1] = fallback.tiktok_concepts[1]
+    }
+    if (hasSubstantialSpanish(spotlight.en, safe)) {
+      replaced.push('spotlight_en_language')
+      spotlight.en = fallback.bilingual_spotlight.en
+    }
+    if (hasSubstantialSpanish([email.subject, email.preview, email.body, email.cta].join(' '), safe)) {
+      replaced.push('email_language')
+      email.subject = fallback.email_campaign.subject
+      email.preview = fallback.email_campaign.preview
+      email.body = fallback.email_campaign.body
+      email.cta = fallback.email_campaign.cta
+    }
+  }
+
   let next: QualityPack = {
     facebook_posts: facebook.slice(0, 2),
     instagram_captions: instagram.slice(0, 2),
     tiktok_concepts: concepts.slice(0, 2),
-    seo: fallback.seo,
+    seo: sanitizeSeo(pack.seo || fallback.seo, safe),
     bilingual_spotlight: spotlight,
     email_campaign: email,
     auto_post: false,
     disclaimer: pack.disclaimer || fallback.disclaimer,
   }
 
-  if (packHasCrossChannelReuse(next, safe) || packHasQaTestHashtags(next) || packHasRawUrls(next) || packHasMechanicalListingLanguage(next, safe) || packHasAwkwardCopy(next) || packHasAddressVisual(next) || packHasPlaceholderText(next, listing)) {
+  if (packHasCrossChannelReuse(next, safe) || packHasQaTestHashtags(next) || packHasRawUrls(next) || packHasMechanicalListingLanguage(next, safe) || packHasAwkwardCopy(next) || packHasAddressVisual(next) || packHasPlaceholderText(next, listing) || packHasUnexpectedLanguageSwitch(next, safe) || packHasUngroundedOwnershipClaims(next, safe)) {
     replaced.push('cross_channel')
     next = {
       ...next,
@@ -776,9 +973,36 @@ export function polishCustomerPack(pack: QualityPack, listing: QualityListing): 
       instagram_captions: fallback.instagram_captions,
       bilingual_spotlight: fallback.bilingual_spotlight,
       email_campaign: fallback.email_campaign,
-      tiktok_concepts: next.tiktok_concepts.some((row) => PHYSICAL_ASSUMPTION.test(row.visual) || isRawStreetVisual(row.visual) || PLACEHOLDER_ADDRESS.test(row.visual || ''))
+      seo: fallback.seo,
+      tiktok_concepts: next.tiktok_concepts.some((row) => PHYSICAL_ASSUMPTION.test(row.visual) || isRawStreetVisual(row.visual) || PLACEHOLDER_ADDRESS.test(row.visual || '') || hasSubstantialSpanish([row.hook, row.visual, row.talking_point, row.cta].join(' '), safe))
         ? fallback.tiktok_concepts
         : next.tiktok_concepts,
+    }
+  }
+
+  if (packHasUngroundedOwnershipClaims(next, safe)) {
+    next = {
+      ...next,
+      facebook_posts: next.facebook_posts.map((text) => stripUngroundedOwnershipClaims(text, safe)),
+      instagram_captions: next.instagram_captions.map((text) => stripUngroundedOwnershipClaims(text, safe)),
+      tiktok_concepts: next.tiktok_concepts.map((row) => ({
+        ...row,
+        hook: stripUngroundedOwnershipClaims(row.hook, safe),
+        visual: stripUngroundedOwnershipClaims(row.visual, safe),
+        talking_point: stripUngroundedOwnershipClaims(row.talking_point, safe),
+        cta: stripUngroundedOwnershipClaims(row.cta, safe),
+      })),
+      bilingual_spotlight: {
+        en: stripUngroundedOwnershipClaims(next.bilingual_spotlight.en, safe),
+        es: stripUngroundedOwnershipClaims(next.bilingual_spotlight.es, safe),
+      },
+      email_campaign: {
+        subject: stripUngroundedOwnershipClaims(next.email_campaign.subject, safe),
+        preview: stripUngroundedOwnershipClaims(next.email_campaign.preview, safe),
+        body: stripUngroundedOwnershipClaims(next.email_campaign.body, safe),
+        cta: stripUngroundedOwnershipClaims(next.email_campaign.cta, safe),
+      },
+      seo: sanitizeSeo(next.seo, safe),
     }
   }
 
@@ -816,5 +1040,7 @@ export function evaluatePackQuality(pack: QualityPack, listing: QualityListing):
   if (packHasAwkwardCopy(pack)) issues.push('awkward_copy')
   if (packHasAddressVisual(pack)) issues.push('address_visual')
   if (/el mejor|de confianza|líder|el lugar perfecto|lo último|número uno/i.test(pack.bilingual_spotlight.es)) issues.push('spanish_hype')
+  if (packHasUnexpectedLanguageSwitch(pack, listing)) issues.push('language_switch')
+  if (packHasUngroundedOwnershipClaims(pack, listing)) issues.push('ownership_claim')
   return { acceptable: issues.length === 0, issues }
 }

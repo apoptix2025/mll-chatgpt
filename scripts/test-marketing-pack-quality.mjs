@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Customer AI Marketing Pack V2.2.2 human-quality fixtures.
+ * Customer AI Marketing Pack V2.2.3 language + ownership grounding fixtures.
  * Does not call production. Does not consume production generations.
  */
 import { createRequire } from 'node:module'
@@ -85,7 +85,7 @@ function groundedJson(row, extra = {}) {
       `Find ${name} in the ${cat} category on My Latino List. People in ${city} can open the profile to learn more.`,
     ],
     instagram_captions: [
-      `Explore the ${name} profile on My Latino List to learn more.\n\n#MyLatinoList #LatinoOwned`,
+      `Explore the ${name} profile on My Latino List to learn more.\n\n#MyLatinoList`,
       `Know someone looking for ${String(cat || 'local businesses').toLowerCase()} in ${city}? Share the ${name} profile on My Latino List.\n\n#MyLatinoList`,
     ],
     tiktok_concepts: [
@@ -252,7 +252,9 @@ async function runPack(label, listingRow, aiPayload) {
   const noAwkward = !pack.packHasAwkwardCopy(generated.pack)
   const noAddressVisual = !pack.packHasAddressVisual(generated.pack)
   const igProse = pack.captionHasProse(generated.pack.instagram_captions[0]) && pack.captionHasProse(generated.pack.instagram_captions[1])
-  const ok = grounded && quality.acceptable && noPlaceholder && noInvented && noClaims && noQaTags && noAwkward && noAddressVisual && igProse && generated.pack.facebook_posts[0].includes(listingRow.name)
+  const noLangSwitch = pack.packPrimaryLanguage(listingRow) !== 'en' || !pack.packHasUnexpectedLanguageSwitch(generated.pack, listingRow)
+  const noOwnership = !pack.packHasUngroundedOwnershipClaims(generated.pack, listingRow)
+  const ok = grounded && quality.acceptable && noPlaceholder && noInvented && noClaims && noQaTags && noAwkward && noAddressVisual && igProse && noLangSwitch && noOwnership && generated.pack.facebook_posts[0].includes(listingRow.name)
   if (ok) stats.acceptable += 1
   assert(label + ' identity', generated.pack.facebook_posts[0].includes(listingRow.name) && generated.pack.bilingual_spotlight.es.includes(listingRow.name))
   assert(label + ' grounded/useful', ok)
@@ -263,6 +265,8 @@ async function runPack(label, listingRow, aiPayload) {
   assert(label + ' no QA hashtags', noQaTags)
   assert(label + ' no awkward copy', noAwkward)
   assert(label + ' no address visual', noAddressVisual)
+  assert(label + ' english channels stay english', noLangSwitch)
+  assert(label + ' no unverified ownership claims', noOwnership)
   assert(label + ' channel diversity', !pack.evaluatePackQuality(generated.pack, listingRow).issues.includes('duplication'))
   return generated
 }
@@ -394,6 +398,72 @@ const awkwardProfile = await runPack('human QA awkward profile copy', humanQa, g
 }))
 assert('awkward profile copy repaired', !/details the business has shared|the profile is ready when you want/i.test(JSON.stringify(awkwardProfile.pack)))
 
+const spanishIg = await runPack('human QA spanish instagram', humanQa, groundedJson(humanQa, {
+  instagram_captions: [
+    'Encontrar servicios profesionales en Silver Spring?',
+    'Explore the Test Business profile on My Latino List to learn more.',
+  ],
+}))
+assert('spanish instagram repaired', !/Encontrar servicios profesionales en Silver Spring/i.test(spanishIg.pack.instagram_captions.join(' ')) && !pack.hasSubstantialSpanish(spanishIg.pack.instagram_captions.join(' '), humanQa))
+
+const spanishReelNeed = await runPack('human QA spanish reel need', humanQa, groundedJson(humanQa, {
+  tiktok_concepts: [
+    { hook: '¿Necesitas servicios profesionales en Silver Spring?', visual: 'My Latino List business profile on screen', talking_point: 'Test Business is listed under Professional Services in Silver Spring.', cta: 'View Listing' },
+    { hook: 'Looking for professional services in Silver Spring?', visual: 'Silver Spring, Maryland location text animation', talking_point: 'Open the My Latino List profile.', cta: 'Learn More' },
+  ],
+}))
+assert('spanish reel need repaired', !/¿Necesitas servicios profesionales en Silver Spring/i.test(JSON.stringify(spanishReelNeed.pack.tiktok_concepts)) && !pack.hasSubstantialSpanish(spanishReelNeed.pack.tiktok_concepts.map((row) => [row.hook, row.talking_point, row.cta].join(' ')).join(' '), humanQa))
+
+const spanishReelConnect = await runPack('human QA spanish reel connect', humanQa, groundedJson(humanQa, {
+  tiktok_concepts: [
+    { hook: 'Meet Test Business on My Latino List', visual: 'My Latino List business profile on screen', talking_point: 'Conecta con My Latino List para encontrar más servicios como el tuyo', cta: 'View Listing' },
+    { hook: 'Looking for professional services in Silver Spring?', visual: 'Silver Spring, Maryland location text animation', talking_point: 'Open the My Latino List profile.', cta: 'Learn More' },
+  ],
+}))
+assert('spanish reel connect repaired', !/Conecta con My Latino List para encontrar más servicios como el tuyo/i.test(JSON.stringify(spanishReelConnect.pack.tiktok_concepts)) && !pack.hasSubstantialSpanish(spanishReelConnect.pack.tiktok_concepts.map((row) => [row.hook, row.talking_point, row.cta].join(' ')).join(' '), humanQa))
+
+const latinoOwned = await runPack('human QA latino-owned seo', humanQa, groundedJson(humanQa, {
+  seo: {
+    keywords: ['Latino-owned Professional Services', 'Test Business', 'Professional Services'],
+    local_discovery: ['Latino-owned Professional Services', 'Professional Services in Silver Spring, Maryland'],
+  },
+  facebook_posts: [
+    'Looking for professional services in Silver Spring, Maryland? Learn more about Test Business and connect through My Latino List. Nothing auto-posts.',
+    'Find Test Business, a Latino-owned Professional Services listing, on My Latino List.',
+  ],
+  instagram_captions: [
+    'Explore Latino-owned Professional Services from Test Business on My Latino List.\n\n#MyLatinoList #LatinoOwned',
+    'Know someone looking for professional services in Silver Spring? Share the Test Business profile on My Latino List.\n\n#MyLatinoList',
+  ],
+}))
+assert('unverified latino-owned removed', !/latino-owned|#LatinoOwned/i.test(JSON.stringify(latinoOwned.pack)))
+
+const verifiedOwnedListing = listing({
+  ...fixtures.sparseProfessional,
+  ownership_claims: ['latino-owned'],
+})
+const verifiedOwned = await runPack('verified latino-owned kept', verifiedOwnedListing, groundedJson(verifiedOwnedListing, {
+  seo: { keywords: ['Latino-owned Professional Services', 'Test Business'], local_discovery: ['Latino-owned Professional Services'] },
+}))
+assert('verified latino-owned may remain', /latino-owned/i.test(JSON.stringify(verifiedOwned.pack)))
+
+assert('primary language defaults to english', pack.packPrimaryLanguage(fixtures.sparseProfessional) === 'en')
+assert('spanish description does not switch pack language', pack.packPrimaryLanguage(fixtures.bilingual) === 'en')
+const englishChannels = pack.buildCustomerFallbackPack(fixtures.sparseProfessional)
+assert('english facebook stays english', !pack.hasSubstantialSpanish(englishChannels.facebook_posts.join(' '), fixtures.sparseProfessional))
+assert('english instagram stays english', !pack.hasSubstantialSpanish(englishChannels.instagram_captions.join(' '), fixtures.sparseProfessional))
+assert('english reel stays english', !pack.hasSubstantialSpanish(englishChannels.tiktok_concepts.map((row) => [row.hook, row.talking_point, row.cta].join(' ')).join(' '), fixtures.sparseProfessional))
+assert('english email stays english', !pack.hasSubstantialSpanish([englishChannels.email_campaign.subject, englishChannels.email_campaign.body].join(' '), fixtures.sparseProfessional))
+assert('spotlight en stays english', !pack.hasSubstantialSpanish(englishChannels.bilingual_spotlight.en, fixtures.sparseProfessional))
+assert('spotlight es remains natural spanish', /est[aá] publicado|quienes buscan|directorio/i.test(englishChannels.bilingual_spotlight.es) && !/el mejor|de confianza|líder|lugar perfecto/i.test(englishChannels.bilingual_spotlight.es))
+assert('unexpected language switch detector catches human QA instagram', pack.hasSubstantialSpanish('Encontrar servicios profesionales en Silver Spring?', fixtures.sparseProfessional))
+assert('unexpected language switch detector catches human QA reel need', pack.hasSubstantialSpanish('¿Necesitas servicios profesionales en Silver Spring?', fixtures.sparseProfessional))
+assert('unexpected language switch detector catches human QA reel connect', pack.hasSubstantialSpanish('Conecta con My Latino List para encontrar más servicios como el tuyo', fixtures.sparseProfessional))
+assert('ownership detector catches latino-owned without verification', pack.packHasUngroundedOwnershipClaims({
+  ...englishChannels,
+  seo: { keywords: ['Latino-owned Professional Services'], local_discovery: [] },
+}, fixtures.sparseProfessional))
+
 const fallback = pack.buildCustomerFallbackPack(fixtures.sparseTech)
 const fallbackQ = pack.evaluatePackQuality(fallback, fixtures.sparseTech)
 assert('channel-specific fallback is acceptable', fallbackQ.acceptable)
@@ -406,6 +476,8 @@ assert('fallback does not expose placeholder', !/qa-staging-test-description/.te
 assert('fallback has no awkward share/profile copy', !/someone looking nearby|details the business has shared/i.test(JSON.stringify(fallback)))
 assert('fallback reel visual is not a street address', !pack.packHasAddressVisual(fallback) && !/100 Test Ave/i.test(fallback.tiktok_concepts.map((row) => row.visual).join(' ')))
 assert('fallback does not expose placeholder street', !/100 Test Ave|Demo Street|QA Avenue/i.test(JSON.stringify(pack.buildCustomerFallbackPack(fixtures.sparseProfessional))))
+assert('fallback omits unverified latino-owned', !/latino-owned|#LatinoOwned/i.test(JSON.stringify(pack.buildCustomerFallbackPack(fixtures.sparseProfessional))))
+assert('fallback has no unexpected spanish switch', !pack.packHasUnexpectedLanguageSwitch(pack.buildCustomerFallbackPack(fixtures.sparseProfessional), fixtures.sparseProfessional))
 
 assert('at least 12 quality generations', stats.total >= 12)
 const rate = stats.acceptable / stats.total

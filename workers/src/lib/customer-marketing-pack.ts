@@ -22,6 +22,12 @@ import {
   packHasMechanicalListingLanguage,
   packHasAwkwardCopy,
   packHasAddressVisual,
+  packHasUnexpectedLanguageSwitch,
+  packHasUngroundedOwnershipClaims,
+  packPrimaryLanguage,
+  hasSubstantialSpanish,
+  stripUngroundedOwnershipClaims,
+  verifiedOwnershipClaims,
   isPlaceholderAddress,
   isRawStreetVisual,
   rewriteAwkwardCopy,
@@ -55,6 +61,8 @@ export type GroundedListing = {
   facebook_url: string | null
   instagram_url: string | null
   other_social: Record<string, string>
+  language?: string | null
+  ownership_claims?: string[] | null
 }
 
 export type CustomerTiktokConcept = {
@@ -149,6 +157,11 @@ export {
   packHasPhysicalAssumptions,
   packHasAwkwardCopy,
   packHasAddressVisual,
+  packHasUnexpectedLanguageSwitch,
+  packHasUngroundedOwnershipClaims,
+  packPrimaryLanguage,
+  hasSubstantialSpanish,
+  stripUngroundedOwnershipClaims,
   isPlaceholderAddress,
   isRawStreetVisual,
   rewriteAwkwardCopy,
@@ -173,6 +186,8 @@ export function allowedFactsFromListing(listing: GroundedListing): Record<string
     facebook_url: safe.facebook_url,
     instagram_url: safe.instagram_url,
     other_social: Object.keys(safe.other_social).length ? safe.other_social : null,
+    primary_language: packPrimaryLanguage(safe) === 'es' ? 'Spanish' : 'English',
+    ownership_claims: verifiedOwnershipClaims(safe).size ? [...verifiedOwnershipClaims(safe)] : null,
   }
   for (const [key, value] of Object.entries(optional)) {
     if (value == null || value === '') continue
@@ -494,13 +509,16 @@ function cleanGroundedText(text: string, listing: GroundedListing): string {
 function deterministicSeo(listing: GroundedListing): CustomerMarketingPack['seo'] {
   const loc = locLabel(listing)
   const cat = listing.category || ''
+  const ownership = verifiedOwnershipClaims(listing).has('latino-owned') && cat
+    ? `Latino-owned ${cat}`
+    : 'My Latino List'
   return {
     keywords: [
       listing.name,
       cat,
       loc && cat ? `${cat} ${loc}` : '',
       loc,
-      cat ? `Latino-owned ${cat}` : 'My Latino List',
+      ownership,
     ].filter(Boolean).slice(0, 8),
     local_discovery: [
       loc && cat ? `${cat} in ${loc}` : cat,
@@ -572,6 +590,8 @@ export function isCustomerPackGrounded(pack: CustomerMarketingPack, listing: Gro
     && !packHasMechanicalListingLanguage(pack, safe)
     && !packHasAwkwardCopy(pack)
     && !packHasAddressVisual(pack)
+    && !packHasUnexpectedLanguageSwitch(pack, safe)
+    && !packHasUngroundedOwnershipClaims(pack, safe)
     && captionHasProse(pack.instagram_captions[0] || '')
     && captionHasProse(pack.instagram_captions[1] || '')
   )
@@ -627,6 +647,9 @@ export function buildCustomerPackPrompt(listing: GroundedListing): string {
       ? 'The listing description is missing or low-information. Use only business name, category, city/state, website, phone, and verified social URLs. Do not invent services.'
       : 'Use only explicitly stated facts and themes from the description. Do not add anything else.',
     'business_name is mandatory in Facebook posts, the English spotlight, the Spanish spotlight, and the email subject or body. Never write [Business Name] or omit the name.',
+    'Pack primary language is ENGLISH unless ALLOWED_FACTS.primary_language is Spanish. Default to English when language preference is missing. Do not infer Spanish because this is My Latino List, because the business has Latino-related metadata, or because the model prefers Spanish.',
+    'If primary language is English: Facebook, Instagram, Reel/TikTok, Email, and Spotlight EN must be English. Spotlight ES remains the only intentionally Spanish section. Do not switch those English channels into Spanish.',
+    'If primary language is Spanish: write those channels in Spanish according to this product design, and keep Spotlight EN in English with Spotlight ES in natural Spanish.',
     'category is a directory classification, not a menu of services. DO NOT infer services from category or from letters like QA. Say people can find this kind of business in this city. NEVER write “[Category] listing”.',
     'Write useful, natural DRAFT copy a business owner could post. Nothing auto-posts. Do not sound like database metadata.',
     'Safe language includes: Looking for [category] in [city]? Learn more about [Business] and connect through My Latino List.',
@@ -638,7 +661,7 @@ export function buildCustomerPackPrompt(listing: GroundedListing): string {
     'Reel/TikTok: HOOK, VISUAL, TALKING POINT, CTA. VISUAL may be the MLL profile screen, name and category text, city/state location text animation, directory search, or a verified real website/social screen. NEVER use a raw street address as the VISUAL. NEVER invent a person using a computer, employees, customers, team meetings, storefronts, or office interiors unless ALLOWED_FACTS support it.',
     'Never write: someone looking nearby; The profile is ready when you want details the business has shared; details the business has shared.',
     'Do not expose placeholder or test street addresses such as 100 Test Ave, 123 Test St, Demo Street, or QA Avenue. Prefer city and state over a full street address in Facebook, Instagram, Spotlight, Email, and Reel visuals.',
-    'SEO: phrases using only business name, category, city, state, and My Latino List.',
+    'SEO: phrases using only business name, category, city, state, and My Latino List. Do not write Latino-owned, Hispanic-owned, minority-owned, woman-owned, veteran-owned, family-owned, or #LatinoOwned unless that exact claim is present in ALLOWED_FACTS.ownership_claims. Being listed on My Latino List is not ownership proof.',
     'English Spotlight: editorial, distinct from Facebook, no raw URLs. Spanish Spotlight: independently written natural Latin American Spanish. Preserve the business name exactly. Avoid el mejor, de confianza, líder, el lugar perfecto, lo último, número uno unless those words are in ALLOWED_FACTS.',
     'Email: concise subject, preview, 2–4 sentence body distinct from Facebook and Spotlight, CTA like “View the My Latino List profile” or “Visit Website”. No raw URLs in the body.',
     'Each channel must be meaningfully different. Do not reuse the same primary sentence across Facebook, Spotlight, and Email.',
@@ -902,7 +925,7 @@ export async function generateCustomerMarketingPack(input: {
         messages: [
           {
             role: 'system',
-            content: 'Generate marketing content ONLY from ALLOWED_FACTS. Anything not present in ALLOWED_FACTS must be treated as unknown. Do not infer services, qualities, achievements, facilities, products, experience, popularity, or customer sentiment. Return one JSON object only. No markdown. No preface. No trailing explanation.',
+            content: 'Generate marketing content ONLY from ALLOWED_FACTS. Anything not present in ALLOWED_FACTS must be treated as unknown. Do not infer services, qualities, achievements, facilities, products, experience, popularity, customer sentiment, language, or ownership. Default pack language is English. Return one JSON object only. No markdown. No preface. No trailing explanation.',
           },
           { role: 'user', content: prompt },
         ],

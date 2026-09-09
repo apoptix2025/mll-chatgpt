@@ -59,6 +59,7 @@ assert('migration does not alter marketing_trials', !/ALTER TABLE public\.market
 assert('migration has no environment UUIDs', !/f38ce2e6-9dd0-462c-a4fb-fd14a3875648/.test(migration) && !/7e735f46-9dc1-4ecf-936b-7342e566978a/.test(migration))
 assert('app source does not hardcode environment business UUIDs', !/f38ce2e6-9dd0-462c-a4fb-fd14a3875648/.test(packLib + api + page + packJs) && !/7e735f46-9dc1-4ecf-936b-7342e566978a/.test(packLib + api + page + packJs))
 assert('hallucination guards in prompt', /Never invent reviews, ratings, awards/.test(packLib) && /ALLOWED_FACTS/.test(packLib) && /Anything not present in ALLOWED_FACTS must be treated as unknown/.test(packLib) && /DO NOT infer services from category/.test(packLib) && /independently written natural Latin American Spanish/.test(packLib))
+assert('prompt locks english channels and ownership grounding', /Pack primary language is ENGLISH/.test(packLib) && /Do not infer Spanish/.test(packLib) && /ownership_claims/.test(packLib) && /Being listed on My Latino List is not ownership proof/.test(packLib))
 assert('generation_source is returned for QA metadata', /generation_source/.test(packLib) && /ai_grounded/.test(packLib) && /deterministic_fallback/.test(packLib) && /generation_source/.test(api))
 assert('structured pack schema in prompt', /facebook_posts: exactly 2/.test(packLib) && /instagram_captions: exactly 2/.test(packLib) && /tiktok_concepts: exactly 2 objects \{hook, visual, talking_point, cta\}/.test(packLib) && /email_campaign: \{subject, preview, body, cta\}/.test(packLib))
 assert('UI uses report cards and Copy/Copied', /mcc-report-card/.test(packJs) && /Post /.test(packJs) && /Caption /.test(packJs) && /Concept /.test(packJs) && /SEO & LOCAL DISCOVERY/.test(packJs) && /BUSINESS SPOTLIGHT/.test(packJs) && /EMAIL CAMPAIGN/.test(packJs) && /Copied/.test(packJs) && /mcc-report-card/.test(packCss))
@@ -147,6 +148,7 @@ assert('grounded listing omits ratings and reviews', !('rating' in listing) && !
 const fallback = pack.buildCustomerFallbackPack(listing)
 assert('fallback pack has required sections', fallback.facebook_posts.length === 2 && fallback.instagram_captions.length === 2 && fallback.tiktok_concepts.length === 2 && fallback.bilingual_spotlight.en && fallback.bilingual_spotlight.es && fallback.email_campaign.subject)
 assert('fallback does not invent awards or ratings', !pack.CUSTOMER_UNGROUNDED_CLAIM.test(JSON.stringify(fallback)))
+assert('fallback omits unverified latino-owned', !/latino-owned|#LatinoOwned/i.test(JSON.stringify(fallback)))
 
 const dirty = pack.filterCustomerPackToGrounded(pack.normalizeCustomerPack({
   facebook_posts: ['Visit MLL QA Test Business on My Latino List.', 'We are the best rated shop with 500 reviews and 20% off.'],
@@ -197,6 +199,7 @@ const generated = await pack.generateCustomerMarketingPack({
   runAi: async () => JSON.stringify(validAi),
 })
 assert('authorized generation returns structured JSON pack', generated.fallback === false && generated.generation_source === 'ai_grounded' && generated.fallback_reason === null && pack.isCustomerPackComplete(generated.pack) && pack.isCustomerPackGrounded(generated.pack, listing) && generated.model === '@cf/meta/llama-3.2-3b-instruct')
+assert('generated pack strips unverified latino-owned', !/latino-owned|#LatinoOwned/i.test(JSON.stringify(generated.pack)))
 assert('one AI call per pack in generator', true)
 assert('valid AI pack keeps distinct channel copy', pack.packChannelsAreDistinct(generated.pack))
 
