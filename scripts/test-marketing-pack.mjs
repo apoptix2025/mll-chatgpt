@@ -258,6 +258,7 @@ const inventedText = JSON.stringify(invented.pack)
 assert('invented services are rewritten or dropped', inventedText.includes(listing.name) && !/software testing|quality assurance|book a consultation/i.test(inventedText))
 assert('invented services never survive as software claims', pack.isCustomerPackComplete(invented.pack) && !pack.packHasInventedServices(invented.pack, listing) && !pack.packHasUnsupportedClaims(invented.pack))
 assert('prompt forbids inferring services and unsupported claims', /Do not infer services/.test(pack.buildCustomerPackPrompt(listing)) && /NEVER write: latest/.test(pack.buildCustomerPackPrompt(listing)) && JSON.stringify(pack.allowedFactsFromListing(listing)).includes('MLL QA Test Business'))
+assert('placeholder street omitted from facts', !JSON.stringify(pack.allowedFactsFromListing(listing)).includes('100 Test Ave'))
 
 let timeoutHit = false
 try {

@@ -20,6 +20,11 @@ import {
   packHasQaTestHashtags,
   packHasRawUrls,
   packHasMechanicalListingLanguage,
+  packHasAwkwardCopy,
+  packHasAddressVisual,
+  isPlaceholderAddress,
+  isRawStreetVisual,
+  rewriteAwkwardCopy,
   rewriteUnsupportedHype,
   captionHasProse,
   type FallbackReason,
@@ -142,6 +147,11 @@ export {
   packHasRawUrls,
   packHasMechanicalListingLanguage,
   packHasPhysicalAssumptions,
+  packHasAwkwardCopy,
+  packHasAddressVisual,
+  isPlaceholderAddress,
+  isRawStreetVisual,
+  rewriteAwkwardCopy,
 }
 
 export function allowedFactsFromListing(listing: GroundedListing): Record<string, unknown> {
@@ -560,6 +570,8 @@ export function isCustomerPackGrounded(pack: CustomerMarketingPack, listing: Gro
     && !packHasQaTestHashtags(pack)
     && !packHasRawUrls(pack)
     && !packHasMechanicalListingLanguage(pack, safe)
+    && !packHasAwkwardCopy(pack)
+    && !packHasAddressVisual(pack)
     && captionHasProse(pack.instagram_captions[0] || '')
     && captionHasProse(pack.instagram_captions[1] || '')
   )
@@ -623,7 +635,9 @@ export function buildCustomerPackPrompt(listing: GroundedListing): string {
     'Do not use placeholder domains (example.test, localhost) or QA/test/demo/staging hashtags. If website is missing from ALLOWED_FACTS, there is no website.',
     'Facebook: two distinct posts of about 2–4 sentences. Post 01 is a local discovery angle. Post 02 is a profile/business discovery angle. Human-readable CTA. No raw URLs.',
     'Instagram: each caption needs 1–2 natural sentences, then optionally 2–5 grounded hashtags. Never hashtag-only. Never #QA #Test #Demo #Staging. Do not truncate Facebook posts.',
-    'Reel/TikTok: HOOK, VISUAL, TALKING POINT, CTA. VISUAL may be the MLL profile screen, name/location text, directory search, or a verified real website/social screen. NEVER invent a person using a computer, employees, customers, team meetings, storefronts, or office interiors unless ALLOWED_FACTS support it.',
+    'Reel/TikTok: HOOK, VISUAL, TALKING POINT, CTA. VISUAL may be the MLL profile screen, name and category text, city/state location text animation, directory search, or a verified real website/social screen. NEVER use a raw street address as the VISUAL. NEVER invent a person using a computer, employees, customers, team meetings, storefronts, or office interiors unless ALLOWED_FACTS support it.',
+    'Never write: someone looking nearby; The profile is ready when you want details the business has shared; details the business has shared.',
+    'Do not expose placeholder or test street addresses such as 100 Test Ave, 123 Test St, Demo Street, or QA Avenue. Prefer city and state over a full street address in Facebook, Instagram, Spotlight, Email, and Reel visuals.',
     'SEO: phrases using only business name, category, city, state, and My Latino List.',
     'English Spotlight: editorial, distinct from Facebook, no raw URLs. Spanish Spotlight: independently written natural Latin American Spanish. Preserve the business name exactly. Avoid el mejor, de confianza, líder, el lugar perfecto, lo último, número uno unless those words are in ALLOWED_FACTS.',
     'Email: concise subject, preview, 2–4 sentence body distinct from Facebook and Spotlight, CTA like “View the My Latino List profile” or “Visit Website”. No raw URLs in the body.',

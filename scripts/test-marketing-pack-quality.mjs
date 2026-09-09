@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Customer AI Marketing Pack V2.2.1 human-quality fixtures.
+ * Customer AI Marketing Pack V2.2.2 human-quality fixtures.
  * Does not call production. Does not consume production generations.
  */
 import { createRequire } from 'node:module'
@@ -81,16 +81,16 @@ function groundedJson(row, extra = {}) {
     : ''
   return {
     facebook_posts: [
-      `Looking for ${String(cat || 'local businesses').toLowerCase()} in ${loc}? Learn more about ${name} and connect through My Latino List. The profile is ready when you want details the business has shared.`,
-      `${name} has a My Latino List profile that people in ${city} can open to learn more and get in touch.`,
+      `Looking for ${String(cat || 'local businesses').toLowerCase()} in ${loc}? Learn more about ${name} and connect through My Latino List. Nothing auto-posts.`,
+      `Find ${name} in the ${cat} category on My Latino List. People in ${city} can open the profile to learn more.`,
     ],
     instagram_captions: [
-      `Save this note: ${name} is on My Latino List for ${String(cat || 'local businesses').toLowerCase()} around ${city}. Open the profile when you want the details the business shared.\n\n#MyLatinoList #LatinoOwned`,
-      `Share ${name} with someone looking nearby in ${city}. The My Latino List profile is the place to read what the business published.\n\n#MyLatinoList`,
+      `Explore the ${name} profile on My Latino List to learn more.\n\n#MyLatinoList #LatinoOwned`,
+      `Know someone looking for ${String(cat || 'local businesses').toLowerCase()} in ${city}? Share the ${name} profile on My Latino List.\n\n#MyLatinoList`,
     ],
     tiktok_concepts: [
-      { hook: `Meet ${name} on My Latino List`, visual: `Show the My Latino List profile screen for ${name}, with a short text animation of the name and ${loc}.`, talking_point: `${name} is listed under ${cat} in ${loc}.`, cta: 'View Listing' },
-      { hook: `Looking for ${String(cat || '').toLowerCase()} in ${loc}?`, visual: 'Screen recording of a My Latino List search opening this profile.', talking_point: `Discover ${name} on My Latino List.${serviceLine}`.trim(), cta: 'Learn More' },
+      { hook: `Meet ${name} on My Latino List`, visual: 'My Latino List business profile on screen', talking_point: `${name} is listed under ${cat} in ${loc}.`, cta: 'View Listing' },
+      { hook: `Looking for ${String(cat || '').toLowerCase()} in ${loc}?`, visual: loc ? `${loc} location text animation` : 'My Latino List search results showing the business profile', talking_point: `Discover ${name} on My Latino List.${serviceLine}`.trim(), cta: 'Learn More' },
     ],
     seo: { keywords: [name, cat, `${cat} ${loc}`], local_discovery: [`${cat} in ${loc}`] },
     bilingual_spotlight: {
@@ -100,7 +100,7 @@ function groundedJson(row, extra = {}) {
     email_campaign: {
       subject: `Discover ${name} in ${city}`,
       preview: `Explore this ${cat} listing on My Latino List.`,
-      body: `If you are exploring ${String(cat || '').toLowerCase()} around ${city}, ${name} has a profile on My Latino List. Open it to learn more from the details the business provided.`,
+      body: `If you are exploring ${String(cat || '').toLowerCase()} around ${city}, ${name} has a profile on My Latino List. Open it to learn more.`,
       cta: 'View the My Latino List profile',
     },
     ...extra,
@@ -141,6 +141,8 @@ const fixtures = {
     description: null,
     city: 'Silver Spring',
     state: 'Maryland',
+    address: '100 Test Ave',
+    zip: '20910',
     website: 'https://qa.example.test',
     email: 'owner@example.test',
     tags: ['QA', 'Test', 'Demo'],
@@ -167,7 +169,29 @@ assert('placeholder description is detected', pack.isPlaceholderDescription('qa-
 assert('rich cleaning description is kept', !pack.isLowInformationDescription(fixtures.cleaning.description))
 assert('placeholder omitted from ALLOWED_FACTS', !JSON.stringify(pack.allowedFactsFromListing(fixtures.placeholder)).includes('qa-staging-test-description'))
 assert('placeholder domain omitted from facts', pack.isPlaceholderUrl('https://qa.example.test') && !pack.allowedFactsFromListing(fixtures.sparseProfessional).website)
+assert('placeholder street omitted from facts', pack.isPlaceholderAddress('100 Test Ave') && pack.isPlaceholderAddress('Demo Street') && pack.isPlaceholderAddress('QA Avenue') && !pack.allowedFactsFromListing(fixtures.sparseProfessional).address)
 assert('Test in business name is preserved', pack.allowedFactsFromListing(fixtures.sparseProfessional).business_name === 'Test Business')
+assert('raw street visual is detected', pack.isRawStreetVisual('100 Test Ave, Silver Spring, MD 20910'))
+assert('awkward share copy is detected', pack.packHasAwkwardCopy({
+  facebook_posts: ['Share MLL QA Test Business with someone looking nearby in Silver Spring.'],
+  instagram_captions: ['ok'],
+  tiktok_concepts: [],
+  seo: { keywords: [], local_discovery: [] },
+  bilingual_spotlight: { en: 'ok', es: 'ok' },
+  email_campaign: { subject: 'ok', preview: 'ok', body: 'ok', cta: 'ok' },
+  auto_post: false,
+  disclaimer: '',
+}))
+assert('awkward profile copy is detected', pack.packHasAwkwardCopy({
+  facebook_posts: ['The profile is ready when you want details the business has shared.'],
+  instagram_captions: ['ok'],
+  tiktok_concepts: [],
+  seo: { keywords: [], local_discovery: [] },
+  bilingual_spotlight: { en: 'ok', es: 'ok' },
+  email_campaign: { subject: 'ok', preview: 'ok', body: 'ok', cta: 'ok' },
+  auto_post: false,
+  disclaimer: '',
+}))
 assert('mechanical facebook is detected', pack.packHasMechanicalListingLanguage({
   facebook_posts: ['Discover Professional Services listing in Silver Spring, MD on My Latino List!'],
   instagram_captions: ['ok'],
@@ -205,6 +229,8 @@ for (const [key, phrase] of Object.entries(phrases)) {
   const rewritten = pack.rewriteUnsupportedHype(phrase, fixtures.sparseTech)
   assert('regression rewrite ' + key, rewritten.includes('Test Business') && !pack.CUSTOMER_UNGROUNDED_CLAIM.test(rewritten) && rewritten !== phrase)
 }
+assert('awkward share rewrite', pack.rewriteAwkwardCopy('Share Test Business with someone looking nearby in Silver Spring.', fixtures.sparseProfessional).includes('Know someone looking for professional services in Silver Spring') && !/someone looking nearby/i.test(pack.rewriteAwkwardCopy('Share Test Business with someone looking nearby in Silver Spring.', fixtures.sparseProfessional)))
+assert('awkward profile rewrite', !/details the business has shared/i.test(pack.rewriteAwkwardCopy('The profile is ready when you want details the business has shared.', fixtures.sparseProfessional)))
 
 const stats = { total: 0, ai: 0, fallback: 0, acceptable: 0 }
 
@@ -219,12 +245,14 @@ async function runPack(label, listingRow, aiPayload) {
   const blob = JSON.stringify(generated.pack)
   const quality = pack.evaluatePackQuality(generated.pack, listingRow)
   const grounded = pack.isCustomerPackComplete(generated.pack) && pack.isCustomerPackGrounded(generated.pack, listingRow)
-  const noPlaceholder = !/qa-staging-test-description|testing new account|example\.test|localhost/i.test(blob)
+  const noPlaceholder = !/qa-staging-test-description|testing new account|example\.test|localhost|100 Test Ave|123 Test St|Demo Street|QA Avenue/i.test(blob)
   const noInvented = !pack.packHasInventedServices(generated.pack, listingRow)
   const noClaims = !pack.packHasUnsupportedClaims(generated.pack)
   const noQaTags = !pack.packHasQaTestHashtags(generated.pack)
+  const noAwkward = !pack.packHasAwkwardCopy(generated.pack)
+  const noAddressVisual = !pack.packHasAddressVisual(generated.pack)
   const igProse = pack.captionHasProse(generated.pack.instagram_captions[0]) && pack.captionHasProse(generated.pack.instagram_captions[1])
-  const ok = grounded && quality.acceptable && noPlaceholder && noInvented && noClaims && noQaTags && igProse && generated.pack.facebook_posts[0].includes(listingRow.name)
+  const ok = grounded && quality.acceptable && noPlaceholder && noInvented && noClaims && noQaTags && noAwkward && noAddressVisual && igProse && generated.pack.facebook_posts[0].includes(listingRow.name)
   if (ok) stats.acceptable += 1
   assert(label + ' identity', generated.pack.facebook_posts[0].includes(listingRow.name) && generated.pack.bilingual_spotlight.es.includes(listingRow.name))
   assert(label + ' grounded/useful', ok)
@@ -233,6 +261,8 @@ async function runPack(label, listingRow, aiPayload) {
   assert(label + ' no placeholder text', noPlaceholder)
   assert(label + ' instagram prose', igProse)
   assert(label + ' no QA hashtags', noQaTags)
+  assert(label + ' no awkward copy', noAwkward)
+  assert(label + ' no address visual', noAddressVisual)
   assert(label + ' channel diversity', !pack.evaluatePackQuality(generated.pack, listingRow).issues.includes('duplication'))
   return generated
 }
@@ -340,6 +370,30 @@ const reused = await runPack('human QA facebook reused', humanQa, groundedJson(h
 }))
 assert('facebook not reused in spotlight/email', !pack.evaluatePackQuality(reused.pack, humanQa).issues.includes('duplication'))
 
+const addressVisual = await runPack('human QA street address visual', humanQa, groundedJson(humanQa, {
+  tiktok_concepts: [
+    { hook: 'Meet Test Business', visual: '100 Test Ave, Silver Spring, MD 20910', talking_point: 'Test Business is listed under Professional Services in Silver Spring.', cta: 'View Listing' },
+    { hook: 'Looking for professional services in Silver Spring?', visual: 'My Latino List search results showing the business profile', talking_point: 'Open the My Latino List profile.', cta: 'Learn More' },
+  ],
+}))
+assert('street address visual repaired', !/100 Test Ave/i.test(addressVisual.pack.tiktok_concepts.map((row) => row.visual).join(' ')) && !pack.packHasAddressVisual(addressVisual.pack))
+
+const awkwardShare = await runPack('human QA awkward share copy', humanQa, groundedJson(humanQa, {
+  instagram_captions: [
+    'Share MLL QA Test Business with someone looking nearby in Silver Spring.',
+    'Share Test Business with someone looking nearby in Silver Spring.',
+  ],
+}))
+assert('awkward share copy repaired', !/someone looking nearby/i.test(JSON.stringify(awkwardShare.pack)))
+
+const awkwardProfile = await runPack('human QA awkward profile copy', humanQa, groundedJson(humanQa, {
+  facebook_posts: [
+    'The profile is ready when you want details the business has shared.',
+    'Find Test Business in the Professional Services category on My Latino List.',
+  ],
+}))
+assert('awkward profile copy repaired', !/details the business has shared|the profile is ready when you want/i.test(JSON.stringify(awkwardProfile.pack)))
+
 const fallback = pack.buildCustomerFallbackPack(fixtures.sparseTech)
 const fallbackQ = pack.evaluatePackQuality(fallback, fixtures.sparseTech)
 assert('channel-specific fallback is acceptable', fallbackQ.acceptable)
@@ -349,6 +403,9 @@ assert('fallback instagram has prose', pack.captionHasProse(fallback.instagram_c
 assert('fallback has no mechanical category listing in facebook', !pack.packHasMechanicalListingLanguage(fallback, fixtures.sparseTech))
 assert('fallback spanish avoids hype', !/el mejor|de confianza|líder|lugar perfecto|lo último|número uno/i.test(fallback.bilingual_spotlight.es))
 assert('fallback does not expose placeholder', !/qa-staging-test-description/.test(JSON.stringify(pack.buildCustomerFallbackPack(fixtures.placeholder))))
+assert('fallback has no awkward share/profile copy', !/someone looking nearby|details the business has shared/i.test(JSON.stringify(fallback)))
+assert('fallback reel visual is not a street address', !pack.packHasAddressVisual(fallback) && !/100 Test Ave/i.test(fallback.tiktok_concepts.map((row) => row.visual).join(' ')))
+assert('fallback does not expose placeholder street', !/100 Test Ave|Demo Street|QA Avenue/i.test(JSON.stringify(pack.buildCustomerFallbackPack(fixtures.sparseProfessional))))
 
 assert('at least 12 quality generations', stats.total >= 12)
 const rate = stats.acceptable / stats.total

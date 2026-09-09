@@ -58,6 +58,18 @@ const PLACEHOLDER_HOST =
 
 const RAW_URL = /https?:\/\/\S+|\b[\w.-]*example\.test\b|\blocalhost\b/i
 
+const STREET_TYPE =
+  /(?:ave(?:nue)?|st(?:reet)?|rd|road|blvd|boulevard|dr(?:ive)?|ln|lane|way|ct|court)\b/i
+
+const PLACEHOLDER_ADDRESS =
+  /\b\d{1,6}\s+test\s+(?:ave(?:nue)?|st(?:reet)?|rd|road|blvd|boulevard|dr(?:ive)?|ln|lane|way|ct|court)\b|\bdemo\s+(?:street|st|ave(?:nue)?|road|rd|drive|dr)\b|\bqa\s+(?:ave(?:nue)?|street|st|road|rd)\b|\bplaceholder\s+(?:street|st|ave(?:nue)?)\b|\bdummy\s+(?:street|st|ave(?:nue)?)\b/i
+
+const AWKWARD_COPY =
+  /someone looking nearby|the profile is ready when you want details the business has shared|details the business has shared|the details the business(?: has)? shared|details the business shared/i
+
+const STREET_LINE =
+  /\b\d{1,6}\s+[\w.'-]+\s+(?:ave(?:nue)?|st(?:reet)?|rd|road|blvd|boulevard|dr(?:ive)?|ln|lane|way|ct|court)\.?(?:,?\s+[A-Za-z .]+)?(?:,?\s+[A-Z]{2})?(?:\s+\d{5}(?:-\d{4})?)?/gi
+
 export const CUSTOMER_UNSUPPORTED_HYPE =
   /#1\b|\bnumber\s*one\b|\bn[uú]mero\s*1\b|\bbest\b|\btop(?:-rated)?\b|\bleading\b|\bindustry-leading\b|\btrusted\b|\baward(?:s|ed|-winning)?\b|\bcertified\b|\btestimonials?\b|\bhighly rated\b|\bpopular\b|\bpremier\b|\bexceptional\b|\binnovative\b|\binnovators?\b|\blatest\b|\bgo-to\b|\bgo to\b|\bperfect place\b|\bel lugar perfecto\b|\blo [uú]ltimo\b|\bde confianza\b|\bl[ií]der(?:es)?\b|\bcutting[- ]edge\b|\bstate[- ]of[- ]the[- ]art\b|\bworld-class\b|\bunparalleled\b|\bpushing the boundaries\b|\bat the forefront\b|\bcalificaci[oó]n(?:es)?\b|\bmejor(?:es)?\b|m[aá]s confiable|el mejor|la mejor|\b\d+\s+reviews?\b|\bstar ratings?\b|\b\d+(?:\.\d+)?\s*stars?\b|\bfollowers\b|\brevenue\b|\branking|\d+\s*%|\$\d+|\bsince\s+\d{4}\b|\byears in business\b/i
 
@@ -107,6 +119,23 @@ export function isQaMetadataTag(tag: string): boolean {
   return /^(qa|test|demo|staging|placeholder|mllqa)$/i.test(value)
 }
 
+export function isPlaceholderAddress(address: string | null | undefined): boolean {
+  const value = String(address || '').trim()
+  if (!value) return false
+  return PLACEHOLDER_ADDRESS.test(value)
+}
+
+export function isRawStreetVisual(visual: string | null | undefined): boolean {
+  const value = String(visual || '').replace(/\s+/g, ' ').trim()
+  if (!value) return false
+  if (PLACEHOLDER_ADDRESS.test(value)) return true
+  if (value.length > 140) return false
+  const startsWithNumber = /^\d{1,6}\s+\S+/.test(value)
+  const hasStreet = STREET_TYPE.test(value)
+  const hasRegion = /,\s*[A-Z]{2}\b|\b\d{5}(?:-\d{4})?\b|\bmaryland\b|\bflorida\b|\btexas\b/i.test(value)
+  return startsWithNumber && hasStreet && (hasRegion || value.split(',').length >= 2)
+}
+
 export function isPlaceholderDescription(text: string | null | undefined): boolean {
   const value = String(text || '').trim()
   if (!value) return false
@@ -134,6 +163,7 @@ export function marketingListingFrom(listing: QualityListing): QualityListing {
     description: isLowInformationDescription(listing.description) ? null : listing.description,
     website: isPlaceholderUrl(listing.website) ? null : listing.website,
     email: isPlaceholderEmail(listing.email) ? null : listing.email,
+    address: isPlaceholderAddress(listing.address) ? null : listing.address,
     facebook_url: isPlaceholderUrl(listing.facebook_url) ? null : listing.facebook_url,
     instagram_url: isPlaceholderUrl(listing.instagram_url) ? null : listing.instagram_url,
     other_social: social,
@@ -172,6 +202,46 @@ export function stripPlaceholderText(text: string, listing: QualityListing): str
     .replace(/\s{2,}/g, ' ')
     .replace(/\s+([,.;:!?])/g, '$1')
     .trim()
+}
+
+export function stripStreetFromCopy(text: string, listing: QualityListing): string {
+  if (!text) return ''
+  let next = String(text)
+  const raw = String(listing.address || '').trim()
+  if (raw) next = next.split(raw).join(' ')
+  next = next.replace(PLACEHOLDER_ADDRESS, ' ')
+  next = next.replace(STREET_LINE, ' ')
+  return next.replace(/\s{2,}/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim()
+}
+
+export function rewriteAwkwardCopy(text: string, listing: QualityListing): string {
+  if (!text) return ''
+  const name = listing.name || 'this business'
+  const cat = naturalCategory(listing.category)
+  const city = listing.city || locLabel(listing)
+  const nameRe = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  let next = String(text)
+  next = next.replace(
+    new RegExp(`Share\\s+${nameRe}\\s+with someone looking nearby(?:\\s+in\\s+[^?.!]+)?`, 'gi'),
+    city
+      ? `Know someone looking for ${cat.toLowerCase()} in ${city}? Share the ${name} profile on My Latino List`
+      : `Share the ${name} profile on My Latino List`,
+  )
+  next = next.replace(
+    /\bThe profile is ready when you want details the business has shared\b/gi,
+    `Learn more about ${name} on My Latino List`,
+  )
+  next = next.replace(
+    /\bOpen the profile when you want the details the business(?: has)? shared\b/gi,
+    `Explore the ${name} profile on My Latino List to learn more`,
+  )
+  next = next.replace(/\bsomeone looking nearby(?:\s+in\s+[^?.!]+)?/gi, city
+    ? `someone looking for ${cat.toLowerCase()} in ${city}`
+    : 'someone in the area')
+  next = next.replace(/\bthe details the business(?: has)? shared\b/gi, 'the profile')
+  next = next.replace(/\bdetails the business has shared\b/gi, 'what appears on the profile')
+  next = next.replace(/\bdetails the business shared\b/gi, 'what appears on the profile')
+  return next.replace(/\s{2,}/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim()
 }
 
 export function sanitizeHashtags(text: string): string {
@@ -278,15 +348,21 @@ export function rewriteUnsupportedHype(text: string, listing: QualityListing): s
 }
 
 export function neutralizeUnsupportedSentences(text: string, listing: QualityListing): string {
-  const rewritten = rewriteMechanicalListingLanguage(
-    rewriteUnsupportedHype(stripPlaceholderText(text, listing), listing),
+  const rewritten = rewriteAwkwardCopy(
+    rewriteMechanicalListingLanguage(
+      rewriteUnsupportedHype(stripStreetFromCopy(stripPlaceholderText(text, listing), listing), listing),
+      listing,
+    ),
     listing,
   )
   return sanitizeHashtags(
     rewritten
       .split(/(?<=[.!?])\s+/)
-      .map((sentence) => rewriteMechanicalListingLanguage(rewriteUnsupportedHype(sentence, listing), listing))
-      .filter((sentence) => sentence && !CUSTOMER_UNSUPPORTED_HYPE.test(sentence))
+      .map((sentence) => rewriteAwkwardCopy(
+        rewriteMechanicalListingLanguage(rewriteUnsupportedHype(sentence, listing), listing),
+        listing,
+      ))
+      .filter((sentence) => sentence && !CUSTOMER_UNSUPPORTED_HYPE.test(sentence) && !AWKWARD_COPY.test(sentence))
       .join(' ')
       .replace(/\s+/g, ' ')
       .trim(),
@@ -297,20 +373,29 @@ export function containsUnsupportedHype(text: string): boolean {
   return CUSTOMER_UNSUPPORTED_HYPE.test(text)
 }
 
-export function sanitizeVisual(visual: string, listing: QualityListing): string {
-  const name = listing.name || 'this business'
+function safeReelVisual(listing: QualityListing, variant: 'profile' | 'search' | 'location' | 'web' | 'social' = 'profile'): string {
+  const cat = naturalCategory(listing.category)
   const loc = locLabel(listing)
-  const locBit = loc ? ` in ${loc}` : ''
+  if (variant === 'web' && listing.website) return 'Screen recording of the business website'
+  if (variant === 'social' && (listing.facebook_url || listing.instagram_url)) return 'Business social profile displayed on screen'
+  if (variant === 'search') return 'My Latino List search results showing the business profile'
+  if (variant === 'location' && loc) return `${loc} location text animation`
+  if (listing.website) return 'Screen recording of the business website'
+  if (listing.facebook_url || listing.instagram_url) return 'Business social profile displayed on screen'
+  if (loc) return `${loc} location text animation`
+  return `Business name and ${cat} category displayed as text`
+}
+
+export function sanitizeVisual(visual: string, listing: QualityListing): string {
+  if (isRawStreetVisual(visual) || PLACEHOLDER_ADDRESS.test(String(visual || '')) || (listing.address && String(visual || '').includes(listing.address))) {
+    return 'My Latino List business profile on screen'
+  }
   const blob = marketingFactsBlob(listing)
   const next = neutralizeUnsupportedSentences(visual, listing)
   const assumed = next.match(new RegExp(PHYSICAL_ASSUMPTION.source, 'gi')) || []
   const invented = assumed.some((term) => !blob.includes(term.toLowerCase().trim()))
-  if (!next || invented) {
-    if (listing.website) return `Screen recording of the ${name} website as it appears from the verified link.`
-    if (listing.facebook_url || listing.instagram_url) return `Show the verified social profile linked from the ${name} My Latino List profile.`
-    return loc
-      ? `Show the My Latino List profile screen for ${name}, with a short text animation of the name and ${loc}.`
-      : `Show the My Latino List profile screen for ${name}.`
+  if (!next || invented || isRawStreetVisual(next) || PLACEHOLDER_ADDRESS.test(next)) {
+    return safeReelVisual(listing)
   }
   return next
 }
@@ -366,11 +451,11 @@ function facebookFallback(listing: QualityListing): [string, string] {
   const loc = locLabel(listing)
   const city = listing.city || loc
   const one = loc
-    ? `Looking for ${cat.toLowerCase()} in ${loc}? Learn more about ${name} and connect through My Latino List. The profile is ready when you want details the business has shared. Nothing auto-posts.`
+    ? `Looking for ${cat.toLowerCase()} in ${loc}? Learn more about ${name} and connect through My Latino List. Nothing auto-posts.`
     : `Looking for ${cat.toLowerCase()}? Learn more about ${name} and connect through My Latino List. Nothing auto-posts.`
   const two = city
-    ? `${name} has a My Latino List profile that local users in ${city} can open to learn more and get in touch. Use only the information published on that profile.`
-    : `${name} has a My Latino List profile you can open to learn more and get in touch. Use only the information published on that profile.`
+    ? `Find ${name} in the ${cat} category on My Latino List. People in ${city} can open the profile to learn more.`
+    : `Find ${name} in the ${cat} category on My Latino List. Open the profile to learn more.`
   return [one, two]
 }
 
@@ -379,12 +464,10 @@ function instagramFallback(listing: QualityListing): [string, string] {
   const cat = naturalCategory(listing.category)
   const city = listing.city || locLabel(listing)
   const tags = instagramTags(listing)
-  const one = city
-    ? `Save this note: ${name} is on My Latino List for ${cat.toLowerCase()} around ${city}. Open the profile when you want the details the business shared.\n\n${tags}`
-    : `Save this note: ${name} is on My Latino List. Open the profile when you want the details the business shared.\n\n${tags}`
+  const one = `Explore the ${name} profile on My Latino List to learn more.\n\n${tags}`
   const two = city
-    ? `Share ${name} with someone looking nearby in ${city}. The My Latino List profile is the place to read what the business published.\n\n#MyLatinoList #LatinoOwned`
-    : `Share ${name} with someone looking nearby. The My Latino List profile is the place to read what the business published.\n\n#MyLatinoList #LatinoOwned`
+    ? `Know someone looking for ${cat.toLowerCase()} in ${city}? Share the ${name} profile on My Latino List.\n\n#MyLatinoList #LatinoOwned`
+    : `Share the ${name} profile on My Latino List.\n\n#MyLatinoList #LatinoOwned`
   return [one, two]
 }
 
@@ -396,17 +479,17 @@ function tiktokFallback(listing: QualityListing): QualityTiktokConcept[] {
   return [
     {
       hook: `Meet ${name} on My Latino List`,
-      visual: loc
-        ? `Show the My Latino List profile screen for ${name}, with a short text animation of the name and ${loc}.`
-        : `Show the My Latino List profile screen for ${name}.`,
+      visual: 'My Latino List business profile on screen',
       talking_point: `${name} is listed under ${cat}${locBit} on My Latino List. Share only what appears on the profile.`,
       cta: 'View Listing',
     },
     {
       hook: loc ? `Looking for ${cat.toLowerCase()} in ${loc}?` : `Looking for ${cat.toLowerCase()} on My Latino List?`,
       visual: listing.website
-        ? `Screen recording of the ${name} website as it appears from the verified link.`
-        : 'Screen recording of a My Latino List search opening this profile.',
+        ? 'Screen recording of the business website'
+        : loc
+          ? `${loc} location text animation`
+          : 'My Latino List search results showing the business profile',
       talking_point: `Discover ${name} on My Latino List. Do not invent reviews, prices, or work happening off camera.`,
       cta: listing.website ? 'Visit Website' : 'Learn More',
     },
@@ -436,8 +519,8 @@ function emailFallback(listing: QualityListing): QualityPack['email_campaign'] {
     subject: city ? `Discover ${name} in ${city}` : `Discover ${name}`,
     preview: `Explore this ${cat} listing on My Latino List.`,
     body: city
-      ? `If you are exploring ${cat.toLowerCase()} around ${city}, ${name} has a profile on My Latino List. Open it to learn more from the details the business provided. This note is a draft and nothing auto-posts.`
-      : `${name} has a profile on My Latino List. Open it to learn more from the details the business provided. This note is a draft and nothing auto-posts.`,
+      ? `If you are exploring ${cat.toLowerCase()} around ${city}, ${name} has a profile on My Latino List. Open it to learn more. This note is a draft and nothing auto-posts.`
+      : `${name} has a profile on My Latino List. Open it to learn more. This note is a draft and nothing auto-posts.`,
     cta: listing.website ? 'Visit Website' : 'View the My Latino List profile',
   }
 }
@@ -528,11 +611,20 @@ export function packHasInvalidSubject(pack: QualityPack): boolean {
 export function packHasPlaceholderText(pack: QualityPack, listing: QualityListing): boolean {
   const blob = packBlob(pack)
   if (isPlaceholderDescription(listing.description) && listing.description && blob.includes(listing.description)) return true
-  return /qa-staging-test-description|testing new account|lorem ipsum|example\.test|localhost/i.test(blob)
+  if (isPlaceholderAddress(listing.address) && listing.address && blob.includes(listing.address)) return true
+  return /qa-staging-test-description|testing new account|lorem ipsum|example\.test|localhost|100 Test Ave|123 Test St|Demo Street|QA Avenue/i.test(blob) || PLACEHOLDER_ADDRESS.test(blob)
 }
 
 export function packHasQaTestHashtags(pack: QualityPack): boolean {
   return QA_HASHTAG.test(pack.instagram_captions.join(' ') + ' ' + pack.facebook_posts.join(' '))
+}
+
+export function packHasAwkwardCopy(pack: QualityPack): boolean {
+  return AWKWARD_COPY.test(packBlob(pack))
+}
+
+export function packHasAddressVisual(pack: QualityPack): boolean {
+  return pack.tiktok_concepts.some((row) => isRawStreetVisual(row.visual) || PLACEHOLDER_ADDRESS.test(row.visual || ''))
 }
 
 export function packHasRawUrls(pack: QualityPack): boolean {
@@ -633,7 +725,12 @@ export function polishCustomerPack(pack: QualityPack, listing: QualityListing): 
     instagram[0] = fallback.instagram_captions[0]
     instagram[1] = fallback.instagram_captions[1]
   }
-  if (concepts.length < 2) {
+  if (postsAreParaphrases(instagram[0], facebook[0], safe)) {
+    replaced.push('facebook_vs_instagram')
+    facebook[0] = fallback.facebook_posts[0]
+    facebook[1] = fallback.facebook_posts[1]
+  }
+  if (concepts.length < 2 || packHasAddressVisual({ ...fallback, tiktok_concepts: concepts.slice(0, 2) })) {
     replaced.push('tiktok')
     concepts[0] = fallback.tiktok_concepts[0]
     concepts[1] = fallback.tiktok_concepts[1]
@@ -671,7 +768,7 @@ export function polishCustomerPack(pack: QualityPack, listing: QualityListing): 
     disclaimer: pack.disclaimer || fallback.disclaimer,
   }
 
-  if (packHasCrossChannelReuse(next, safe) || packHasQaTestHashtags(next) || packHasRawUrls(next) || packHasMechanicalListingLanguage(next, safe)) {
+  if (packHasCrossChannelReuse(next, safe) || packHasQaTestHashtags(next) || packHasRawUrls(next) || packHasMechanicalListingLanguage(next, safe) || packHasAwkwardCopy(next) || packHasAddressVisual(next) || packHasPlaceholderText(next, listing)) {
     replaced.push('cross_channel')
     next = {
       ...next,
@@ -679,7 +776,7 @@ export function polishCustomerPack(pack: QualityPack, listing: QualityListing): 
       instagram_captions: fallback.instagram_captions,
       bilingual_spotlight: fallback.bilingual_spotlight,
       email_campaign: fallback.email_campaign,
-      tiktok_concepts: next.tiktok_concepts.some((row) => PHYSICAL_ASSUMPTION.test(row.visual))
+      tiktok_concepts: next.tiktok_concepts.some((row) => PHYSICAL_ASSUMPTION.test(row.visual) || isRawStreetVisual(row.visual) || PLACEHOLDER_ADDRESS.test(row.visual || ''))
         ? fallback.tiktok_concepts
         : next.tiktok_concepts,
     }
@@ -716,6 +813,8 @@ export function evaluatePackQuality(pack: QualityPack, listing: QualityListing):
   if (packHasQaTestHashtags(pack)) issues.push('qa_hashtags')
   if (packHasRawUrls(pack)) issues.push('raw_url')
   if (packHasMechanicalListingLanguage(pack, listing)) issues.push('mechanical_listing')
+  if (packHasAwkwardCopy(pack)) issues.push('awkward_copy')
+  if (packHasAddressVisual(pack)) issues.push('address_visual')
   if (/el mejor|de confianza|líder|el lugar perfecto|lo último|número uno/i.test(pack.bilingual_spotlight.es)) issues.push('spanish_hype')
   return { acceptable: issues.length === 0, issues }
 }
