@@ -5,7 +5,10 @@ import type { MarketingTrialStatus } from './marketing-trial'
 import {
   CUSTOMER_UNSUPPORTED_HYPE,
   channelSpecificFallbackPack,
+  evaluatePackQuality,
   isLowInformationDescription,
+  isPlaceholderDescription,
+  isPlaceholderUrl,
   marketingFactsBlob,
   marketingListingFrom,
   neutralizeUnsupportedSentences,
@@ -14,6 +17,11 @@ import {
   packHasPhysicalAssumptions,
   packHasPlaceholderText,
   polishCustomerPack,
+  packHasQaTestHashtags,
+  packHasRawUrls,
+  packHasMechanicalListingLanguage,
+  rewriteUnsupportedHype,
+  captionHasProse,
   type FallbackReason,
 } from './customer-marketing-pack-quality'
 
@@ -125,10 +133,16 @@ export {
   evaluatePackQuality,
   isLowInformationDescription,
   isPlaceholderDescription,
+  isPlaceholderUrl,
   rewriteUnsupportedHype,
   polishCustomerPack,
   channelSpecificFallbackPack,
-} from './customer-marketing-pack-quality'
+  captionHasProse,
+  packHasQaTestHashtags,
+  packHasRawUrls,
+  packHasMechanicalListingLanguage,
+  packHasPhysicalAssumptions,
+}
 
 export function allowedFactsFromListing(listing: GroundedListing): Record<string, unknown> {
   const safe = marketingListingFrom(listing)
@@ -246,7 +260,7 @@ function asTiktokList(raw: unknown, max: number): CustomerTiktokConcept[] {
   for (const item of raw) {
     if (typeof item === 'string') {
       const text = item.trim()
-      if (text) out.push({ hook: text, visual: '', talking_point: text, cta: 'Visit this listing on My Latino List.' })
+      if (text) out.push({ hook: text, visual: '', talking_point: text, cta: 'View Listing' })
       continue
     }
     if (!item || typeof item !== 'object') continue
@@ -260,7 +274,7 @@ function asTiktokList(raw: unknown, max: number): CustomerTiktokConcept[] {
       hook: hook || talking,
       visual,
       talking_point: talking || hook,
-      cta: cta || 'Visit this listing on My Latino List.',
+      cta: cta || 'View Listing',
     })
   }
   return out.slice(0, max)
@@ -364,7 +378,7 @@ export function filterCustomerPackToGrounded(pack: CustomerMarketingPack, listin
     hook: cleanGroundedText(row.hook, listing),
     visual: cleanGroundedText(row.visual, listing),
     talking_point: cleanGroundedText(row.talking_point, listing),
-    cta: cleanGroundedText(row.cta, listing) || 'Visit this listing on My Latino List.',
+    cta: cleanGroundedText(row.cta, listing) || 'View Listing',
   })).filter((row) => row.hook || row.talking_point)
 
   return {
@@ -380,7 +394,7 @@ export function filterCustomerPackToGrounded(pack: CustomerMarketingPack, listin
       subject: cleanGroundedText(pack.email_campaign.subject, listing),
       preview: cleanGroundedText(pack.email_campaign.preview, listing),
       body: cleanGroundedText(pack.email_campaign.body, listing),
-      cta: cleanGroundedText(pack.email_campaign.cta, listing) || 'View this listing on My Latino List',
+      cta: cleanGroundedText(pack.email_campaign.cta, listing) || 'View the My Latino List profile',
     },
     auto_post: false,
     disclaimer: pack.disclaimer || 'Drafts only. Review before publishing. Nothing auto-posts. No performance claims.',
@@ -424,13 +438,13 @@ function rewriteInventedPhrases(text: string, listing: GroundedListing): string 
   const replacements: Array<[RegExp, string]> = [
     [/\bsoftware testing\b/gi, cat],
     [/\bquality assurance\b/gi, cat],
-    [/\bqa testing(?: services)?\b/gi, `${cat} listing`],
-    [/\bqa services\b/gi, `${cat} listing`],
-    [/\btesting services\b/gi, `${cat} listing`],
-    [/\btesting needs\b/gi, `${cat} listing`],
-    [/\btesting partner\b/gi, `${cat} listing`],
-    [/\bbook a consultation\b/gi, 'open the listing'],
-    [/\bconsultations?\b/gi, 'listing'],
+    [/\bqa testing(?: services)?\b/gi, cat],
+    [/\bqa services\b/gi, cat],
+    [/\btesting services\b/gi, cat],
+    [/\btesting needs\b/gi, cat],
+    [/\btesting partner\b/gi, cat],
+    [/\bbook a consultation\b/gi, 'open the profile'],
+    [/\bconsultations?\b/gi, 'profile'],
     [/\bpruebas de calidad\b/gi, catEs],
     [/\bservicios de qa\b/gi, catEs],
     [/\bqa testing\b/gi, cat],
@@ -543,6 +557,11 @@ export function isCustomerPackGrounded(pack: CustomerMarketingPack, listing: Gro
     && !packHasPhysicalAssumptions(pack, safe)
     && !packHasCrossChannelReuse(pack, safe)
     && !packHasInvalidSubject(pack)
+    && !packHasQaTestHashtags(pack)
+    && !packHasRawUrls(pack)
+    && !packHasMechanicalListingLanguage(pack, safe)
+    && captionHasProse(pack.instagram_captions[0] || '')
+    && captionHasProse(pack.instagram_captions[1] || '')
   )
 }
 
@@ -564,25 +583,9 @@ function withName(text: string, name: string): string {
 
 export function repairCustomerPackFacts(pack: CustomerMarketingPack, listing: GroundedListing): CustomerMarketingPack {
   const name = listing.name
-  const cat = listing.category
-  const loc = locLabel(listing)
-  const facebook = pack.facebook_posts.map((text, index) => {
-    let next = withName(text, name)
-    if (index === 0 && cat && !next.toLowerCase().includes(cat.toLowerCase())) {
-      next = `${next} Listed as ${cat} on My Latino List.`
-    }
-    if (index === 0 && listing.city && !next.includes(listing.city)) {
-      next = `${next} ${loc}.`
-    }
-    return next.replace(/\s+/g, ' ').trim()
-  })
+  const facebook = pack.facebook_posts.map((text) => withName(text, name).replace(/\s+/g, ' ').trim())
   const instagram = pack.instagram_captions.map((text) => withName(text, name))
-  const spotlightEn = (() => {
-    let next = withName(pack.bilingual_spotlight.en, name)
-    if (cat && !next.toLowerCase().includes(cat.toLowerCase())) next = `${next} Category: ${cat}.`
-    if (listing.city && !next.includes(listing.city)) next = `${next} ${loc}.`
-    return next.replace(/\s+/g, ' ').trim()
-  })()
+  const spotlightEn = withName(pack.bilingual_spotlight.en, name)
   const spotlightEs = withName(pack.bilingual_spotlight.es, name)
   const subject = pack.email_campaign.subject.includes(name) || pack.email_campaign.body.includes(name)
     ? pack.email_campaign.subject
@@ -612,18 +615,18 @@ export function buildCustomerPackPrompt(listing: GroundedListing): string {
       ? 'The listing description is missing or low-information. Use only business name, category, city/state, website, phone, and verified social URLs. Do not invent services.'
       : 'Use only explicitly stated facts and themes from the description. Do not add anything else.',
     'business_name is mandatory in Facebook posts, the English spotlight, the Spanish spotlight, and the email subject or body. Never write [Business Name] or omit the name.',
-    'category is a directory classification, not a menu of services. You may say the listing is in that category. DO NOT infer services from category or from letters like QA.',
-    'Write useful, natural, action-oriented DRAFT copy for this My Latino List listing. Nothing auto-posts.',
-    'Safe language includes: Discover [Business], Explore [Business], Learn more about [Business], Find [category] businesses in [location], Connect with [Business], View the listing on My Latino List.',
+    'category is a directory classification, not a menu of services. DO NOT infer services from category or from letters like QA. Say people can find this kind of business in this city. NEVER write “[Category] listing”.',
+    'Write useful, natural DRAFT copy a business owner could post. Nothing auto-posts. Do not sound like database metadata.',
+    'Safe language includes: Looking for [category] in [city]? Learn more about [Business] and connect through My Latino List.',
     'NEVER write: latest, go-to, perfect place, el lugar perfecto, pushing the boundaries, at the forefront, leading, industry-leading, innovative, premier, exceptional, best, top, trusted, #1, number one, award-winning, highly rated, popular — unless those exact words appear in ALLOWED_FACTS.',
     'Never invent reviews, ratings, awards, rankings, years in business, customer counts, prices, discounts, services not present in ALLOWED_FACTS, certifications, testimonials, specialties, employees, storefronts, or promotions.',
-    'Facebook: two distinct community/discovery posts, somewhat longer than Instagram, different openings and structure, grounded CTA. Do not paraphrase the same sentence twice.',
-    'Instagram: two distinct shorter social captions. Preserve the exact business name. Natural hashtags. Do not truncate Facebook posts. Avoid awkward category insertion and mechanical Spanish-English mixtures.',
-    'Reel/TikTok: two concepts with HOOK, VISUAL, TALKING POINT, CTA. Hooks must be engaging but factual. VISUAL may use logo, MLL listing card, website screen if website exists, category/location text, directory search, or a verified social profile. Do not invent storefront, interior, employees, customers, products, equipment, or an office unless ALLOWED_FACTS support it.',
-    'SEO: deterministic phrases using only business name, category, city, state, and My Latino List. No ranking claims. No unsupported service keywords.',
-    'English Spotlight: neutral editorial introduction. Do NOT duplicate Facebook copy.',
-    'Spanish Spotlight: independently written natural Latin American Spanish. Preserve the business name exactly. Avoid el mejor, de confianza, líder, el lugar perfecto, lo último, número uno unless those words are in ALLOWED_FACTS.',
-    'Email: SUBJECT, PREVIEW TEXT, BODY, CTA. Informative discovery tone, different from Facebook and Spotlight. No duplicated words like Services Services. CTA must match an actual destination (listing, website if present).',
+    'Do not use placeholder domains (example.test, localhost) or QA/test/demo/staging hashtags. If website is missing from ALLOWED_FACTS, there is no website.',
+    'Facebook: two distinct posts of about 2–4 sentences. Post 01 is a local discovery angle. Post 02 is a profile/business discovery angle. Human-readable CTA. No raw URLs.',
+    'Instagram: each caption needs 1–2 natural sentences, then optionally 2–5 grounded hashtags. Never hashtag-only. Never #QA #Test #Demo #Staging. Do not truncate Facebook posts.',
+    'Reel/TikTok: HOOK, VISUAL, TALKING POINT, CTA. VISUAL may be the MLL profile screen, name/location text, directory search, or a verified real website/social screen. NEVER invent a person using a computer, employees, customers, team meetings, storefronts, or office interiors unless ALLOWED_FACTS support it.',
+    'SEO: phrases using only business name, category, city, state, and My Latino List.',
+    'English Spotlight: editorial, distinct from Facebook, no raw URLs. Spanish Spotlight: independently written natural Latin American Spanish. Preserve the business name exactly. Avoid el mejor, de confianza, líder, el lugar perfecto, lo último, número uno unless those words are in ALLOWED_FACTS.',
+    'Email: concise subject, preview, 2–4 sentence body distinct from Facebook and Spotlight, CTA like “View the My Latino List profile” or “Visit Website”. No raw URLs in the body.',
     'Each channel must be meaningfully different. Do not reuse the same primary sentence across Facebook, Spotlight, and Email.',
     'Do not mention businesses that are not this listing. Do not mention AP Optix Marketing Command Center.',
     'Return ONLY one JSON object. No markdown. No preface. No trailing explanation. Keys:',
