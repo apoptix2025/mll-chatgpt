@@ -30,13 +30,19 @@ const autoSrc = readFileSync(join(root, 'workers/src/lib/marketing-trial-automat
 assert('production cron schedules unchanged', /\[env\.production\.triggers\][\s\S]*?crons = \[\s*"0 10 \* \* \*",\s*"0 9 \* \* 1"\s*\]/.test(wrangler))
 assert('root/default triggers remain empty', /\[triggers\]\s*\ncrons = \[\]/.test(wrangler))
 assert('staging does not add automation cron trigger', !/\[env\.staging\.triggers\]/.test(wrangler))
-assert('production automation flag empty', /\[env\.production\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = ""/.test(wrangler))
+assert('production automation flag Test-Business-only', /\[env\.production\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "7e735f46-9dc1-4ecf-936b-7342e566978a"/.test(wrangler))
 assert('staging automation flag QA-only', /\[env\.staging\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "f38ce2e6-9dd0-462c-a4fb-fd14a3875648"/.test(wrangler))
-assert('default automation flag empty; production empty; staging QA-only', (() => {
+assert('default empty; production Test Business; staging QA; no cross-env UUID leak', (() => {
   const prod = /\[env\.production\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
   const staging = /\[env\.staging\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
   const defaults = /\[vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
-  return defaults === '' && prod === '' && staging === 'f38ce2e6-9dd0-462c-a4fb-fd14a3875648'
+  return (
+    defaults === '' &&
+    prod === '7e735f46-9dc1-4ecf-936b-7342e566978a' &&
+    staging === 'f38ce2e6-9dd0-462c-a4fb-fd14a3875648' &&
+    !String(prod).includes('f38ce2e6') &&
+    !String(staging).includes('7e735f46')
+  )
 })())
 
 assert('cron imports automation processor', /from '\.\/lib\/marketing-trial-automation'/.test(cronSrc))

@@ -44,11 +44,17 @@ assert('read-only trial loader exported', /export async function getMarketingTri
 assert('internal fields stripped', /last_error/.test(viewSrc) && /sanitizeCustomerMilestoneResult/.test(viewSrc) && /attempt_count/.test(viewSrc))
 assert('customer labels defined', /Starting Point/.test(viewSrc) && /30-Day Growth Report/.test(viewSrc) && /Week 1 Growth Recommendations/.test(viewSrc))
 assert('cron wires daily automation processor', /processMarketingTrialAutomation/.test(cronSrc) && /marketing-trial-automation/.test(cronSrc))
-assert('production automation flag empty; staging QA-only', (() => {
+assert('production Test-Business-only; staging QA-only; default empty', (() => {
   const prod = /\[env\.production\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
   const staging = /\[env\.staging\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
   const defaults = /\[vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
-  return defaults === '' && prod === '' && staging === 'f38ce2e6-9dd0-462c-a4fb-fd14a3875648'
+  return (
+    defaults === '' &&
+    prod === '7e735f46-9dc1-4ecf-936b-7342e566978a' &&
+    staging === 'f38ce2e6-9dd0-462c-a4fb-fd14a3875648' &&
+    !String(prod).includes('f38ce2e6') &&
+    !String(staging).includes('7e735f46')
+  )
 })())
 assert('summary includes automation payload', /automation/.test(api) && /buildCustomerAutomationView/.test(api))
 assert('UI renders timeline and empty state', /mg-timeline/.test(page) && /renderTimeline/.test(page) && /milestones are completed/.test(page))
