@@ -52,9 +52,15 @@ assert('customer automation API does not call processor', !/processMarketingTria
 assert('index still does not define processor route', !/processBusinessAutomation/.test(indexTs) && !/processMarketingTrialAutomation/.test(indexTs))
 assert('automation flag is separate from pilot flag', /MLL_MARKETING_AUTOMATION_BUSINESS_IDS/.test(autoSrc) === false ? /parseAutomationBusinessIds/.test(autoSrc) : true)
 assert('Env declares automation flag', /MLL_MARKETING_AUTOMATION_BUSINESS_IDS\?:/.test(indexTs))
-assert('wrangler automation defaults empty in default/production/staging', (() => {
-  const all = [...wrangler.matchAll(/MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/g)].map((m) => m[1])
-  return all.length >= 3 && all.every((v) => v === '')
+assert('wrangler production+default automation empty; staging QA-only', (() => {
+  const prod = /\[env\.production\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
+  const staging = /\[env\.staging\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
+  const defaults = /\[vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
+  return defaults === '' && prod === '' && staging === 'f38ce2e6-9dd0-462c-a4fb-fd14a3875648'
+})())
+assert('staging automation allowlist is QA only (no Coastal Maid / prod test biz)', (() => {
+  const staging = /\[env\.staging\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1] || ''
+  return staging === 'f38ce2e6-9dd0-462c-a4fb-fd14a3875648' && !staging.includes('7e735f46-9dc1-4ecf-936b-7342e566978a')
 })())
 assert('automation does not fall back to pilot allowlist', !/MLL_MARKETING_PILOT_BUSINESS_IDS/.test(autoSrc))
 assert('authoritative clock is marketing_trials.started_at', /from\('marketing_trials'\)/.test(autoSrc) && !/businesses\.created_at/.test(autoSrc) && !/biz\.created_at/.test(autoSrc))

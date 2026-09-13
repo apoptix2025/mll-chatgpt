@@ -31,10 +31,12 @@ assert('production cron schedules unchanged', /\[env\.production\.triggers\][\s\
 assert('root/default triggers remain empty', /\[triggers\]\s*\ncrons = \[\]/.test(wrangler))
 assert('staging does not add automation cron trigger', !/\[env\.staging\.triggers\]/.test(wrangler))
 assert('production automation flag empty', /\[env\.production\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = ""/.test(wrangler))
-assert('staging automation flag empty', /\[env\.staging\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = ""/.test(wrangler))
-assert('default automation flag empty', (() => {
-  const all = [...wrangler.matchAll(/MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/g)].map((m) => m[1])
-  return all.length >= 3 && all.every((v) => v === '')
+assert('staging automation flag QA-only', /\[env\.staging\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "f38ce2e6-9dd0-462c-a4fb-fd14a3875648"/.test(wrangler))
+assert('default automation flag empty; production empty; staging QA-only', (() => {
+  const prod = /\[env\.production\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
+  const staging = /\[env\.staging\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
+  const defaults = /\[vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
+  return defaults === '' && prod === '' && staging === 'f38ce2e6-9dd0-462c-a4fb-fd14a3875648'
 })())
 
 assert('cron imports automation processor', /from '\.\/lib\/marketing-trial-automation'/.test(cronSrc))

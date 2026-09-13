@@ -43,8 +43,13 @@ assert('automation GET does not call processor', !/processMarketingTrialAutomati
 assert('read-only trial loader exported', /export async function getMarketingTrial/.test(trialSrc))
 assert('internal fields stripped', /last_error/.test(viewSrc) && /sanitizeCustomerMilestoneResult/.test(viewSrc) && /attempt_count/.test(viewSrc))
 assert('customer labels defined', /Starting Point/.test(viewSrc) && /30-Day Growth Report/.test(viewSrc) && /Week 1 Growth Recommendations/.test(viewSrc))
-assert('cron still not connected', !/processMarketingTrialAutomation/.test(cronSrc) && !/marketing-trial-automation/.test(cronSrc))
-assert('automation flag remains empty in wrangler', [...wrangler.matchAll(/MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/g)].every((m) => m[1] === ''))
+assert('cron wires daily automation processor', /processMarketingTrialAutomation/.test(cronSrc) && /marketing-trial-automation/.test(cronSrc))
+assert('production automation flag empty; staging QA-only', (() => {
+  const prod = /\[env\.production\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
+  const staging = /\[env\.staging\.vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
+  const defaults = /\[vars\][\s\S]*?MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "([^"]*)"/.exec(wrangler)?.[1]
+  return defaults === '' && prod === '' && staging === 'f38ce2e6-9dd0-462c-a4fb-fd14a3875648'
+})())
 assert('summary includes automation payload', /automation/.test(api) && /buildCustomerAutomationView/.test(api))
 assert('UI renders timeline and empty state', /mg-timeline/.test(page) && /renderTimeline/.test(page) && /milestones are completed/.test(page))
 assert('UI preserves listing checklist', /Listing checklist/.test(page) && /mg-progress/.test(page))

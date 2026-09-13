@@ -199,8 +199,8 @@ ENVIRONMENT = "staging"
 MLL_AI_ENABLED = "true"
 # Staging-only QA listing mll-qa-test-business. Do not copy production IDs.
 MLL_MARKETING_PILOT_BUSINESS_IDS = "f38ce2e6-9dd0-462c-a4fb-fd14a3875648"
-# Staging automation stays OFF until migration + enrollment are separately approved.
-MLL_MARKETING_AUTOMATION_BUSINESS_IDS = ""
+# Phase E: automation enabled for staging QA business only. Production stays empty.
+MLL_MARKETING_AUTOMATION_BUSINESS_IDS = "f38ce2e6-9dd0-462c-a4fb-fd14a3875648"
 
 # Cloudflare Pages staging frontend
 FRONTEND_URL = "https://staging.mylatinolist.pages.dev"
