@@ -137,3 +137,14 @@ export async function activateMarketingTrial(
   }
   return row
 }
+
+/** Read-only trial load. Does not insert or update. */
+export async function getMarketingTrial(
+  supabase: TrialClient,
+  businessId: string,
+): Promise<MarketingTrialRow | null> {
+  if (!businessId || !UUID_RE.test(businessId)) {
+    throw new MarketingTrialStorageError('failed', 'Invalid business id.')
+  }
+  return loadMarketingTrial(supabase, businessId)
+}

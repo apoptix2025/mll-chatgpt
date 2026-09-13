@@ -42,7 +42,25 @@
     .mg-bar>span{display:block;height:8px;background:var(--coral);border-radius:99px;}
     .mg-reasons{margin:6px 0 0;padding-left:16px;color:var(--ink-muted);font-size:12px;}
     .mg-cta{display:inline-block;margin-top:12px;background:var(--coral);color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;max-width:100%;box-sizing:border-box;}
-    @media (max-width: 767px){.dash-layout{grid-template-columns:1fr}.sidebar{display:none;position:fixed;top:var(--nav-h);left:0;bottom:0;z-index:200;width:220px;overflow:auto}.sidebar.mob-open{display:block}.main{padding:20px 16px 80px}.mg-score{font-size:28px}.mg-row{flex-wrap:wrap}}
+    .mg-tl{display:flex;flex-direction:column;gap:12px;margin-top:8px;}
+    .mg-tl-item{border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--surface-2,#f8fafc);}
+    .mg-tl-item.is-completed{background:#fff;border-color:#bbf7d0;}
+    .mg-tl-item.is-available,.mg-tl-item.is-in_progress{background:#fff;border-color:var(--coral);box-shadow:0 0 0 1px rgba(8,102,255,0.08);}
+    .mg-tl-item.is-upcoming{opacity:0.92;}
+    .mg-tl-item.is-skipped,.mg-tl-item.is-unavailable{opacity:0.75;}
+    .mg-tl-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px;}
+    .mg-tl-day{font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-muted);}
+    .mg-tl-title{font-size:14px;font-weight:600;color:var(--ink);margin:2px 0 4px;}
+    .mg-tl-blurb{font-size:12px;color:var(--ink-soft);line-height:1.45;margin:0;}
+    .mg-tl-badge{flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--surface-3);color:var(--ink-muted);}
+    .mg-tl-badge.is-completed{background:#d1fae5;color:#065f46;}
+    .mg-tl-badge.is-available,.mg-tl-badge.is-in_progress{background:var(--coral-light);color:var(--coral-dark);}
+    .mg-tl-meta{font-size:11px;color:var(--ink-muted);margin-top:6px;}
+    .mg-tl-result{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--ink-soft);}
+    .mg-tl-result .mg-row{padding:5px 0;font-size:12px;}
+    .mg-listing-progress{margin-top:16px;padding-top:12px;border-top:1px solid var(--border);}
+    .mg-listing-progress h3{font-size:13px;margin:0 0 8px;color:var(--ink);}
+    @media (max-width: 767px){.dash-layout{grid-template-columns:1fr}.sidebar{display:none;position:fixed;top:var(--nav-h);left:0;bottom:0;z-index:200;width:220px;overflow:auto}.sidebar.mob-open{display:block}.main{padding:20px 16px 80px}.mg-score{font-size:28px}.mg-row{flex-wrap:wrap}.mg-tl-top{flex-wrap:wrap}}
   </style>
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
@@ -148,8 +166,13 @@
         </section>
 
         <section class="mg-card" id="mg-progress-card">
-          <h2>30-Day Growth Progress</h2>
-          <div id="mg-progress"></div>
+          <h2 data-en="30-Day Growth Progress" data-es="Progreso de crecimiento de 30 días">30-Day Growth Progress</h2>
+          <p class="mg-empty" id="mg-timeline-msg" hidden></p>
+          <div class="mg-tl" id="mg-timeline"></div>
+          <div class="mg-listing-progress" id="mg-listing-progress">
+            <h3 data-en="Listing checklist" data-es="Lista de verificación del perfil">Listing checklist</h3>
+            <div id="mg-progress"></div>
+          </div>
         </section>
 
         <section class="mg-card" id="mg-upgrade-card">
@@ -179,6 +202,117 @@ function showDenied(msg) {
 }
 
 function yn(v) { return v ? 'Ready' : 'Needs attention'; }
+
+function statusBadgeLabel(status) {
+  if (status === 'completed') return 'Completed';
+  if (status === 'available') return 'Available';
+  if (status === 'in_progress') return 'In progress';
+  if (status === 'upcoming') return 'Upcoming';
+  if (status === 'skipped') return 'Skipped';
+  if (status === 'unavailable') return 'Unavailable';
+  return 'Upcoming';
+}
+
+function renderMilestoneResult(code, result) {
+  if (!result || typeof result !== 'object') return '';
+  var rows = [];
+  function add(label, value) {
+    if (value == null || value === '') return;
+    rows.push('<div class="mg-row"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(String(value)) + '</strong></div>');
+  }
+  if (code === 'DAY_0_BASELINE') {
+    if (result.score && result.score.total != null) add('Starting score', result.score.total + ' / ' + (result.score.max || 100));
+    if (result.progress_items && result.progress_items.length) {
+      var done = result.progress_items.filter(function (i) { return i.done; }).length;
+      add('Profile completeness', done + ' / ' + result.progress_items.length);
+    }
+  } else if (code === 'DAY_1_ANALYSIS') {
+    add('Current score', result.current_score);
+    if (Array.isArray(result.top_actions) && result.top_actions.length) {
+      rows.push('<div class="mg-empty" style="margin-top:6px;">Top actions</div>');
+      result.top_actions.slice(0, 3).forEach(function (a) {
+        rows.push('<div class="mg-opp"><strong>' + escapeHtml(a.title || '') + '</strong><p class="mg-empty">' + escapeHtml(a.detail || '') + '</p></div>');
+      });
+    }
+  } else if (code === 'DAY_2_MARKETING_PACK') {
+    add('Packs generated', result.packs_generated);
+    add('Packs remaining', result.packs_remaining);
+    if (result.recommendation) rows.push('<p class="mg-empty">' + escapeHtml(String(result.recommendation)) + '</p>');
+  } else if (code === 'DAY_7_RECOMMENDATIONS' || code === 'DAY_21_RECOMMENDATIONS') {
+    if (Array.isArray(result.improvements_completed) && result.improvements_completed.length) {
+      add('Improvements completed', result.improvements_completed.join(', '));
+    }
+    if (Array.isArray(result.recommended_actions) && result.recommended_actions.length) {
+      rows.push('<div class="mg-empty" style="margin-top:6px;">Recommended actions</div>');
+      result.recommended_actions.slice(0, 3).forEach(function (a) {
+        rows.push('<div class="mg-opp"><strong>' + escapeHtml(a.title || '') + '</strong><p class="mg-empty">' + escapeHtml(a.detail || '') + '</p></div>');
+      });
+    }
+  } else if (code === 'DAY_14_MID_TRIAL_REPORT') {
+    add('Baseline score', result.baseline_score);
+    add('Current score', result.current_score);
+    add('Score change', result.score_change);
+    add('Packs generated', result.packs_generated);
+    add('Copy events', result.content_copy_events);
+    add('Days remaining', result.days_remaining);
+  } else if (code === 'DAY_25_UPGRADE_RECOMMENDATION') {
+    add('Current plan', result.current_plan);
+    if (result.recommended_next_step) rows.push('<p class="mg-empty">' + escapeHtml(String(result.recommended_next_step)) + '</p>');
+    if (result.view_plans) rows.push('<a class="mg-cta" href="billing.html">View Plans</a>');
+  } else if (code === 'DAY_28_ENDING_REMINDER') {
+    add('Trial ends', fmtDate(result.ends_at));
+    add('Days remaining', result.days_remaining);
+    if (result.view_plans) rows.push('<a class="mg-cta" href="billing.html">View Plans</a>');
+  } else if (code === 'DAY_30_FINAL_REPORT') {
+    add('Baseline score', result.baseline_score);
+    add('Final score', result.final_score);
+    add('Score change', result.score_change);
+    if (Array.isArray(result.listing_improvements) && result.listing_improvements.length) {
+      add('Improvements', result.listing_improvements.join(', '));
+    }
+    add('Packs generated', result.packs_generated);
+    add('Copy events', result.content_copy_events);
+    if (result.view_plans) rows.push('<a class="mg-cta" href="billing.html">View Plans</a>');
+  }
+  if (!rows.length) return '';
+  return '<div class="mg-tl-result">' + rows.join('') + '</div>';
+}
+
+function renderTimeline(automation) {
+  var root = document.getElementById('mg-timeline');
+  var msg = document.getElementById('mg-timeline-msg');
+  automation = automation || {};
+  var milestones = automation.milestones || [];
+  if (!milestones.length) {
+    msg.hidden = false;
+    msg.textContent = automation.message || 'Your marketing growth timeline will appear here as milestones are completed.';
+    root.innerHTML = '';
+    return;
+  }
+  if (automation.message) {
+    msg.hidden = false;
+    msg.textContent = automation.message;
+  } else {
+    msg.hidden = true;
+    msg.textContent = '';
+  }
+  root.innerHTML = milestones.map(function (m) {
+    var st = m.status || 'upcoming';
+    var meta = '';
+    if (m.executed_at) meta = 'Completed ' + fmtDate(m.executed_at);
+    else if (m.scheduled_for) meta = 'Scheduled ' + fmtDate(m.scheduled_for);
+    return '<article class="mg-tl-item is-' + escapeHtml(st) + '">' +
+      '<div class="mg-tl-top">' +
+        '<div><div class="mg-tl-day">Day ' + escapeHtml(String(m.day != null ? m.day : '')) + '</div>' +
+        '<div class="mg-tl-title">' + escapeHtml(m.label || m.code || '') + '</div>' +
+        '<p class="mg-tl-blurb">' + escapeHtml(m.blurb || '') + '</p></div>' +
+        '<span class="mg-tl-badge is-' + escapeHtml(st) + '">' + escapeHtml(statusBadgeLabel(st)) + '</span>' +
+      '</div>' +
+      (meta ? '<div class="mg-tl-meta">' + escapeHtml(meta) + '</div>' : '') +
+      (st === 'completed' || st === 'available' ? renderMilestoneResult(m.code, m.result) : '') +
+    '</article>';
+  }).join('');
+}
 
 function fmtDate(iso) {
   if (window.MLL_DATE && typeof window.MLL_DATE.formatUtcDateOnly === 'function') {
@@ -323,10 +457,16 @@ async function load() {
     '<div class="mg-row"><span>Leads for this listing</span><strong>' + escapeHtml(String(progress.listing_leads != null ? progress.listing_leads : 0)) + '</strong></div>' +
     progressRows;
 
+  renderTimeline(data.automation);
+
   const upgrade = data.upgrade || {};
   document.getElementById('mg-upgrade-title').textContent = upgrade.headline || 'Keep Growing After Your Free Trial';
   document.getElementById('mg-upgrade-copy').textContent = upgrade.detail || 'Review your plan when you are ready.';
   document.getElementById('mg-upgrade-cta').textContent = upgrade.cta_label || 'View Plans';
+  if (trial.status === 'converted') {
+    document.getElementById('mg-upgrade-title').textContent = 'Your growth continues';
+    document.getElementById('mg-upgrade-copy').textContent = 'Your paid plan stays in place. Review billing anytime from your workspace.';
+  }
 
   renderPackState(data.pack);
   if (window.MLL_MARKETING_PACK) {

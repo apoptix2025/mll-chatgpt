@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Env } from './index'
 import { notifyExpiryWarning, notifyExpired, notifyExpiredAdmin } from './api/notify'
+import { processMarketingTrialAutomation } from './lib/marketing-trial-automation'
 
 async function getOwnerEmails(
   supabase: ReturnType<typeof createClient>,
@@ -442,15 +443,34 @@ async function sendWeeklyReport(env: Env): Promise<void> {
   })
 }
 
+/**
+ * Daily sibling job (10:00 UTC only). Empty MLL_MARKETING_AUTOMATION_BUSINESS_IDS = no-op.
+ * Isolated: failures here must not unwind already-finished expiry/drip work.
+ */
+async function runMarketingTrialAutomationJob(env: Env, supabase: { from: (table: string) => any }): Promise<void> {
+  try {
+    const summary = await processMarketingTrialAutomation(
+      supabase,
+      env.MLL_MARKETING_AUTOMATION_BUSINESS_IDS,
+    )
+    console.log(
+      `Marketing trial automation: allowlist_size=${summary.allowlist_size} businesses=${summary.results.length}`,
+    )
+  } catch (e) {
+    console.error('Marketing trial automation failed:', e)
+  }
+}
+
 export async function handleScheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
   // Monday 9am UTC — admin report + newsletter to all businesses
+  // Do not run marketing trial automation here (avoids Monday double-invoke with daily 10:00).
   if (event.cron === '0 9 * * 1') {
     await sendWeeklyReport(env).catch(e => console.error('Weekly report failed:', e))
     await sendWeeklyNewsletter(env).catch(e => console.error('Weekly newsletter failed:', e))
     return
   }
 
-  // Daily 10am UTC — expiry checks + drip emails
+  // Daily 10am UTC — expiry checks + drip emails, then marketing trial automation (sibling)
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
   const now = new Date()
 
@@ -536,4 +556,7 @@ export async function handleScheduled(event: ScheduledEvent, env: Env, ctx: Exec
   }
 
   console.log(`Cron: ${warn1?.length || 0} 75-day warnings, ${warn2?.length || 0} 82-day warnings, ${expired?.length || 0} expirations`)
+
+  // Sibling after existing daily jobs. Empty allowlist returns quickly with 0 writes.
+  await runMarketingTrialAutomationJob(env, supabase)
 }
