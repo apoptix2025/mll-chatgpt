@@ -3,6 +3,10 @@ import type { Env } from '../index'
 import { authorizeMarketingPilot, buildCustomerPilotSummary, type PilotBusiness } from '../lib/marketing-pilot'
 import { activateMarketingTrial, MarketingTrialStorageError, presentMarketingTrial } from '../lib/marketing-trial'
 import {
+  buildCustomerAutomationView,
+} from '../lib/marketing-trial-automation-view'
+import { MarketingAutomationError } from '../lib/marketing-trial-automation'
+import {
   buildPackSummary,
   generateCustomerMarketingPack,
   generationEntitlement,
@@ -28,6 +32,10 @@ type WorkerDb = { from: (table: string) => any }
 async function trialFor(supabase: WorkerDb, businessId: string) {
   const trialRow = await activateMarketingTrial(supabase, businessId)
   return presentMarketingTrial(trialRow)
+}
+
+async function automationFor(supabase: WorkerDb, businessId: string) {
+  return buildCustomerAutomationView(supabase, businessId)
 }
 
 export async function handleMarketingPilot(request: Request, env: Env, userId: string): Promise<Response> {
@@ -60,6 +68,24 @@ export async function handleMarketingPilot(request: Request, env: Env, userId: s
     })
   }
 
+  if (path === '/api/marketing/pilot/automation') {
+    try {
+      const automation = await automationFor(supabase, access.business.id)
+      return json({
+        business_id: access.business.id,
+        automation,
+      })
+    } catch (err) {
+      if (err instanceof MarketingAutomationError && err.code === 'unavailable') {
+        return json({ error: err.message }, 503)
+      }
+      if (err instanceof MarketingTrialStorageError && err.code === 'unavailable') {
+        return json({ error: err.message }, 503)
+      }
+      return json({ error: 'Could not load marketing automation timeline.' }, 500)
+    }
+  }
+
   if (path === '/api/marketing/pilot/summary') {
     try {
       const trial = await trialFor(supabase, access.business.id)
@@ -88,7 +114,30 @@ export async function handleMarketingPilot(request: Request, env: Env, userId: s
           throw err
         }
       }
-      return json({ ...summary, pack })
+      let automation
+      try {
+        automation = await automationFor(supabase, access.business.id)
+      } catch (err) {
+        if (err instanceof MarketingAutomationError && err.code === 'unavailable') {
+          automation = {
+            enabled_for_customer_ui: true,
+            ready: false,
+            message: 'Your marketing growth timeline will appear here as milestones are completed.',
+            trial_started_at: trial.started_at,
+            trial_ends_at: trial.ends_at,
+            trial_status: trial.status,
+            days_remaining: trial.days_remaining,
+            milestones: [],
+            current_milestone: null,
+            next_milestone: null,
+            baseline: null,
+            latest_report: null,
+          }
+        } else {
+          throw err
+        }
+      }
+      return json({ ...summary, pack, automation })
     } catch (err) {
       if (err instanceof MarketingTrialStorageError && err.code === 'unavailable') {
         return json({ error: err.message }, 503)
