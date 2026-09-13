@@ -46,6 +46,8 @@ export interface Env {
   FRONTEND_URL: string
   MLL_AI_ENABLED?: string
   MLL_MARKETING_PILOT_BUSINESS_IDS?: string
+  /** Comma-separated business UUIDs for trial automation. Empty/unset = OFF. Separate from pilot UI flag. */
+  MLL_MARKETING_AUTOMATION_BUSINESS_IDS?: string
   AI?: { run: (model: string, input: Record<string, unknown>) => Promise<unknown> }
 }
 
