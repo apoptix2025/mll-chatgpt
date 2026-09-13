@@ -800,8 +800,8 @@ export async function processBusinessAutomation(
 }
 
 /**
- * Future cron entrypoint. Not wired to cron.ts in Phase A+B.
- * Empty/unset allowlist = automation OFF.
+ * Cron entrypoint (daily 10:00 UTC sibling job via cron.ts).
+ * Empty/unset allowlist = automation OFF (0 rows, 0 AI, 0 packs, 0 email, 0 Stripe).
  */
 export async function processMarketingTrialAutomation(
   supabase: DbClient,
