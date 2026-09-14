@@ -183,7 +183,7 @@ async function fetchStripeSubscription(
 async function notifyPaidUpgrade(
   env: Env,
   ctx: ExecutionContext,
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   businessId: string,
   plan: string,
 ) {
@@ -238,7 +238,7 @@ async function notifyPaidUpgrade(
 async function notifyCancelled(
   env: Env,
   ctx: ExecutionContext,
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   businessId: string,
   previousPlan: string,
 ) {
