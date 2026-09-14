@@ -3,18 +3,15 @@ import type { Env } from '../index'
 import { resolveAssignedBusiness } from '../lib/billing-business'
 import { notifyPlanUpgrade, notifyPlanCancellation } from './notify'
 import { trackMarketingEvent } from '../lib/analytics'
+import {
+  STRIPE_PRICE_IDS,
+  syncCheckoutSessionCompleted,
+  syncSubscriptionEvent,
+  type StripeSubscriptionLike,
+} from '../lib/stripe-billing-sync'
 
-// ── Price IDs ─────────────────────────────────────────────────────────────────────
-const PRICE_IDS: Record<string, string> = {
-  basic:           'price_1TP11Q3lF9K8v3zheYUShWhQ',   // $19/mo
-  pro:             'price_1TP15B3lF9K8v3zhBuK9PqyS',   // $49/mo
-  featured:        'price_1TP15p3lF9K8v3zhXVXS4MHM',   // $99/mo
-  agency:          'price_1TP16Q3lF9K8v3zhtR9LhB5k',   // $299/mo
-  basic_annual:    'price_1TP18S3lF9K8v3zh2dyoMazn',   // $190/yr
-  pro_annual:      'price_1TP1913lF9K8v3zhrfFmwRJQ',   // $490/yr
-  featured_annual: 'price_1TP19V3lF9K8v3zhPits88OX',   // $990/yr
-  agency_annual:   'price_1TP1A33lF9K8v3zhw2kTIwjd',   // $2990/yr
-}
+// ── Price IDs (unchanged amounts; shared with billing sync) ───────────────────────
+const PRICE_IDS: Record<string, string> = { ...STRIPE_PRICE_IDS }
 
 // ── Email helper via Resend ───────────────────────────────────────────────────────
 async function sendEmail(env: Env, to: string, subject: string, html: string) {
@@ -164,6 +161,117 @@ async function createCheckoutSession(request: Request, env: Env, userId: string)
   return Response.json({ url: session.url })
 }
 
+async function fetchStripeSubscription(
+  env: Env,
+  subscriptionId: string,
+): Promise<StripeSubscriptionLike | null> {
+  try {
+    const res = await fetch(`https://api.stripe.com/v1/subscriptions/${subscriptionId}`, {
+      headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
+    })
+    if (!res.ok) {
+      console.warn('stripe subscription fetch failed', res.status)
+      return null
+    }
+    return (await res.json()) as StripeSubscriptionLike
+  } catch (e) {
+    console.warn('stripe subscription fetch error', e)
+    return null
+  }
+}
+
+async function notifyPaidUpgrade(
+  env: Env,
+  ctx: ExecutionContext,
+  supabase: ReturnType<typeof createClient>,
+  businessId: string,
+  plan: string,
+) {
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('name, owner_id, referred_by')
+    .eq('id', businessId)
+    .single()
+
+  if (!business) return
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email, first_name')
+    .eq('id', business.owner_id)
+    .single()
+
+  if (profile?.email) {
+    const priceMap: Record<string, string> = { basic: '$19', pro: '$49', featured: '$99', agency: '$299' }
+    const price = priceMap[plan] || '$49'
+    await sendEmail(
+      env,
+      profile.email,
+      `🎉 Your ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan is now active — MyLatinoList`,
+      upgradeEmailHtml(profile.first_name || 'there', business.name, plan, price),
+    )
+    ctx.waitUntil(
+      notifyPlanUpgrade(env, {
+        businessName: business.name,
+        email: profile.email,
+        oldPlan: 'free',
+        newPlan: plan,
+      }).catch((e) => console.error('notify upgrade failed:', e)),
+    )
+  }
+
+  if (business.referred_by) {
+    const { data: referrer } = await supabase
+      .from('businesses')
+      .select('id, referral_credits')
+      .eq('referral_code', business.referred_by)
+      .single()
+    if (referrer) {
+      await supabase
+        .from('businesses')
+        .update({ referral_credits: (referrer.referral_credits || 0) + 1 })
+        .eq('id', referrer.id)
+    }
+  }
+}
+
+async function notifyCancelled(
+  env: Env,
+  ctx: ExecutionContext,
+  supabase: ReturnType<typeof createClient>,
+  businessId: string,
+  previousPlan: string,
+) {
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('name, owner_id')
+    .eq('id', businessId)
+    .single()
+  if (!business) return
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email, first_name')
+    .eq('id', business.owner_id)
+    .single()
+
+  if (profile?.email) {
+    await sendEmail(
+      env,
+      profile.email,
+      'Your MyLatinoList subscription has been cancelled',
+      cancellationEmailHtml(profile.first_name || 'there', business.name, previousPlan),
+    )
+    ctx.waitUntil(
+      notifyPlanCancellation(env, {
+        businessName: business.name,
+        email: profile.email,
+        plan: previousPlan,
+      }).catch((e) => console.error('notify cancel failed:', e)),
+    )
+  }
+}
+
 // ── POST /api/stripe/webhook ──────────────────────────────────────────────────────
 async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const signature = request.headers.get('stripe-signature')
@@ -183,124 +291,69 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
 
   // ── checkout.session.completed ────────────────────────────
   if (event.type === 'checkout.session.completed') {
-    const session    = event.data.object
-    const businessId = session.metadata?.business_id
-    const plan       = session.metadata?.plan
-    const customerId = session.customer
-
-    if (!businessId || !plan) return Response.json({ received: true })
-
-    await trackMarketingEvent(env, { event: 'paid_subscription_created' })
-
-    // Update business plan
-    await supabase
-      .from('businesses')
-      .update({ plan, stripe_customer_id: customerId, updated_at: new Date().toISOString() })
-      .eq('id', businessId)
-
-    // Get profile for email
-    const { data: business } = await supabase
-      .from('businesses')
-      .select('name, owner_id')
-      .eq('id', businessId)
-      .single()
-
-    if (business) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('email, first_name')
-        .eq('id', business.owner_id)
-        .single()
-
-      if (profile?.email) {
-        const priceMap: Record<string, string> = { basic:'$19', pro:'$49', featured:'$99', agency:'$299' }
-        const price = priceMap[plan] || '$49'
-        await sendEmail(
-          env,
-          profile.email,
-          `🎉 Your ${plan.charAt(0).toUpperCase()+plan.slice(1)} plan is now active — MyLatinoList`,
-          upgradeEmailHtml(profile.first_name || 'there', business.name, plan, price)
-        )
-        ctx.waitUntil(notifyPlanUpgrade(env, {
-          businessName: business.name,
-          email:        profile.email,
-          oldPlan:      'free',
-          newPlan:      plan,
-        }).catch(e => console.error('notify upgrade failed:', e)))
+    const session = event.data.object
+    let subscription: StripeSubscriptionLike | null = null
+    const subId = session.subscription ? String(session.subscription) : ''
+    if (subId) {
+      subscription = await fetchStripeSubscription(env, subId)
+      if (!subscription) {
+        subscription = { id: subId, customer: session.customer, status: 'active' }
       }
     }
 
-    // Give referral credit to referrer if this business was referred
-    const { data: upgradedBiz } = await supabase
-      .from('businesses')
-      .select('referred_by')
-      .eq('id', businessId)
-      .single()
+    const result = await syncCheckoutSessionCompleted(supabase, session, subscription)
+    if (result.ok) {
+      await trackMarketingEvent(env, { event: 'paid_subscription_created' })
+      await notifyPaidUpgrade(env, ctx, supabase, result.business_id, result.plan)
+      console.log(`✅ Plan synced: business=${result.business_id} plan=${result.plan}`)
+    } else {
+      console.warn(`checkout.session.completed not applied: ${result.reason}`, result.details || {})
+    }
+  }
 
-    if (upgradedBiz?.referred_by) {
-      const { data: referrer } = await supabase
+  // ── customer.subscription.created / updated / deleted ─────
+  if (
+    event.type === 'customer.subscription.created' ||
+    event.type === 'customer.subscription.updated' ||
+    event.type === 'customer.subscription.deleted'
+  ) {
+    const sub = event.data.object as StripeSubscriptionLike
+    let previousPlan = 'free'
+    if (sub.id) {
+      const { data: before } = await supabase
         .from('businesses')
-        .select('id, referral_credits')
-        .eq('referral_code', upgradedBiz.referred_by)
-        .single()
-      if (referrer) {
-        await supabase
+        .select('plan')
+        .eq('stripe_subscription_id', String(sub.id))
+        .maybeSingle()
+      if (before?.plan) previousPlan = String(before.plan)
+      else if (sub.customer) {
+        const { data: byCustomer } = await supabase
           .from('businesses')
-          .update({ referral_credits: (referrer.referral_credits || 0) + 1 })
-          .eq('id', referrer.id)
+          .select('plan')
+          .eq('stripe_customer_id', String(sub.customer))
+          .maybeSingle()
+        if (byCustomer?.plan) previousPlan = String(byCustomer.plan)
       }
     }
 
-    console.log(`✅ Plan updated: business=${businessId} plan=${plan}`)
-  }
-
-  // ── customer.subscription.deleted ────────────────────────
-  if (event.type === 'customer.subscription.deleted') {
-    const customerId = event.data.object.customer
-
-    const { data: business } = await supabase
-      .from('businesses')
-      .select('name, owner_id, plan')
-      .eq('stripe_customer_id', customerId)
-      .single()
-
-    await supabase
-      .from('businesses')
-      .update({ plan: 'free', updated_at: new Date().toISOString() })
-      .eq('stripe_customer_id', customerId)
-
-    if (business) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('email, first_name')
-        .eq('id', business.owner_id)
-        .single()
-
-      if (profile?.email) {
-        await sendEmail(
-          env,
-          profile.email,
-          'Your MyLatinoList subscription has been cancelled',
-          cancellationEmailHtml(profile.first_name || 'there', business.name, business.plan)
-        )
-        ctx.waitUntil(notifyPlanCancellation(env, {
-          businessName: business.name,
-          email:        profile.email,
-          plan:         business.plan,
-        }).catch(e => console.error('notify cancel failed:', e)))
+    const result = await syncSubscriptionEvent(supabase, sub, event.type)
+    if (result.ok) {
+      if (result.plan === 'free' && previousPlan !== 'free') {
+        await notifyCancelled(env, ctx, supabase, result.business_id, previousPlan)
       }
+      console.log(`✅ Subscription synced (${event.type}): business=${result.business_id} plan=${result.plan}`)
+    } else {
+      console.warn(`subscription sync skipped (${event.type}): ${result.reason}`, result.details || {})
     }
-
-    console.log(`⚠️ Subscription cancelled for customer=${customerId}`)
   }
 
-  // ── invoice.payment_failed ────────────────────────────────
+  // ── invoice.payment_failed — notify only; do not downgrade ─
   if (event.type === 'invoice.payment_failed') {
     const customerId = event.data.object.customer
 
     const { data: business } = await supabase
       .from('businesses')
-      .select('name, owner_id')
+      .select('name, owner_id, plan')
       .eq('stripe_customer_id', customerId)
       .single()
 
@@ -316,12 +369,13 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
           env,
           profile.email,
           '⚠️ Payment failed — update your payment method',
-          paymentFailedEmailHtml(profile.first_name || 'there', business.name)
+          paymentFailedEmailHtml(profile.first_name || 'there', business.name),
         )
       }
+      console.warn(`❌ Payment failed for customer=${customerId} plan_preserved=${business.plan}`)
+    } else {
+      console.warn(`❌ Payment failed for customer=${customerId}`)
     }
-
-    console.warn(`❌ Payment failed for customer=${customerId}`)
   }
 
   return Response.json({ received: true })

@@ -498,14 +498,22 @@ async function loadDashboard() {
     return;
   }
 
-  // ── Show enrolled success banner ──────────────────────
+  // ── Enroll / checkout return banners (plan from API only) ──
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('enrolled') === '1') {
+  if (urlParams.get('enrolled') === '1' || urlParams.get('upgraded') === '1') {
     const banner = document.createElement('div');
-    banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;font-weight:500;';
-    banner.textContent = urlParams.get('upgraded') === '1'
-      ? '🎉 Welcome! Your account and subscription are now active.'
-      : '🎉 Welcome to MyLatinoList! Your business is now live.';
+    const wantedUpgrade = urlParams.get('upgraded') === '1';
+    const paid = ['basic', 'pro', 'featured', 'agency'].includes(String(bizPlan || '').toLowerCase());
+    if (wantedUpgrade && paid) {
+      banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;font-weight:500;';
+      banner.textContent = 'Welcome! Your account and subscription are now active.';
+    } else if (wantedUpgrade && !paid) {
+      banner.style = 'background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;';
+      banner.textContent = 'Your payment is still being confirmed. Refresh in a moment to check your plan.';
+    } else {
+      banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;font-weight:500;';
+      banner.textContent = 'Welcome to MyLatinoList! Your business is now live.';
+    }
     document.querySelector('.main').prepend(banner);
     window.history.replaceState({}, '', 'dashboard.html');
   }

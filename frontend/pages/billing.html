@@ -243,22 +243,33 @@ function setBilling(cycle) {
   });
 }
 
-// ── Show success/cancel banners ──────────────────────────────
+// ── Return-from-Stripe banners (URL is a hint only; plan from API) ──
 const params = new URLSearchParams(window.location.search);
-if (params.get('upgraded') === '1') {
-  const banner = document.createElement('div');
-  banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:12px 20px;border-radius:8px;margin-bottom:16px;font-size:14px;font-weight:500;';
-  banner.textContent = '🎉 Plan upgraded successfully! Your new features are now active.';
-  document.querySelector('.main').prepend(banner);
+const upgradeHint = params.get('upgraded') === '1';
+const cancelledHint = params.get('cancelled') === '1';
+if (upgradeHint || cancelledHint) {
   window.history.replaceState({}, '', 'billing.html');
-  gtag('event', 'upgrade', {event_category: 'conversion'});
 }
-if (params.get('cancelled') === '1') {
+if (cancelledHint) {
   const banner = document.createElement('div');
   banner.style = 'background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:12px 20px;border-radius:8px;margin-bottom:16px;font-size:14px;';
   banner.textContent = 'Upgrade cancelled. You can upgrade anytime from this page.';
   document.querySelector('.main').prepend(banner);
-  window.history.replaceState({}, '', 'billing.html');
+}
+function showUpgradeVerificationBanner(authoritativePlan) {
+  if (!upgradeHint || cancelledHint) return;
+  const plan = String(authoritativePlan || 'free').toLowerCase();
+  const paid = ['basic', 'pro', 'featured', 'agency'].includes(plan);
+  const banner = document.createElement('div');
+  if (paid) {
+    banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:12px 20px;border-radius:8px;margin-bottom:16px;font-size:14px;font-weight:500;';
+    banner.textContent = 'Plan upgraded successfully! Your new features are now active.';
+    if (typeof gtag === 'function') gtag('event', 'upgrade', {event_category: 'conversion'});
+  } else {
+    banner.style = 'background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a;padding:12px 20px;border-radius:8px;margin-bottom:16px;font-size:14px;';
+    banner.textContent = 'Your payment is still being confirmed. Refresh in a moment to check your plan.';
+  }
+  document.querySelector('.main').prepend(banner);
 }
 
 // ── Stripe Checkout ──────────────────────────────────────────
@@ -326,7 +337,10 @@ fetch(`${API}/api/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
         window.MLL_CURRENT_BUSINESS.isMarketingPilotEnabled(d)
       );
     }
-    if (!b) return;
+    if (!b) {
+      if (upgradeHint && !cancelledHint) showUpgradeVerificationBanner('free');
+      return;
+    }
     document.getElementById('sb-biz-avatar').textContent  = b.emoji || '🏢';
     document.getElementById('sb-biz-name').textContent    = b.name  || 'Your business';
     document.getElementById('sb-biz-plan').textContent    = (b.plan||'free') + ' plan';
@@ -334,6 +348,7 @@ fetch(`${API}/api/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
     document.getElementById('dash-user-initials').textContent = (f.charAt(0)+l.charAt(0)).toUpperCase();
     const plan = b.plan || 'free';
     window.__mll_plan = plan;
+    showUpgradeVerificationBanner(plan);
     document.getElementById('current-plan-name').textContent = plan.charAt(0).toUpperCase()+plan.slice(1);
     const descs = {
       free:     'Upgrade to unlock full features, analytics, and more.',
