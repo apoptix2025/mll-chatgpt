@@ -9,6 +9,7 @@ import {
   syncSubscriptionEvent,
   type StripeSubscriptionLike,
 } from '../lib/stripe-billing-sync'
+import { logBillingEvent } from '../lib/billing-entitlement'
 
 // ── Price IDs (unchanged amounts; shared with billing sync) ───────────────────────
 const PRICE_IDS: Record<string, string> = { ...STRIPE_PRICE_IDS }
@@ -305,9 +306,29 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
     if (result.ok) {
       await trackMarketingEvent(env, { event: 'paid_subscription_created' })
       await notifyPaidUpgrade(env, ctx, supabase, result.business_id, result.plan)
-      console.log(`✅ Plan synced: business=${result.business_id} plan=${result.plan}`)
+      logBillingEvent('billing_sync_success', {
+        business_id: result.business_id,
+        plan: result.plan,
+        event_type: 'checkout.session.completed',
+      })
+    } else if (result.reason === 'payment_not_completed') {
+      logBillingEvent('billing_sync_pending', {
+        business_id: session.metadata?.business_id || null,
+        reason: result.reason,
+        event_type: 'checkout.session.completed',
+      })
+    } else if (result.reason === 'unknown_stripe_price') {
+      logBillingEvent('unknown_price', {
+        business_id: session.metadata?.business_id || null,
+        reason: result.reason,
+        event_type: 'checkout.session.completed',
+      })
     } else {
-      console.warn(`checkout.session.completed not applied: ${result.reason}`, result.details || {})
+      logBillingEvent('billing_sync_failed', {
+        business_id: session.metadata?.business_id || null,
+        reason: result.reason,
+        event_type: 'checkout.session.completed',
+      })
     }
   }
 
@@ -340,10 +361,56 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
     if (result.ok) {
       if (result.plan === 'free' && previousPlan !== 'free') {
         await notifyCancelled(env, ctx, supabase, result.business_id, previousPlan)
+        logBillingEvent('subscription_terminated', {
+          business_id: result.business_id,
+          plan: result.plan,
+          event_type: event.type,
+        })
+      } else {
+        logBillingEvent('billing_sync_success', {
+          business_id: result.business_id,
+          plan: result.plan,
+          event_type: event.type,
+          status: sub.status || null,
+        })
       }
-      console.log(`✅ Subscription synced (${event.type}): business=${result.business_id} plan=${result.plan}`)
+    } else if (result.reason === 'unknown_stripe_price') {
+      logBillingEvent('unknown_price', {
+        reason: result.reason,
+        event_type: event.type,
+        ...(result.details || {}),
+      })
     } else {
-      console.warn(`subscription sync skipped (${event.type}): ${result.reason}`, result.details || {})
+      logBillingEvent('billing_sync_failed', {
+        reason: result.reason,
+        event_type: event.type,
+        ...(result.details || {}),
+      })
+    }
+  }
+
+  // ── invoice.paid — soft sync subscription status when present ─
+  if (event.type === 'invoice.paid') {
+    const invoice = event.data.object
+    const subId = invoice.subscription ? String(invoice.subscription) : ''
+    if (subId) {
+      const subscription = await fetchStripeSubscription(env, subId)
+      if (subscription) {
+        const result = await syncSubscriptionEvent(supabase, subscription, 'invoice.paid')
+        if (result.ok) {
+          logBillingEvent('billing_sync_success', {
+            business_id: result.business_id,
+            plan: result.plan,
+            event_type: 'invoice.paid',
+          })
+        } else {
+          logBillingEvent('billing_sync_failed', {
+            reason: result.reason,
+            event_type: 'invoice.paid',
+            ...(result.details || {}),
+          })
+        }
+      }
     }
   }
 
@@ -372,9 +439,15 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
           paymentFailedEmailHtml(profile.first_name || 'there', business.name),
         )
       }
-      console.warn(`❌ Payment failed for customer=${customerId} plan_preserved=${business.plan}`)
+      logBillingEvent('billing_sync_pending', {
+        event_type: 'invoice.payment_failed',
+        plan_preserved: business.plan,
+      })
     } else {
-      console.warn(`❌ Payment failed for customer=${customerId}`)
+      logBillingEvent('billing_sync_failed', {
+        event_type: 'invoice.payment_failed',
+        reason: 'business_not_found',
+      })
     }
   }
 

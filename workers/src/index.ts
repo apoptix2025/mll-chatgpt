@@ -9,6 +9,7 @@ import { handleResources } from './api/resources'
 import { handleReviews } from './api/reviews'
 import { handleLeads } from './api/leads'
 import { handleStripe } from './api/stripe'
+import { handleBilling } from './api/billing'
 import { handleStats } from './api/stats'
 import { handleContact } from './api/contact'
 import { handleHealth } from './api/health'
@@ -138,6 +139,7 @@ export default {
         else if (path.startsWith('/api/leads'))       response = await handleLeads(request, env, authResult.userId)
         else if (path.startsWith('/api/uploads'))     response = await handleUploads(request, env, authResult.userId, ctx)
         else if (path.startsWith('/api/stripe'))      response = await handleStripe(request, env, ctx, authResult.userId)
+        else if (path.startsWith('/api/billing'))     response = await handleBilling(request, env, authResult.userId)
         else if (path.startsWith('/api/marketing/pilot')) response = await handleMarketingPilot(request, env, authResult.userId)
         else response = Response.json({ error: 'Not found' }, { status: 404 })
       }

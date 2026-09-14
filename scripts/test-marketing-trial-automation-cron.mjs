@@ -46,6 +46,8 @@ assert('default empty; production Test Business; staging QA; no cross-env UUID l
 })())
 
 assert('cron imports automation processor', /from '\.\/lib\/marketing-trial-automation'/.test(cronSrc))
+assert('cron imports billing reconciliation', /from '\.\/lib\/billing-reconcile'/.test(cronSrc))
+assert('billing reconciliation error is isolated', /Billing reconciliation failed:/.test(cronSrc))
 assert('daily path calls runMarketingTrialAutomationJob', /runMarketingTrialAutomationJob\(env, supabase\)/.test(cronSrc))
 assert('weekly cron early-returns before automation', (() => {
   const weeklyIdx = cronSrc.indexOf("event.cron === '0 9 * * 1'")
@@ -147,12 +149,23 @@ export function createClient() {
 )
 
 writeFileSync(
+  join(tmp, 'billing-reconcile.mjs'),
+  `
+export async function runBillingReconciliation() {
+  globalThis.__MLL_CRON_STATE__.billingReconcile = (globalThis.__MLL_CRON_STATE__.billingReconcile || 0) + 1
+  return { scanned: 0, repaired: 0, failed: 0, skipped: 0, issues: [] }
+}
+`,
+)
+
+writeFileSync(
   join(tmp, 'cron.mjs'),
   transpile(cronSrc, 'cron.ts', (src) =>
     src
       .replaceAll("from '@supabase/supabase-js'", "from './supabase-js.mjs'")
       .replaceAll("from './api/notify'", "from './notify.mjs'")
       .replaceAll("from './lib/marketing-trial-automation'", "from './marketing-trial-automation.mjs'")
+      .replaceAll("from './lib/billing-reconcile'", "from './billing-reconcile.mjs'")
       .replace(
         'async function sendDripEmails(env: Env): Promise<void> {',
         'async function sendDripEmails(env: Env): Promise<void> { globalThis.__MLL_CRON_STATE__.dripStarted += 1; return;',
@@ -192,11 +205,13 @@ function resetCounters() {
   state.weeklyNewsletter = 0
   state.throwAutomation = false
   state.lastFlag = undefined
+  state.billingReconcile = 0
 }
 
 resetCounters()
 await handleScheduled({ cron: '0 10 * * *' }, env, ctx)
 assert('daily cron invokes automation processor once', state.processCalls === 1)
+assert('daily cron invokes billing reconciliation once', state.billingReconcile === 1)
 assert('daily cron still starts drip job', state.dripStarted === 1)
 assert('empty allowlist creates 0 inserts via processor', state.inserts === 0)
 assert('empty allowlist AI/pack/email/stripe remain 0', state.aiCalls === 0 && state.packGens === 0 && state.emails === 0 && state.stripe === 0)
@@ -205,6 +220,7 @@ assert('daily cron passes automation flag (empty)', state.lastFlag === '')
 resetCounters()
 await handleScheduled({ cron: '0 9 * * 1' }, env, ctx)
 assert('weekly cron does not invoke automation', state.processCalls === 0)
+assert('weekly cron does not invoke billing reconciliation', state.billingReconcile === 0)
 assert('weekly report still runs', state.weeklyReport === 1)
 assert('weekly newsletter still runs', state.weeklyNewsletter === 1)
 

@@ -509,7 +509,28 @@ async function loadDashboard() {
       banner.textContent = 'Welcome! Your account and subscription are now active.';
     } else if (wantedUpgrade && !paid) {
       banner.style = 'background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;';
-      banner.textContent = 'Your payment is still being confirmed. Refresh in a moment to check your plan.';
+      banner.textContent = 'Confirming your subscription... Your payment is being confirmed.';
+      // Bounded recheck — never treat upgraded=1 as success
+      (async function pollDashBilling() {
+        for (let i = 0; i < 5; i++) {
+          try {
+            const res = await fetch(`${API}/api/billing/status?confirming=1&reconcile=1`, {
+              headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const data = await res.json();
+            const p = String(data.plan || 'free').toLowerCase();
+            if (['basic', 'pro', 'featured', 'agency'].includes(p)) {
+              banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;font-weight:500;';
+              banner.textContent = 'Welcome! Your account and subscription are now active.';
+              const planBadge = document.getElementById('sb-biz-plan');
+              if (planBadge) planBadge.textContent = p.charAt(0).toUpperCase() + p.slice(1) + ' plan';
+              return;
+            }
+          } catch (e) {}
+          await new Promise(r => setTimeout(r, 2000));
+        }
+        banner.textContent = 'Your payment is being confirmed. Refresh in a moment to check your plan.';
+      })();
     } else {
       banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;font-weight:500;';
       banner.textContent = 'Welcome to MyLatinoList! Your business is now live.';

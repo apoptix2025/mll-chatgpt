@@ -28,7 +28,8 @@ const PRICE_TO_PLAN: Record<string, PaidPlan> = {
   [STRIPE_PRICE_IDS.agency_annual]: 'agency',
 }
 
-const PAID_PLANS = new Set<string>(['basic', 'pro', 'featured', 'agency'])
+export const PAID_PLAN_SET = new Set<string>(['basic', 'pro', 'featured', 'agency'])
+const PAID_PLANS = PAID_PLAN_SET
 
 export type StripeSubscriptionLike = {
   id?: string | null
@@ -43,6 +44,7 @@ export type StripeSubscriptionLike = {
 
 export type CheckoutSessionLike = {
   id?: string | null
+  mode?: string | null
   customer?: string | null
   subscription?: string | null
   payment_status?: string | null
@@ -185,6 +187,16 @@ export async function syncCheckoutSessionCompleted(
     return { ok: false, action: 'checkout.session.completed', reason: 'missing_business_id' }
   }
 
+  const mode = String(session.mode || 'subscription').toLowerCase()
+  if (mode !== 'subscription') {
+    return {
+      ok: false,
+      action: 'checkout.session.completed',
+      reason: 'checkout_mode_not_subscription',
+      details: { mode },
+    }
+  }
+
   const paymentStatus = String(session.payment_status || '').toLowerCase()
   if (paymentStatus && paymentStatus !== 'paid' && paymentStatus !== 'no_payment_required') {
     return {
@@ -195,21 +207,32 @@ export async function syncCheckoutSessionCompleted(
     }
   }
 
+  const { data: bizRow } = await supabase
+    .from('businesses')
+    .select('id, stripe_customer_id')
+    .eq('id', businessId)
+    .maybeSingle()
+  if (!bizRow?.id) {
+    return { ok: false, action: 'checkout.session.completed', reason: 'business_not_found' }
+  }
+
+  if (!subscription?.id && !session.subscription) {
+    return { ok: false, action: 'checkout.session.completed', reason: 'missing_subscription' }
+  }
+
   const priceId = primaryPriceIdFromSubscription(subscription)
-  const resolved = resolvePaidPlan({
-    metadataPlan: session.metadata?.plan,
-    priceId,
-  })
-  if (resolved.unknown_price) {
+  // Price mapping is authoritative — do not grant from client metadata alone.
+  if (!priceId) {
+    return { ok: false, action: 'checkout.session.completed', reason: 'missing_stripe_price' }
+  }
+  const plan = planFromStripePriceId(priceId)
+  if (!plan) {
     return {
       ok: false,
       action: 'checkout.session.completed',
       reason: 'unknown_stripe_price',
       details: { price_id: priceId },
     }
-  }
-  if (!resolved.plan) {
-    return { ok: false, action: 'checkout.session.completed', reason: 'unresolved_plan' }
   }
 
   const customerId = session.customer
@@ -219,16 +242,29 @@ export async function syncCheckoutSessionCompleted(
     ? String(session.subscription)
     : (subscription?.id ? String(subscription.id) : null)
 
+  if (
+    bizRow.stripe_customer_id
+    && customerId
+    && String(bizRow.stripe_customer_id) !== customerId
+  ) {
+    return {
+      ok: false,
+      action: 'checkout.session.completed',
+      reason: 'customer_mismatch',
+      details: { business_id: businessId },
+    }
+  }
+
   await applyPaidPlanToBusiness(supabase, {
     business_id: businessId,
-    plan: resolved.plan,
+    plan,
     stripe_customer_id: customerId,
     stripe_subscription_id: subscriptionId,
   })
 
   await upsertSubscriptionLedger(supabase, {
     business_id: businessId,
-    plan: resolved.plan,
+    plan,
     stripe_subscription_id: subscriptionId,
     stripe_customer_id: customerId,
     status: String(subscription?.status || 'active'),
@@ -240,9 +276,9 @@ export async function syncCheckoutSessionCompleted(
     ok: true,
     action: 'checkout.session.completed',
     business_id: businessId,
-    plan: resolved.plan,
+    plan,
     details: {
-      source: resolved.source,
+      source: 'price',
       stripe_customer_id_set: !!customerId,
       stripe_subscription_id_set: !!subscriptionId,
     },
@@ -328,8 +364,17 @@ export async function syncSubscriptionEvent(
   }
 
   if (shouldPreservePaidAccess(sub)) {
-    if (!resolved.plan) {
-      return { ok: false, action: eventType, reason: 'unresolved_plan', details: { business_id: businessId } }
+    const priceIdForPlan = priceId
+    if (!priceIdForPlan) {
+      return { ok: false, action: eventType, reason: 'missing_stripe_price', details: { business_id: businessId } }
+    }
+    if (resolved.unknown_price || !resolved.plan) {
+      return {
+        ok: false,
+        action: eventType,
+        reason: resolved.unknown_price ? 'unknown_stripe_price' : 'unresolved_plan',
+        details: { price_id: priceId, business_id: businessId },
+      }
     }
 
     await applyPaidPlanToBusiness(supabase, {

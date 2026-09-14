@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { Env } from './index'
 import { notifyExpiryWarning, notifyExpired, notifyExpiredAdmin } from './api/notify'
 import { processMarketingTrialAutomation } from './lib/marketing-trial-automation'
+import { runBillingReconciliation } from './lib/billing-reconcile'
 
 async function getOwnerEmails(
   supabase: ReturnType<typeof createClient>,
@@ -556,6 +557,16 @@ export async function handleScheduled(event: ScheduledEvent, env: Env, ctx: Exec
   }
 
   console.log(`Cron: ${warn1?.length || 0} 75-day warnings, ${warn2?.length || 0} 82-day warnings, ${expired?.length || 0} expirations`)
+
+  // Billing reconciliation sibling — isolated from expiry + marketing automation.
+  try {
+    const billingSummary = await runBillingReconciliation(supabase, env.STRIPE_SECRET_KEY, { limit: 40 })
+    console.log(
+      `Billing reconciliation: scanned=${billingSummary.scanned} repaired=${billingSummary.repaired} failed=${billingSummary.failed} skipped=${billingSummary.skipped}`,
+    )
+  } catch (e) {
+    console.error('Billing reconciliation failed:', e)
+  }
 
   // Sibling after existing daily jobs. Empty allowlist returns quickly with 0 writes.
   await runMarketingTrialAutomationJob(env, supabase)

@@ -7,6 +7,7 @@ export type BillingBusiness = {
   id: string
   name: string
   stripe_customer_id: string | null
+  stripe_subscription_id?: string | null
   plan?: string | null
 }
 
@@ -22,7 +23,7 @@ export type ResolveAssignedBusinessResult =
 export async function resolveAssignedBusiness(
   supabase: { from: (table: string) => any },
   userId: string,
-  select = 'id, name, stripe_customer_id, plan',
+  select = 'id, name, stripe_customer_id, stripe_subscription_id, plan',
 ): Promise<ResolveAssignedBusinessResult> {
   const { data: profileRow } = await supabase
     .from('profiles')
@@ -60,6 +61,7 @@ export async function resolveAssignedBusiness(
       id: String(businessRow.id),
       name: String(businessRow.name ?? ''),
       stripe_customer_id: (businessRow.stripe_customer_id as string | null) ?? null,
+      stripe_subscription_id: (businessRow.stripe_subscription_id as string | null) ?? null,
       plan: (businessRow.plan as string | null) ?? null,
     },
   }

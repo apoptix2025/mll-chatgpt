@@ -247,7 +247,8 @@ function setBilling(cycle) {
 const params = new URLSearchParams(window.location.search);
 const upgradeHint = params.get('upgraded') === '1';
 const cancelledHint = params.get('cancelled') === '1';
-if (upgradeHint || cancelledHint) {
+const checkoutSessionId = params.get('session_id') || '';
+if (upgradeHint || cancelledHint || checkoutSessionId) {
   window.history.replaceState({}, '', 'billing.html');
 }
 if (cancelledHint) {
@@ -256,20 +257,52 @@ if (cancelledHint) {
   banner.textContent = 'Upgrade cancelled. You can upgrade anytime from this page.';
   document.querySelector('.main').prepend(banner);
 }
-function showUpgradeVerificationBanner(authoritativePlan) {
-  if (!upgradeHint || cancelledHint) return;
-  const plan = String(authoritativePlan || 'free').toLowerCase();
-  const paid = ['basic', 'pro', 'featured', 'agency'].includes(plan);
-  const banner = document.createElement('div');
-  if (paid) {
-    banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:12px 20px;border-radius:8px;margin-bottom:16px;font-size:14px;font-weight:500;';
-    banner.textContent = 'Plan upgraded successfully! Your new features are now active.';
-    if (typeof gtag === 'function') gtag('event', 'upgrade', {event_category: 'conversion'});
-  } else {
-    banner.style = 'background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a;padding:12px 20px;border-radius:8px;margin-bottom:16px;font-size:14px;';
-    banner.textContent = 'Your payment is still being confirmed. Refresh in a moment to check your plan.';
+
+var upgradeBannerEl = null;
+function setUpgradeBanner(kind, text) {
+  if (!upgradeBannerEl) {
+    upgradeBannerEl = document.createElement('div');
+    document.querySelector('.main').prepend(upgradeBannerEl);
   }
-  document.querySelector('.main').prepend(banner);
+  if (kind === 'success') {
+    upgradeBannerEl.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:12px 20px;border-radius:8px;margin-bottom:16px;font-size:14px;font-weight:500;';
+  } else if (kind === 'pending') {
+    upgradeBannerEl.style = 'background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a;padding:12px 20px;border-radius:8px;margin-bottom:16px;font-size:14px;';
+  } else {
+    upgradeBannerEl.style = 'background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:12px 20px;border-radius:8px;margin-bottom:16px;font-size:14px;';
+  }
+  upgradeBannerEl.textContent = text;
+}
+
+async function verifyUpgradeFromApi() {
+  if (!upgradeHint || cancelledHint) return null;
+  setUpgradeBanner('pending', 'Confirming your subscription...');
+  const maxAttempts = 5;
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      if (i === 0 && checkoutSessionId) {
+        await fetch(`${API}/api/billing/confirm-checkout`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: checkoutSessionId }),
+        }).catch(function () {});
+      }
+      const res = await fetch(`${API}/api/billing/status?confirming=1&reconcile=1`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const data = await res.json();
+      const plan = String(data.plan || 'free').toLowerCase();
+      const paid = ['basic', 'pro', 'featured', 'agency'].includes(plan);
+      if (paid) {
+        setUpgradeBanner('success', 'Plan upgraded successfully! Your new features are now active.');
+        if (typeof gtag === 'function') gtag('event', 'upgrade', { event_category: 'conversion' });
+        return plan;
+      }
+    } catch (e) { /* keep polling */ }
+    if (i < maxAttempts - 1) await new Promise(r => setTimeout(r, 2000));
+  }
+  setUpgradeBanner('pending', 'Your payment is being confirmed. Refresh in a moment to check your plan.');
+  return 'free';
 }
 
 // ── Stripe Checkout ──────────────────────────────────────────
@@ -338,7 +371,7 @@ fetch(`${API}/api/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
       );
     }
     if (!b) {
-      if (upgradeHint && !cancelledHint) showUpgradeVerificationBanner('free');
+      if (upgradeHint && !cancelledHint) verifyUpgradeFromApi();
       return;
     }
     document.getElementById('sb-biz-avatar').textContent  = b.emoji || '🏢';
@@ -348,7 +381,26 @@ fetch(`${API}/api/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
     document.getElementById('dash-user-initials').textContent = (f.charAt(0)+l.charAt(0)).toUpperCase();
     const plan = b.plan || 'free';
     window.__mll_plan = plan;
-    showUpgradeVerificationBanner(plan);
+    const afterVerify = (finalPlan) => {
+      const p = finalPlan || plan;
+      window.__mll_plan = p;
+      document.getElementById('sb-biz-plan').textContent = p + ' plan';
+      document.getElementById('current-plan-name').textContent = p.charAt(0).toUpperCase()+p.slice(1);
+      const descs = {
+        free:     'Upgrade to unlock full features, analytics, and more.',
+        basic:    'You have full access to all Basic features.',
+        pro:      'You have full access to all Pro features.',
+        featured: 'You have full access to all Featured benefits including homepage placement.',
+        agency:   'You have full access to all Agency features.',
+        admin:    'Admin accounts do not require a paid subscription.',
+      };
+      document.getElementById('current-plan-desc').textContent = descs[p] || '';
+    };
+    if (upgradeHint && !cancelledHint) {
+      verifyUpgradeFromApi().then(afterVerify);
+    } else {
+      afterVerify(plan);
+    }
     document.getElementById('current-plan-name').textContent = plan.charAt(0).toUpperCase()+plan.slice(1);
     const descs = {
       free:     'Upgrade to unlock full features, analytics, and more.',
