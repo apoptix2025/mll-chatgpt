@@ -1,6 +1,6 @@
 /* ============================================================
    COMMUNITY CONNECT — Follow Us & Connect / Síguenos y Conecta
-   Local homepage prototype. Brand accents for this section.
+   Brand accents for this homepage section.
    ============================================================ */
 
 .mll-community-connect {
@@ -174,18 +174,25 @@
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
-/* Single featured layout — vertical video + content panel (not full-bleed stretch) */
+/* Single featured layout — compact side-by-side stage (not full-bleed stretch) */
+.cc-video-layout--single {
+  display: flex;
+  justify-content: center;
+}
+
 .cc-video-layout--single .cc-single-stage {
   margin-top: 24px;
+  width: 100%;
+  max-width: 720px;
   display: grid;
-  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
-  gap: 28px;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 22px;
   align-items: stretch;
   background: var(--cc-white);
   border: 1px solid var(--cc-border);
   border-radius: 28px;
   box-shadow: var(--cc-shadow);
-  padding: 22px;
+  padding: 20px;
   overflow: hidden;
 }
 
@@ -193,9 +200,9 @@
   margin: 0;
   box-shadow: none;
   border: 1px solid var(--cc-border);
-  max-width: 320px;
+  max-width: 300px;
   width: 100%;
-  justify-self: center;
+  justify-self: start;
 }
 
 .cc-featured-panel {
@@ -203,8 +210,9 @@
   flex-direction: column;
   justify-content: center;
   gap: 10px;
-  padding: 12px 8px 12px 12px;
+  padding: 8px 4px 8px 4px;
   min-width: 0;
+  max-width: 34ch;
 }
 
 .cc-featured-brand {
@@ -247,10 +255,10 @@
 
 .cc-featured-panel-copy {
   margin: 0;
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.55;
   color: var(--cc-muted);
-  max-width: 42ch;
+  max-width: none;
 }
 
 .cc-video-card {
@@ -264,9 +272,10 @@
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
+.cc-video-layout--single .cc-video-card:hover,
 .cc-video-layout--grid .cc-video-card:hover,
 .cc-video-layout--many .cc-video-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: var(--cc-shadow-hover);
 }
 
@@ -274,10 +283,31 @@
   position: relative;
   width: 100%;
   aspect-ratio: 9 / 16;
-  background:
-    linear-gradient(160deg, rgba(6, 59, 152, 0.92), rgba(6, 59, 152, 0.72)),
-    radial-gradient(circle at 30% 20%, rgba(34, 217, 232, 0.35), transparent 55%);
+  background: #0b1f44;
   overflow: hidden;
+  border-radius: 22px 22px 0 0;
+  cursor: pointer;
+}
+
+.cc-video-layout--single .cc-video-media {
+  border-radius: 18px 18px 0 0;
+}
+
+.cc-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  display: block;
+  transition: opacity 0.28s ease;
+  z-index: 0;
+}
+
+.cc-poster--pending {
+  background:
+    linear-gradient(160deg, rgba(6, 59, 152, 0.85), rgba(6, 59, 152, 0.55));
 }
 
 .cc-embed-slot,
@@ -288,68 +318,121 @@
   height: 100%;
   border: 0;
   background: #000;
+  z-index: 3;
 }
 
-.cc-fallback {
+.cc-play {
   position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 18px;
-  color: var(--cc-white);
-  text-decoration: none;
-  background: linear-gradient(180deg, transparent 20%, rgba(6, 35, 90, 0.88) 100%);
-  transition: opacity 0.25s ease;
-}
-
-.cc-fallback:focus-visible {
-  outline: 3px solid var(--cc-cyan);
-  outline-offset: -4px;
-}
-
-.cc-fallback-play {
-  position: absolute;
-  top: 50%;
+  /* Lower than face — roughly upper chest on 9:16 portrait posters */
+  top: 62%;
   left: 50%;
   transform: translate(-50%, -50%);
+  z-index: 4;
   width: 64px;
   height: 64px;
+  border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
+  padding: 0;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.96);
   color: var(--cc-blue);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  transition: transform 0.18s ease, background 0.18s ease;
 }
 
-.cc-fallback-creator {
+.cc-play:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+  background: #fff;
+}
+
+.cc-play:focus-visible {
+  outline: 3px solid var(--cc-cyan);
+  outline-offset: 3px;
+}
+
+.cc-play-icon {
+  display: flex;
+  margin-left: 3px;
+}
+
+.cc-media-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 48px 16px 14px;
+  color: var(--cc-white);
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 8%, rgba(6, 20, 55, 0.55) 100%);
+  transition: opacity 0.28s ease;
+}
+
+.cc-media-brand {
   font-size: 13px;
-  font-weight: 700;
-  opacity: 0.9;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  opacity: 0.95;
 }
 
-.cc-fallback-title {
+.cc-media-title {
   font-size: 15px;
   font-weight: 800;
+  line-height: 1.3;
   margin-top: 2px;
+  letter-spacing: -0.02em;
+}
+
+/* Hidden in normal poster state; only revealed if TikTok iframe fails.
+   Explicit [hidden] rule required — display:flex would otherwise override UA hidden. */
+.cc-fallback {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 5;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  color: var(--cc-white);
+  text-decoration: none;
+  background: rgba(6, 35, 90, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: opacity 0.25s ease;
+}
+
+.cc-fallback[hidden] {
+  display: none !important;
+}
+
+.cc-fallback:not([hidden]) {
+  display: inline-flex;
+}
+
+.cc-fallback:focus-visible {
+  outline: 3px solid var(--cc-cyan);
+  outline-offset: 2px;
 }
 
 .cc-fallback-cta {
-  display: inline-flex;
-  margin-top: 10px;
   font-size: 13px;
   font-weight: 700;
   color: var(--cc-cyan);
+}
+
+.cc-video-media[data-playing="1"] {
+  cursor: default;
 }
 
 .cc-badge {
   position: absolute;
   top: 12px;
   left: 12px;
-  z-index: 2;
+  z-index: 4;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -359,13 +442,14 @@
   border-radius: 999px;
   padding: 6px 10px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
 }
 
 .cc-platform-chip {
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 2;
+  z-index: 4;
   width: 32px;
   height: 32px;
   border-radius: 10px;
@@ -374,6 +458,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
 }
 
 .cc-platform-chip svg {
@@ -382,35 +467,43 @@
 }
 
 .cc-video-body {
-  padding: 16px 16px 18px;
+  padding: 14px 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-height: 110px;
-}
-
-.cc-video-title {
-  font-size: 16px;
-  font-weight: 750;
-  color: var(--cc-ink);
-  letter-spacing: -0.02em;
-  line-height: 1.3;
-  margin: 0;
+  min-height: 0;
 }
 
 .cc-video-desc {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
   color: var(--cc-muted);
   margin: 0;
+  font-weight: 600;
 }
 
 .cc-video-meta {
-  margin-top: auto;
-  padding-top: 8px;
+  margin-top: 4px;
+  padding-top: 4px;
   font-size: 12px;
   font-weight: 700;
   color: var(--cc-blue);
+}
+
+.cc-meta-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cc-meta-link:hover {
+  color: #0a57d0;
+}
+
+.cc-meta-link:focus-visible {
+  outline: 2px solid var(--cc-cyan);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* Appear CTA */
@@ -496,8 +589,9 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .cc-video-layout--single .cc-single-stage {
-    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
-    gap: 20px;
+    max-width: 680px;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: 18px;
   }
 }
 
@@ -513,17 +607,20 @@
     align-items: flex-start;
   }
   .cc-video-layout--single .cc-single-stage {
+    max-width: min(360px, 100%);
     grid-template-columns: 1fr;
     justify-items: center;
     text-align: left;
     padding: 16px;
   }
   .cc-video-layout--single .cc-video-card {
-    max-width: min(320px, 100%);
+    max-width: min(300px, 100%);
+    justify-self: center;
   }
   .cc-featured-panel {
     padding: 8px 4px 4px;
     width: 100%;
+    max-width: none;
   }
   .cc-video-layout--grid .cc-video-grid,
   .cc-video-layout--many .cc-video-grid {

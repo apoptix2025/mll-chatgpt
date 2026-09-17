@@ -1,7 +1,7 @@
 /**
  * Homepage community section — Follow Us & Connect / Síguenos y Conecta
  * Data-driven; uses existing site i18n (data-en/data-es + localStorage mll_lang).
- * TikTok: lazy iframe only (no embed.js).
+ * TikTok: poster preview first; iframe mounts only on Play click (no embed.js).
  */
 (function () {
   'use strict';
@@ -50,19 +50,27 @@
    *   2–3      → cc-video-layout--grid
    *   4–5      → cc-video-layout--many    (responsive grid / native scroll)
    * Only the 1-video path renders today; keep this array data-driven for expansion.
+   *
+   * posterUrl for the featured TikTok was obtained via TikTok’s official oEmbed API
+   * (GET https://www.tiktok.com/oembed?url=<externalUrl> → thumbnail_url), then
+   * cached/optimized locally so we do not rely on signed CDN URLs that expire.
+   * No TikTok MP4 was downloaded. Refresh poster via oEmbed when swapping videos.
    */
   var featuredVideos = [
     {
-      id: 'aleja-recomienda-mll',
+      id: 'mll-featured-negocio',
+      sourceType: 'tiktok',
       type: 'tiktok',
+      brand: 'MLL',
       badgeEn: 'MLL RECOMMENDS',
-      badgeEs: 'RECOMIENDA MLL',
+      badgeEs: 'MLL RECOMIENDA',
       titleEn: 'Do you own a business?',
       titleEs: '¿Tienes un negocio?',
       descriptionEn: 'Register your business FREE at MyLatinoList.io',
       descriptionEs: 'Registra tu negocio GRATIS en MyLatinoList.io',
-      creator: 'Aleja',
       platform: 'tiktok',
+      // Cached from TikTok oEmbed thumbnail_url for video 7686468241471835406 (2026-09-17).
+      posterUrl: '/assets/community/mll-featured-poster.jpg',
       externalUrl: 'https://www.tiktok.com/@mylatinolist.io/video/7686468241471835406',
       embedUrl: 'https://www.tiktok.com/embed/v2/7686468241471835406',
       videoId: '7686468241471835406',
@@ -109,6 +117,15 @@
     return 'cc-video-layout--many';
   }
 
+  function isTikTokVideo(video) {
+    var source = video && (video.sourceType || video.type);
+    return source === 'tiktok' && video.embedUrl && video.externalUrl;
+  }
+
+  function brandLabel(video) {
+    return (video && video.brand) || 'MLL';
+  }
+
   function renderSocialButtons() {
     // Hide unfinished destinations (e.g. YouTube href '#') — no dead buttons in production.
     return MLL_SOCIAL_LINKS.filter(function (s) {
@@ -126,33 +143,51 @@
   }
 
   function renderVideoCard(video) {
-    var isTikTok = video.type === 'tiktok' && video.embedUrl && video.externalUrl;
+    if (!isTikTokVideo(video)) return '';
+
+    var brand = brandLabel(video);
+    var hasPoster = !!(video.posterUrl && String(video.posterUrl).trim());
+    // TODO: If posterUrl is missing for a future video, resolve via TikTok oEmbed
+    // (GET https://www.tiktok.com/oembed?url=<externalUrl> → thumbnail_url) and
+    // cache an optimized local asset — do not invent CDN image URLs.
+    var posterHtml = hasPoster
+      ? '<img class="cc-poster" src="' + escapeHtml(video.posterUrl) + '"' +
+        ' alt="" width="540" height="960" loading="lazy" decoding="async" />'
+      : '<div class="cc-poster cc-poster--pending" aria-hidden="true"></div>';
+
     var mediaInner =
+      posterHtml +
       '<span class="cc-badge"' + bi(video.badgeEn, video.badgeEs) + '</span>' +
       '<span class="cc-platform-chip" aria-hidden="true">' + iconSvg('tiktok') + '</span>' +
-      '<a class="cc-fallback" href="' + escapeHtml(video.externalUrl) + '" target="_blank" rel="noopener noreferrer"' +
-      ' aria-label="' + escapeHtml(video.titleEn) + '">' +
-      '<span class="cc-fallback-play" aria-hidden="true">' +
+      '<button type="button" class="cc-play" aria-label="' +
+      escapeHtml(currentLang() === 'es' ? 'Reproducir video' : 'Play video') + '">' +
+      '<span class="cc-play-icon" aria-hidden="true">' +
       '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' +
       '</span>' +
-      '<div>' +
-      (video.creator ? '<div class="cc-fallback-creator">' + escapeHtml(video.creator) + '</div>' : '') +
-      '<div class="cc-fallback-title"' + bi(video.titleEn, video.titleEs) + '</div>' +
-      '<span class="cc-fallback-cta"' + bi('Watch on TikTok', 'Ver en TikTok') + '</span>' +
+      '</button>' +
+      '<div class="cc-media-caption">' +
+      '<div class="cc-media-brand">' + escapeHtml(brand) + '</div>' +
+      '<div class="cc-media-title"' + bi(video.titleEn, video.titleEs) + '</div>' +
       '</div>' +
+      '<a class="cc-fallback" href="' + escapeHtml(video.externalUrl) + '"' +
+      ' target="_blank" rel="noopener noreferrer" hidden' +
+      ' aria-label="' + escapeHtml(video.titleEn) + '">' +
+      '<span class="cc-fallback-cta"' + bi('Watch on TikTok', 'Ver en TikTok') + '</span>' +
       '</a>' +
-      '<div class="cc-embed-slot" data-embed-url="' + escapeHtml(video.embedUrl) + '" data-video-id="' + escapeHtml(video.videoId || '') + '" hidden></div>';
-
-    if (!isTikTok) return '';
+      '<div class="cc-embed-slot" data-embed-url="' + escapeHtml(video.embedUrl) + '"' +
+      ' data-video-id="' + escapeHtml(video.videoId || '') + '" hidden></div>';
 
     return (
       '<article class="cc-video-card" data-video-id="' + escapeHtml(video.id) + '"' +
       (video.featured ? ' data-featured="1"' : '') + '>' +
-      '<div class="cc-video-media">' + mediaInner + '</div>' +
+      '<div class="cc-video-media" data-playable="1">' + mediaInner + '</div>' +
       '<div class="cc-video-body">' +
-      '<h3 class="cc-video-title"' + bi(video.titleEn, video.titleEs) + '</h3>' +
       '<p class="cc-video-desc"' + bi(video.descriptionEn, video.descriptionEs) + '</p>' +
-      '<div class="cc-video-meta">' + escapeHtml(video.creator || '') + ' · TikTok</div>' +
+      '<div class="cc-video-meta">' +
+      escapeHtml(brand) +
+      ' · <a class="cc-meta-link" href="' + escapeHtml(video.externalUrl) + '"' +
+      ' target="_blank" rel="noopener noreferrer">TikTok</a>' +
+      '</div>' +
       '</div>' +
       '</article>'
     );
@@ -163,23 +198,27 @@
       '<aside class="cc-featured-panel" aria-label="Featured community story">' +
       '<div class="cc-featured-brand" aria-hidden="true">' +
       '<span class="cc-brand-mark">MLL</span>' +
-      '<span class="cc-brand-name">my<strong>latino</strong>list</span>' +
+      '<span class="cc-brand-name">My Latino List</span>' +
       '</div>' +
-      '<div class="cc-eyebrow"' + bi('Featured Video', 'Video Destacado') + '</div>' +
-      '<h3 class="cc-featured-panel-title"' + bi('Supporting Our Community 💙', 'Apoyando nuestra comunidad 💙') + '</h3>' +
+      '<div class="cc-eyebrow"' + bi('FEATURED VIDEO', 'VIDEO DESTACADO') + '</div>' +
+      '<h3 class="cc-featured-panel-title"' + bi('Supporting Our Community 💙', 'Apoyando Nuestra Comunidad 💙') + '</h3>' +
       '<p class="cc-featured-panel-copy"' + bi(
         'Discover stories, businesses, and creators who are part of My Latino List.',
-        'Conoce historias, negocios y creadores que forman parte de My Latino List.'
+        'Descubre historias, negocios y creadores que forman parte de My Latino List.'
       ) + '</p>' +
       '</aside>'
     );
   }
 
-  /** Lazy iframe mount only — TikTok embed.js is not required for embed/v2 iframes. */
-  function mountTikTokEmbed(slot) {
+  /** Mount TikTok iframe only after Play — embed.js is not required for embed/v2. */
+  function mountTikTokEmbed(media) {
+    if (!media || media.getAttribute('data-playing') === '1') return;
+    var slot = media.querySelector('.cc-embed-slot');
     if (!slot || slot.getAttribute('data-mounted') === '1') return;
     var url = slot.getAttribute('data-embed-url');
     if (!url) return;
+
+    media.setAttribute('data-playing', '1');
     slot.setAttribute('data-mounted', '1');
     slot.hidden = false;
 
@@ -191,48 +230,57 @@
     iframe.setAttribute('allowfullscreen', '');
     iframe.referrerPolicy = 'strict-origin-when-cross-origin';
 
-    var media = slot.parentElement;
-    var fallback = media ? media.querySelector('.cc-fallback') : null;
+    var fallback = media.querySelector('.cc-fallback');
+    var playBtn = media.querySelector('.cc-play');
+    var poster = media.querySelector('.cc-poster');
+    var caption = media.querySelector('.cc-media-caption');
+    var badge = media.querySelector('.cc-badge');
+    var chip = media.querySelector('.cc-platform-chip');
+
+    function hidePreview() {
+      if (playBtn) playBtn.hidden = true;
+      if (poster) poster.style.opacity = '0';
+      if (caption) caption.style.opacity = '0';
+      if (badge) badge.style.opacity = '0';
+      if (chip) chip.style.opacity = '0';
+    }
 
     iframe.addEventListener('load', function () {
-      if (fallback) {
-        fallback.style.opacity = '0';
-        fallback.style.pointerEvents = 'none';
-      }
+      hidePreview();
+      if (fallback) fallback.hidden = true;
     });
     iframe.addEventListener('error', function () {
       slot.hidden = true;
-      if (fallback) {
-        fallback.style.opacity = '1';
-        fallback.style.pointerEvents = 'auto';
-      }
+      media.removeAttribute('data-playing');
+      if (playBtn) playBtn.hidden = true;
+      if (fallback) fallback.hidden = false;
     });
 
     slot.appendChild(iframe);
+    // Transition immediately so click feels responsive; iframe paints when ready.
+    hidePreview();
   }
 
-  function observeEmbeds(root) {
-    var slots = root.querySelectorAll('.cc-embed-slot');
-    if (!slots.length) return;
+  function bindPlayControls(root) {
+    root.querySelectorAll('.cc-video-media[data-playable="1"]').forEach(function (media) {
+      var playBtn = media.querySelector('.cc-play');
+      if (!playBtn) return;
 
-    if (!('IntersectionObserver' in window)) {
-      slots.forEach(function (slot) { mountTikTokEmbed(slot); });
-      return;
-    }
+      function activate(e) {
+        if (e) e.preventDefault();
+        mountTikTokEmbed(media);
+      }
 
-    var io = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            mountTikTokEmbed(entry.target);
-            io.unobserve(entry.target);
-          }
-        });
-      },
-      { rootMargin: '120px 0px', threshold: 0.15 }
-    );
-
-    slots.forEach(function (slot) { io.observe(slot); });
+      playBtn.addEventListener('click', activate);
+      // Clicking the poster area (not the TikTok fallback link) also plays.
+      media.addEventListener('click', function (e) {
+        if (media.getAttribute('data-playing') === '1') return;
+        if (e.target.closest('.cc-fallback')) return;
+        if (e.target.closest('.cc-play') || e.target.closest('.cc-poster') || e.target === media) {
+          activate(e);
+        }
+      });
+    });
   }
 
   /** Re-apply site language to this section after dynamic render. */
@@ -242,10 +290,13 @@
       var txt = lang === 'es' ? el.getAttribute('data-es') : el.getAttribute('data-en');
       if (txt != null) el.innerHTML = txt;
     });
+    root.querySelectorAll('.cc-play').forEach(function (btn) {
+      btn.setAttribute('aria-label', lang === 'es' ? 'Reproducir video' : 'Play video');
+    });
   }
 
   function renderSection() {
-    var videos = featuredVideos.filter(function (v) { return v && v.type === 'tiktok'; });
+    var videos = featuredVideos.filter(isTikTokVideo);
     var mode = layoutMode(videos.length);
     var showViewMore = videos.length > 1;
     var cards = videos.map(renderVideoCard).join('');
@@ -317,7 +368,7 @@
     try {
       mount.innerHTML = renderSection();
       syncExistingLang(mount);
-      observeEmbeds(mount);
+      bindPlayControls(mount);
     } catch (err) {
       console.warn('MLL community connect failed to render', err);
       mount.innerHTML =
@@ -332,7 +383,7 @@
     init: init,
   };
 
-  // Existing nav.js applyLang already updates [data-en]/ mll:langswitch is extra safety
+  // Existing nav.js applyLang already updates [data-en]; mll:langswitch is extra safety
   // if other scripts re-render after a language change.
   document.addEventListener('mll:langswitch', function () {
     var mount = document.getElementById('mll-community-connect');
