@@ -1,0 +1,63 @@
+/* Official supplied PNG is displayed unchanged. Navy sampled from its top-left pixel. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{--mll-brand-navy:#041f49;}
+.mll-official-logo{display:block;width:221px;max-width:100%;height:auto;object-fit:contain;flex-shrink:0;}
+.brand,.logo{background:var(--mll-brand-navy);border-radius:0;min-width:0;}
+.site-header,.site-header .nav-links,.footer,.nav.scrolled,.v2-topnav{background:var(--mll-brand-navy);}
+.site-header .brand{flex-shrink:0}.site-header .nav-tools{flex-shrink:0}.footer .brand{display:inline-flex;}
+.nav.scrolled{color:#eaf3ff;border-bottom:1px solid #284870;box-shadow:none;backdrop-filter:none;}
+.nav.scrolled .nav-inner{max-width:1280px;gap:20px;}
+.nav.scrolled .btn-ghost,.nav.scrolled .lang-btn{color:#eaf3ff;}
+.nav.scrolled .lang-toggle{gap:4px;margin:0;}
+.nav.scrolled .lang-btn{border-color:#426083;white-space:nowrap;font-size:12px;padding:7px 10px;border-radius:20px;}
+.nav.scrolled .lang-btn.active{background:#0869f7;color:white;border-color:#0869f7;}
+.v3-account-page{--font-body:Inter,Arial,sans-serif;--font-display:Inter,Arial,sans-serif;--nav-h:88px;--coral:#0869f7;--coral-dark:#0757cf;--coral-light:#eaf3ff;--ink:#09254c;--ink-muted:#647996;font-family:var(--font-body);background:#f1f6fc;padding-top:0;}
+.v3-account-page>.nav{position:sticky;top:0;order:0;}
+.v3-account-page #mll-staging-notice{order:-1;}
+.v3-account-page .nav-inner{height:88px;flex-wrap:nowrap;}
+.v3-login{display:flex;flex-direction:column;min-height:100vh;}
+.v3-login .nav-actions{gap:18px;}
+.v3-login .login-wrap{padding:48px 20px 64px;}
+.v3-login .login-card{max-width:480px;padding:32px 40px 36px;border:1px solid #d9e8fc;border-radius:24px;box-shadow:0 16px 48px #09254c0b;}
+.login-brand-panel{display:flex;justify-content:center;background:var(--mll-brand-navy);padding:18px 16px;border-radius:16px;}
+.v3-login .login-logo{margin-bottom:26px}.v3-login .login-h{font-size:30px;font-weight:750;letter-spacing:-1px;line-height:1.2;}
+.v3-login .login-sub{line-height:1.65;margin:12px 0 28px;}
+.v3-login label{font-size:13px;color:#29496f}.v3-login input{min-height:48px;background:#fafdff;border-color:#ccddf4;border-radius:13px;font-family:var(--font-body);}
+.v3-login input:focus{border-color:#0869f7;box-shadow:0 0 0 3px #0869f715;}
+.v3-login .login-btn{min-height:48px;border-radius:24px;font-weight:700;background:#0869f7;margin-top:10px;}
+.v3-login .forgot{margin:0 0 6px;font-size:13px}.v3-login .login-footer{line-height:1.8;}
+.v3-account-page .mll-bottom-nav{background:var(--mll-brand-navy);border-color:#2b4a70;}
+.v3-account-page .mll-bottom-nav a{color:#c9d9ed}.v3-account-page .mll-bottom-nav a.is-active{color:#42d2f4;}
+.v3-dashboard .dash-layout{grid-template-columns:240px minmax(0,1fr);}
+.v3-dashboard .sidebar{display:block;background:var(--mll-brand-navy);border-right:1px solid #284870;top:88px;height:calc(100vh - 88px);padding:24px 12px;}
+.v3-dashboard .sb-biz{padding:0 12px 22px;border-color:#284870;}
+.v3-dashboard .sb-name,.v3-dashboard .sb-section{color:#d5e4f5;}.v3-dashboard .sb-plan{background:#163c67;color:#7bd9f1;}
+.v3-dashboard .sb-link{color:#c7d9ed;border-radius:10px;border:0;margin:3px 0;padding:10px 12px;min-height:42px;font-weight:500;}
+.v3-dashboard .sb-link:hover,.v3-dashboard .sb-link.active{background:#174475;color:white;}
+.v3-dashboard .sb-soon{opacity:.6}.v3-dashboard .main{min-width:0;padding:32px;}
+.v3-dashboard .dash-greeting{font-size:30px;line-height:1.3;font-weight:750;letter-spacing:-.8px;}
+.v3-dashboard .dash-card,.v3-dashboard .kpi,.v3-dashboard .profile-bar{border:1px solid #d9e8fc;border-radius:18px;box-shadow:none;background:white;min-width:0;}
+.v3-dashboard .dc-title{font-weight:700;font-size:15px;}.v3-dashboard .dash-grid{gap:20px;}
+.v3-dashboard .btn-sm-primary,.v3-dashboard .btn-sm{min-height:40px;border-radius:22px;font-weight:600;}
+.v3-dashboard .v2-promote{border-radius:18px;background:var(--mll-brand-navy);color:white;}
+.v3-dashboard .v2-promote p{color:#c9d9ed}.v3-dashboard .v2-promote a{background:#0869f7;color:white;}
+.v3-dashboard .mob-menu-btn,.v3-dashboard .mob-overlay,.v3-dashboard .mob-back-bar{display:none;}
+.v3-dashboard .nav .mob-menu-btn span{background:#eaf3ff!important;}
+.v3-dashboard .nav #dash-user-name{color:#d5e4f5!important;}.v3-dashboard .nav #dash-user-initials{color:#eaf3ff!important;background:#174475!important;}
+.v3-dashboard .profile-bar,.v3-dashboard .pb-left{flex-wrap:wrap;gap:16px;}.v3-dashboard .pb-steps{flex-wrap:wrap;}
+.v3-dashboard .dash-card{padding:22px;}.v3-dashboard #refer-earn{background:#edf6ff!important;border-color:#cfe2f8!important;}
+@media(max-width:1100px){.site-header .mll-official-logo{width:200px;}.v3-dashboard .dash-layout{grid-template-columns:210px minmax(0,1fr);}.v3-dashboard .dash-grid{grid-template-columns:1fr;}.v3-dashboard .main{padding:24px;}}
+@media(max-width:900px){
+ .v3-dashboard .dash-layout{grid-template-columns:minmax(0,1fr);}.v3-dashboard .sidebar{display:none;position:fixed;left:0;top:88px;bottom:0;z-index:150;width:260px;height:calc(100dvh - 88px);transform:none;}
+ .v3-dashboard .sidebar.mob-open{display:block;}.v3-dashboard .mob-overlay.active{display:block;position:fixed;inset:0;background:#041c4190;z-index:120;}.v3-dashboard .nav{z-index:160;}
+ .v3-dashboard .nav .mob-menu-btn{display:flex;}.v3-dashboard .dash-header{align-items:flex-start;gap:16px;}.v3-dashboard .hdr-btns{justify-content:flex-start;}
+}
+@media(max-width:760px){.site-header .mll-official-logo{width:180px;}.site-header .nav-links{top:100%;}.v3-account-page .nav-inner{padding:12px 16px;height:auto;min-height:88px;gap:12px;flex-wrap:wrap;}.v3-account-page .nav-inner>.logo{width:auto;height:auto;}.v3-login .nav-inner .logo{margin-right:auto;}.v3-login .nav-actions{width:100%;height:auto;margin:0!important;justify-content:space-between;gap:10px;}.v3-login .login-wrap{padding:28px 16px 40px;}.v3-login .login-card{padding:24px;}.v3-login .login-h{font-size:27px;}.v3-account-page .mll-bottom-nav{position:fixed;}.v3-dashboard .main{padding:24px 16px 32px;}.v3-dashboard .dash-greeting{font-size:26px;}.v3-dashboard .kpi-row{gap:12px;}.v3-dashboard .kpi{padding:16px;}.v3-dashboard .dash-card{padding:18px;}.v3-dashboard .dc-head{gap:10px;flex-wrap:wrap;}.v3-dashboard .nav #dash-user-name,.v3-dashboard .nav #dash-user-initials{display:none;}}
+@media(max-width:420px){.site-header .mll-official-logo{width:150px;}.site-header .nav-tools select#lang{max-width:65px;}.v3-account-page .mll-official-logo{width:190px;}.v3-dashboard .nav .mll-official-logo{width:150px;}.v3-dashboard .nav-inner{gap:8px;}.v3-dashboard .lang-btn{font-size:11px;padding:6px 8px;}.v3-dashboard .nav-inner>div:last-child{gap:6px!important;}.v3-dashboard .nav .mob-menu-btn{padding:4px!important;}.v3-dashboard .kpi-num{font-size:26px;}}
+
+/* Keep native city selection accessible on desktop and touch layouts. */
+.site-header #location{display:block;max-width:145px;min-width:0;cursor:pointer;}
+.site-header .city-status{display:block;color:#fff;background:#041f49;font-size:12px;text-align:center;}
+.city-status:empty{display:none;}
+@media(max-width:1100px){.site-header .nav{flex-wrap:wrap;}.site-header .nav-tools{flex-wrap:wrap;}.site-header #location{max-width:140px;}}
+@media(max-width:760px){.site-header .nav-tools{width:100%;padding-bottom:10px;justify-content:space-between;}.site-header #location{flex:1;max-width:none;width:120px;}.site-header #lang{display:block;}.site-header .nav-links{z-index:70;}.site-header .nav{gap:8px;}}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script data-mll-v3-safety>try {
+(function () {
+'use strict';
+var host=window.location.hostname;
+var approved=host==='mylatinolist-staging.pages.dev'||/^(?:staging|v3-preview|mll-v2-dev|[a-f0-9]{8})\.mylatinolist-staging\.pages\.dev$/.test(host);
+approved=approved||((host==='localhost'||host==='127.0.0.1')&&window.location.port==='8083');
+if(!approved){window.stop();throw new Error('V3 visual-only preview: unapproved host');}
+var api='https://mll-api-staging.sparkling-hill-934f.workers.dev';
+window.MLL_STAGING=Object.freeze({visualOnly:true,api:api,origin:window.location.origin});
+var policy="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src https://media.mylatinolist.io; connect-src "+api+"; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'self'";
+document.write('<meta http-equiv="Content-Security-Policy" content="'+policy+'">');
+var message='Visual-only staging: submissions and account/payment changes are disabled. / Prueba visual: los envíos y cambios de cuenta/pagos están desactivados.';
+function blocked(){if(window.console)console.info(message);}
+var nativeFetch=window.fetch.bind(window);
+window.fetch=function(input,init){
+ init=init||{};var method=String(init.method||(input&&input.method)||'GET').toUpperCase();var url;
+ try{url=new URL(typeof input==='string'||input instanceof URL?input:input.url,window.location.href);}catch(e){return deny();}
+ var path=/^\/api\/(?:businesses(?:\/[^/]+)?|jobs|marketplace|affiliates|resources|stats|ai\/status)\/?$/.test(url.pathname);
+ if(url.origin!==api||!path||(method!=='GET'&&method!=='HEAD')||init.body!=null)return deny();
+ var headers=new Headers(init.headers||(input&&input.headers)||{});headers.delete('Authorization');headers.delete('Cookie');
+ return nativeFetch(input,Object.assign({},init,{headers:headers,redirect:'error',credentials:'omit'}));
+};
+function deny(){blocked();return Promise.resolve(new Response('{"error":"Visual-only staging: this action is disabled"}',{status:403,headers:{'Content-Type':'application/json'}}));}
+window.XMLHttpRequest=function(){throw new Error(message);};
+window.WebSocket=window.EventSource=function(){throw new Error(message);};
+if(navigator.sendBeacon)navigator.sendBeacon=function(){blocked();return false;};
+if(window.HTMLFormElement){HTMLFormElement.prototype.submit=blocked;HTMLFormElement.prototype.requestSubmit=blocked;}
+document.addEventListener('submit',function(e){e.preventDefault();e.stopImmediatePropagation();blocked();},true);
+document.addEventListener('click',function(e){
+ var link=e.target.closest&&e.target.closest('a[href]');if(!link)return;var url;
+ try{url=new URL(link.href,window.location.href);}catch(err){return;}
+ if(/^(?:mylatinolist\.io|www\.mylatinolist\.io)$/.test(url.hostname)||/(?:^|\.)stripe\.com$/.test(url.hostname)||/^(?:mailto|tel):$/.test(url.protocol)){e.preventDefault();e.stopImmediatePropagation();blocked();}
+},true);
+document.addEventListener('DOMContentLoaded',function(){
+ var banner=document.createElement('div');banner.id='mll-staging-notice';banner.setAttribute('role','note');banner.textContent=message;
+ banner.style.cssText='position:relative;z-index:10000;padding:12px;background:#eaf3ff;color:#123e73;text-align:center;font:14px sans-serif';
+ document.body.insertBefore(banner,document.body.firstChild);
+});
+})();
+
+} catch (error) { window.stop(); throw error; }</script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enroll Your Business — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body { background: var(--surface-2); padding-top: var(--nav-h); }
+    .enroll-page { min-height: calc(100vh - var(--nav-h)); display: flex; align-items: flex-start; justify-content: center; padding: 48px 16px 80px; }
+    .wizard { width: 100%; max-width: 680px; }
+    .wizard-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; }
+    .wizard-top { background: var(--coral); padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; }
+    .wiz-brand { font-family: var(--font-body); font-size: 15px; font-weight: 300; color: #fff; }
+    .wiz-brand strong { font-weight: 500; }
+    .step-track { display: flex; align-items: center; }
+    .st-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; transition: all 0.3s; flex-shrink: 0; }
+    .st-dot.done { background: rgba(255,255,255,0.9); color: var(--coral); }
+    .st-dot.active { background: #fff; color: var(--coral); font-weight: 600; box-shadow: 0 0 0 3px rgba(255,255,255,0.3); }
+    .st-dot.todo { background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.6); }
+    .st-line { width: 40px; height: 1px; background: rgba(255,255,255,0.3); transition: background 0.3s; }
+    .st-line.done { background: rgba(255,255,255,0.8); }
+    .prog-bar { height: 3px; background: rgba(0,0,0,0.06); }
+    .prog-fill { height: 3px; background: var(--coral); transition: width 0.5s ease; }
+    .wiz-body { padding: 36px 40px 28px; }
+    .wiz-step-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--coral); margin-bottom: 6px; }
+    .wiz-h { font-family: var(--font-display); font-size: 26px; font-weight: 500; color: var(--ink); margin-bottom: 4px; letter-spacing: -0.02em; }
+    .wiz-p { font-size: 14px; color: var(--ink-soft); margin-bottom: 28px; line-height: 1.55; }
+    .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .f3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .f1 { margin-bottom: 16px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 12px; font-weight: 500; color: var(--ink-soft); letter-spacing: 0.02em; }
+    .field input, .field select, .field textarea {
+      padding: 11px 14px; border-radius: var(--radius-md);
+      border: 1px solid var(--border-mid); background: var(--surface);
+      font-family: var(--font-body); font-size: 14px; color: var(--ink);
+      transition: border-color 0.15s, box-shadow 0.15s; outline: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--coral); box-shadow: 0 0 0 3px rgba(216,90,48,0.08);
+    }
+    .field textarea { resize: none; height: 88px; line-height: 1.55; }
+    .tip-box { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; background: var(--teal-light); border-radius: var(--radius-md); margin-bottom: 20px; }
+    .tip-icon { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); margin-top: 6px; flex-shrink: 0; }
+    .tip-box p { font-size: 13px; color: var(--teal-dark); line-height: 1.5; }
+    .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+    .cat-item:last-child { grid-column: span 4; }
+    .cat-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 8px; text-align: center; cursor: pointer; background: var(--surface); transition: all 0.15s; }
+    .cat-item:hover { border-color: var(--coral-mid); background: var(--coral-light); }
+    .cat-item.on { border: 2px solid var(--coral); background: var(--coral-light); }
+    .cat-ic { font-size: 22px; margin-bottom: 5px; }
+    .cat-lbl { font-size: 11px; color: var(--ink-soft); font-weight: 400; }
+    .cat-item.on .cat-lbl { color: var(--coral-dark); font-weight: 500; }
+    .mod-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .mod-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.15s; }
+    .mod-item:hover { border-color: var(--border-mid); }
+    .mod-item.on { background: var(--coral-light); border-color: var(--coral-mid); }
+    .mod-ico { width: 38px; height: 38px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .mod-txt { flex: 1; }
+    .mod-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+    .mod-desc { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+    .tog { width: 38px; height: 22px; border-radius: 11px; position: relative; transition: background 0.2s; flex-shrink: 0; }
+    .tog.on { background: var(--coral); }
+    .tog.off { background: var(--surface-3); }
+    .tog-t { width: 18px; height: 18px; border-radius: 50%; background: #fff; position: absolute; top: 2px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .tog.on .tog-t { left: 18px; }
+    .tog.off .tog-t { left: 2px; }
+    .plan-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 20px; }
+    .plan-item { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 18px; cursor: pointer; position: relative; transition: all 0.15s; background: var(--surface); }
+    .plan-item:hover { border-color: var(--border-mid); }
+    .plan-item.on { border: 2px solid var(--coral); background: #fff; }
+    .plan-pop { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--coral); color: #fff; font-size: 10px; font-weight: 500; padding: 3px 12px; border-radius: 20px; white-space: nowrap; }
+    .plan-name-lbl { font-size: 12px; font-weight: 500; color: var(--ink-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .plan-price-big { font-family: var(--font-display); font-size: 30px; font-weight: 500; color: var(--ink); line-height: 1; margin-bottom: 14px; }
+    .plan-price-big sub { font-size: 14px; font-weight: 300; color: var(--ink-muted); font-family: var(--font-body); }
+    .plan-feats { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .plan-feats li { font-size: 12px; color: var(--ink-soft); display: flex; align-items: center; gap: 7px; }
+    .plan-feats li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+    .plan-feats li.no { opacity: 0.4; }
+    .plan-feats li.no::before { background: var(--border-mid); }
+    .review-box { background: var(--surface-2); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px; }
+    .rv-lbl { font-size: 11px; font-weight: 500; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 12px; }
+    .rv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .rv-item { background: #fff; border-radius: var(--radius-md); padding: 12px 14px; }
+    .rv-item-lbl { font-size: 11px; color: var(--ink-muted); margin-bottom: 3px; }
+    .rv-item-val { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .rv-coral { color: var(--coral); }
+    .terms-row { display: flex; align-items: center; gap: 10px; }
+    .terms-row input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--coral); cursor: pointer; }
+    .terms-row label { font-size: 13px; color: var(--ink-soft); cursor: pointer; }
+    .terms-row a { color: var(--coral); }
+    .wiz-foot { padding: 18px 40px; border-top: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; }
+    .btn-wiz-back { font-size: 14px; padding: 10px 22px; border-radius: var(--radius-md); border: 1px solid var(--border-mid); background: #fff; color: var(--ink-soft); transition: all 0.15s; font-family: var(--font-body); }
+    .btn-wiz-back:hover { background: var(--surface-2); color: var(--ink); }
+    .btn-wiz-next { font-size: 14px; font-weight: 500; padding: 10px 28px; border-radius: var(--radius-md); border: none; background: var(--coral); color: #fff; transition: all 0.15s; font-family: var(--font-body); }
+    .btn-wiz-next:hover { background: var(--coral-dark); }
+    .btn-wiz-next:disabled { opacity: 0.35; cursor: not-allowed; }
+    .foot-info { font-size: 12px; color: var(--ink-muted); }
+    .success-inner { text-align: center; padding: 48px 40px 40px; }
+    .success-circle { width: 64px; height: 64px; border-radius: 50%; background: var(--teal-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .success-circle svg { width: 32px; height: 32px; }
+    .success-h { font-family: var(--font-display); font-size: 28px; font-weight: 500; color: var(--ink); margin-bottom: 10px; letter-spacing: -0.02em; }
+    .success-p { font-size: 14px; color: var(--ink-soft); max-width: 380px; margin: 0 auto 28px; line-height: 1.65; }
+    .next-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; max-width: 460px; margin: 0 auto 28px; }
+    .next-card { background: var(--surface-2); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; text-decoration: none; color: inherit; display: block; transition: all 0.15s; border: 1px solid transparent; }
+    .next-card:hover { background: var(--coral-light); border-color: var(--coral-mid); transform: translateY(-2px); }
+    .nc-ic { font-size: 22px; margin-bottom: 6px; }
+    .nc-lbl { font-size: 12px; color: var(--ink-soft); line-height: 1.4; }
+    .btn-dash { display: inline-block; font-size: 14px; font-weight: 500; padding: 12px 28px; background: var(--coral); color: #fff; border-radius: var(--radius-md); transition: all 0.15s; }
+    .btn-dash:hover { background: var(--coral-dark); transform: translateY(-1px); }
+    @media (max-width: 600px) {
+      .wiz-body, .wiz-foot { padding-left: 20px; padding-right: 20px; }
+      .f2, .f3 { grid-template-columns: 1fr; }
+      .cat-grid { grid-template-columns: repeat(3,1fr); }
+      .plan-row { grid-template-columns: 1fr 1fr; }
+      .rv-grid { grid-template-columns: 1fr; }
+      .wizard-top { flex-direction: column; gap: 16px; align-items: flex-start; }
+    }
+  </style>
+  <!-- Google tag (gtag.js) -->
+
+
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+<link rel="stylesheet" href="/css/v3-brand.css">
+<link rel="stylesheet" href="/css/location-language.css">
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><img class="mll-official-logo" src="/assets/mll-v3-official-logo.png" width="221" height="48" alt="My Latino List — Connect • Support • Grow"></a>
+      <div class="nav-actions" style="margin-left:auto;">
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">🇺🇸 EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">🇪🇸 ES</button>
+        </div>
+        <a href="/index.html" class="btn-ghost" data-en="← Back to home" data-es="← Volver al inicio">← Back to home</a>
+        <a href="login.html" class="btn-ghost" data-en="Already enrolled? Sign in" data-es="¿Ya te registraste? Inicia sesión">Already enrolled? Sign in</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="enroll-page">
+    <div class="wiz-layout">
+    <div class="wizard">
+      <div style="text-align:center;margin-bottom:24px;">
+        <h1 data-en="Enroll your business" data-es="Registra tu negocio" style="font-family:var(--font-display);font-size:32px;font-weight:500;color:var(--ink);letter-spacing:-0.02em;margin-bottom:6px;">Enroll your business</h1>
+        <p data-en="Free to start · Be live in minutes · No credit card required" data-es="Gratis para empezar · Publícate en minutos · Sin tarjeta de crédito" style="font-size:15px;color:var(--ink-soft);font-weight:300;">Free to start · Be live in minutes · No credit card required</p>
+      </div>
+
+      <div class="wizard-card">
+        <div class="wizard-top">
+          <div class="wiz-brand">my<strong>latino</strong>list</div>
+          <div class="step-track" id="step-track">
+            <div class="st-dot active" id="sd1">1</div>
+            <div class="st-line" id="sl1"></div>
+            <div class="st-dot todo" id="sd2">2</div>
+            <div class="st-line" id="sl2"></div>
+            <div class="st-dot todo" id="sd3">3</div>
+            <div class="st-line" id="sl3"></div>
+            <div class="st-dot todo" id="sd4">4</div>
+          </div>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:25%"></div></div>
+        <div id="wiz-body"></div>
+        <div class="wiz-foot" id="wiz-foot">
+          <button class="btn-wiz-back" id="btn-back" style="visibility:hidden" data-en="← Back" data-es="← Atrás">← Back</button>
+          <span class="foot-info" id="foot-info">Step 1 of 4</span>
+          <button class="btn-wiz-next" id="btn-next">Continue →</button>
+        </div>
+      </div>
+    </div>
+    <aside class="wiz-preview" id="wiz-preview"></aside>
+    </div>
+  </div>
+
+<script src="/js/data.js"></script>
+
+  <script src="/js/nav.js"></script>
+<script src="/js/language-flags.js" defer></script></body>
+</html>

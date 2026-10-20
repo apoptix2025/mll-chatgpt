@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script data-mll-v3-safety>try {
+(function () {
+'use strict';
+var host=window.location.hostname;
+var approved=host==='mylatinolist-staging.pages.dev'||/^(?:staging|v3-preview|mll-v2-dev|[a-f0-9]{8})\.mylatinolist-staging\.pages\.dev$/.test(host);
+approved=approved||((host==='localhost'||host==='127.0.0.1')&&window.location.port==='8083');
+if(!approved){window.stop();throw new Error('V3 visual-only preview: unapproved host');}
+var api='https://mll-api-staging.sparkling-hill-934f.workers.dev';
+window.MLL_STAGING=Object.freeze({visualOnly:true,api:api,origin:window.location.origin});
+var policy="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src https://media.mylatinolist.io; connect-src "+api+"; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'self'";
+document.write('<meta http-equiv="Content-Security-Policy" content="'+policy+'">');
+var message='Visual-only staging: submissions and account/payment changes are disabled. / Prueba visual: los envíos y cambios de cuenta/pagos están desactivados.';
+function blocked(){if(window.console)console.info(message);}
+var nativeFetch=window.fetch.bind(window);
+window.fetch=function(input,init){
+ init=init||{};var method=String(init.method||(input&&input.method)||'GET').toUpperCase();var url;
+ try{url=new URL(typeof input==='string'||input instanceof URL?input:input.url,window.location.href);}catch(e){return deny();}
+ var path=/^\/api\/(?:businesses(?:\/[^/]+)?|jobs|marketplace|affiliates|resources|stats|ai\/status)\/?$/.test(url.pathname);
+ if(url.origin!==api||!path||(method!=='GET'&&method!=='HEAD')||init.body!=null)return deny();
+ var headers=new Headers(init.headers||(input&&input.headers)||{});headers.delete('Authorization');headers.delete('Cookie');
+ return nativeFetch(input,Object.assign({},init,{headers:headers,redirect:'error',credentials:'omit'}));
+};
+function deny(){blocked();return Promise.resolve(new Response('{"error":"Visual-only staging: this action is disabled"}',{status:403,headers:{'Content-Type':'application/json'}}));}
+window.XMLHttpRequest=function(){throw new Error(message);};
+window.WebSocket=window.EventSource=function(){throw new Error(message);};
+if(navigator.sendBeacon)navigator.sendBeacon=function(){blocked();return false;};
+if(window.HTMLFormElement){HTMLFormElement.prototype.submit=blocked;HTMLFormElement.prototype.requestSubmit=blocked;}
+document.addEventListener('submit',function(e){e.preventDefault();e.stopImmediatePropagation();blocked();},true);
+document.addEventListener('click',function(e){
+ var link=e.target.closest&&e.target.closest('a[href]');if(!link)return;var url;
+ try{url=new URL(link.href,window.location.href);}catch(err){return;}
+ if(/^(?:mylatinolist\.io|www\.mylatinolist\.io)$/.test(url.hostname)||/(?:^|\.)stripe\.com$/.test(url.hostname)||/^(?:mailto|tel):$/.test(url.protocol)){e.preventDefault();e.stopImmediatePropagation();blocked();}
+},true);
+document.addEventListener('DOMContentLoaded',function(){
+ var banner=document.createElement('div');banner.id='mll-staging-notice';banner.setAttribute('role','note');banner.textContent=message;
+ banner.style.cssText='position:relative;z-index:10000;padding:12px;background:#eaf3ff;color:#123e73;text-align:center;font:14px sans-serif';
+ document.body.insertBefore(banner,document.body.firstChild);
+});
+})();
+} catch (error) { window.stop(); throw error; }</script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body { background: var(--surface-soft, var(--surface-2)); padding-top: var(--nav-h); }
+    .dash-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - var(--nav-h)); }
+    .sidebar { background: #fff; border-right: 1px solid var(--border); padding: 24px 0; position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto; }
+    .sb-biz { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .sb-avatar { width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--coral-light); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 8px; }
+    .sb-name { font-size: 14px; font-weight: 500; color: var(--ink); }
+    .sb-plan { font-size: 11px; color: var(--coral); font-weight: 500; background: var(--coral-light); padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 3px; }
+    .sb-section { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-muted); padding: 10px 20px 4px; }
+    .sb-link { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; border-right: 2px solid transparent; text-decoration: none; }
+    .sb-link:hover { color: var(--ink); background: var(--surface-2); }
+    .sb-link.active { color: var(--coral-dark); background: var(--coral-light); border-right-color: var(--coral); font-weight: 500; }
+    .sb-link svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .sb-badge { margin-left: auto; font-size: 10px; background: var(--amber-light); color: #633806; padding: 1px 7px; border-radius: 10px; font-weight: 500; }
+    .main { padding: 32px 32px 60px; }
+    .dash-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+    .dash-greeting { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--navy-900, var(--ink)); letter-spacing: -0.03em; }
+    .dash-sub { font-size: 13px; color: var(--ink-muted); margin-top: 3px; }
+    .hdr-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .btn-sm { font-size: 12px; padding: 8px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-mid); background: #fff; color: var(--ink-soft); cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
+    .btn-sm:hover { background: var(--surface-2); }
+    .btn-sm:disabled, .btn-sm.btn-soon { opacity: 0.55; cursor: default; pointer-events: none; }
+    .btn-sm:disabled:hover, .btn-sm.btn-soon:hover { background: #fff; }
+    .btn-sm-primary { font-size: 12px; padding: 8px 16px; border-radius: var(--radius-sm); border: none; background: var(--coral); color: #fff; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
+    .btn-sm-primary:hover { background: var(--coral-dark); }
+    .profile-bar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .pb-left { display: flex; align-items: center; gap: 14px; }
+    .pb-title { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .pb-sub { font-size: 12px; color: var(--ink-muted); margin-top: 1px; }
+    .pb-bar-wrap { flex: 1; max-width: 200px; height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+    .pb-bar { height: 6px; background: var(--coral); border-radius: 3px; }
+    .pb-pct { font-size: 13px; font-weight: 500; color: var(--coral); }
+    .pb-steps { display: flex; gap: 6px; }
+    .pb-step { font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+    .pb-step.done { background: var(--teal-light); color: var(--teal-dark); }
+    .pb-step.todo { background: var(--surface-3); color: var(--ink-muted); }
+    .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+    .kpi { background: #fff; border: 1px solid var(--border-line, var(--border)); border-radius: 20px; padding: 20px; box-shadow: 0 8px 24px rgba(16,33,58,0.06); }
+    .kpi-lbl { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-secondary, var(--ink-muted)); margin-bottom: 8px; }
+    .kpi-num { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--navy-900, var(--ink)); line-height: 1; }
+    .kpi-trend { font-size: 12px; margin-top: 5px; }
+    .kpi-up { color: var(--teal-dark); }
+    .kpi-nt { color: var(--ink-muted); }
+    .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .dash-card { background: #fff; border: 1px solid var(--border-line, var(--border)); border-radius: 20px; padding: 20px 22px; box-shadow: 0 8px 24px rgba(16,33,58,0.06); }
+    .dc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .dc-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+    .dc-link { font-size: 12px; color: var(--coral); cursor: pointer; }
+    .bar-chart { display: flex; align-items: flex-end; gap: 5px; height: 56px; }
+    .bc-bar { flex: 1; border-radius: 3px 3px 0 0; min-width: 0; }
+    .bc-labels { display: flex; gap: 5px; margin-top: 5px; }
+    .bc-labels span { flex: 1; font-size: 9px; color: var(--ink-muted); text-align: center; }
+    .act-list { display: flex; flex-direction: column; gap: 10px; }
+    .act-row { display: flex; align-items: flex-start; gap: 9px; }
+    .act-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .act-text { font-size: 13px; color: var(--ink-soft); line-height: 1.4; }
+    .act-time { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+    .lead-list { display: flex; flex-direction: column; gap: 7px; }
+    .lead-row { display: flex; align-items: center; gap: 9px; padding: 9px 12px; background: var(--surface-2); border-radius: var(--radius-md); }
+    .lead-av { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+    .lead-nm { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .lead-ac { font-size: 11px; color: var(--ink-muted); }
+    .lead-tm { font-size: 11px; color: var(--ink-muted); margin-left: auto; }
+    .prod-list { display: flex; flex-direction: column; gap: 8px; }
+    .prod-row { display: flex; align-items: center; gap: 10px; }
+    .prod-ic { width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .prod-nm { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .prod-sold { font-size: 11px; color: var(--ink-muted); }
+    .prod-price { font-size: 13px; font-weight: 500; color: var(--teal); margin-left: auto; }
+    .job-list-dash { display: flex; flex-direction: column; gap: 7px; }
+    .jd-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface-2); border-radius: var(--radius-md); }
+    .jd-title { font-size: 13px; font-weight: 500; color: var(--ink); flex: 1; }
+    .jd-apps { font-size: 11px; color: var(--ink-muted); }
+    .jd-badge { font-size: 10px; font-weight: 500; padding: 2px 9px; border-radius: 10px; }
+    .res-list { display: flex; flex-direction: column; gap: 6px; }
+    .res-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s; }
+    .res-row:hover { background: var(--surface-2); }
+    .res-ic { width: 30px; height: 30px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .res-lbl { font-size: 13px; color: var(--ink); flex: 1; }
+    .res-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px; }
+    .aff-list { display: flex; flex-direction: column; gap: 7px; }
+    .af-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface-2); border-radius: var(--radius-md); }
+    .af-ic { width: 30px; height: 30px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .af-nm { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .af-earn { font-size: 11px; color: var(--teal-dark); }
+    .af-status { font-size: 10px; font-weight: 500; padding: 2px 9px; border-radius: 10px; margin-left: auto; }
+    @media (max-width: 900px) {
+      .dash-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .kpi-row { grid-template-columns: 1fr 1fr; }
+      .dash-grid { grid-template-columns: 1fr; }
+      .dash-header { flex-direction: column; gap: 12px; }
+      .hdr-btns { justify-content: flex-start; }
+    }
+  </style>
+  <!-- Google tag (gtag.js) -->
+
+
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/current-business.js"></script>
+<link rel="stylesheet" href="/css/v3-brand.css">
+<link rel="stylesheet" href="/css/location-language.css">
+</head>
+<body class="v2-dash v3-account-page v3-dashboard">
+
+  <nav class="nav scrolled" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><img class="mll-official-logo" src="/assets/mll-v3-official-logo.png" width="221" height="48" alt="My Latino List — Connect • Support • Grow"></a>
+      <button class="mob-menu-btn" id="mob-menu-btn" onclick="toggleDashSidebar()" style="background:none;border:none;cursor:pointer;padding:8px;flex-direction:column;gap:5px;align-items:center;justify-content:center;">
+        <span style="width:22px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+        <span style="width:22px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+        <span style="width:22px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+      </button>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">🇺🇸 EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">🇪🇸 ES</button>
+        </div>
+        <span id="dash-user-name" style="font-size:12px;color:var(--ink-muted);"><span data-en="Loading..." data-es="Cargando...">Loading...</span></span>
+        <div id="dash-user-initials" style="width:32px;height:32px;border-radius:50%;background:var(--coral-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--coral-dark);">...</div>
+      </div>
+    </div>
+  </nav>
+  <div class="mob-overlay" id="mob-overlay" onclick="toggleDashSidebar()"></div>
+
+  <div class="mob-back-bar">
+    <button class="mob-back-btn" onclick="history.back()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span data-en="Back" data-es="Volver">Back</span>
+    </button>
+    <span style="font-size:13px;font-weight:500;color:var(--ink);"><span data-en="Dashboard" data-es="Panel de control">Dashboard</span></span>
+    <button class="mob-menu-btn" onclick="toggleDashSidebar()" style="background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:4px;margin-left:auto;">
+      <span style="width:20px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+      <span style="width:20px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+      <span style="width:20px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+    </button>
+  </div>
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <div class="sb-biz">
+        <div class="sb-avatar" id="sb-biz-avatar">🏢</div>
+        <div class="sb-name" id="sb-biz-name"><span data-en="Loading..." data-es="Cargando...">Loading...</span></div>
+        <div class="sb-plan" id="sb-biz-plan"><span data-en="Free plan" data-es="Plan gratuito">Free plan</span></div>
+      </div>
+      <div class="sb-section"><span data-en="Workspace" data-es="Espacio de trabajo">Workspace</span></div>
+      <a href="dashboard.html" class="sb-link active">
+        <svg viewBox="0 0 15 15" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor"/><rect x="8" y="1" width="6" height="6" rx="1" fill="currentColor" opacity="0.4"/><rect x="1" y="8" width="6" height="6" rx="1" fill="currentColor" opacity="0.4"/><rect x="8" y="8" width="6" height="6" rx="1" fill="currentColor" opacity="0.4"/></svg>
+        <span data-en="Dashboard" data-es="Panel de control">Dashboard</span>
+      </a>
+      <a href="listing.html" class="sb-link">
+        <svg viewBox="0 0 15 15" fill="none"><rect x="1" y="2" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M4 7h7M4 9.5h5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+        <span data-en="My Listing" data-es="Mi negocio">My Listing</span>
+      </a>
+      <a href="analytics.html" class="sb-link"><span data-en="Analytics" data-es="Estadísticas">Analytics</span></a>
+      <a href="marketplace.html" class="sb-link"><span data-en="Marketplace" data-es="Mercado">Marketplace</span></a>
+      <a href="jobs.html" class="sb-link"><span data-en="Jobs" data-es="Empleos">Jobs</span></a>
+      <a href="voz.html" class="sb-link">
+        <svg viewBox="0 0 15 15" fill="none"><path d="M7.5 1L14 5V10L7.5 14L1 10V5L7.5 1Z" stroke="currentColor" stroke-width="1.1"/></svg>
+        La Voz Latino
+      </a>
+      <a href="affiliates.html" class="sb-link"><span data-en="Affiliates" data-es="Afiliados">Affiliates</span></a>
+      <a href="dashboard.html#refer-earn" class="sb-link"><span data-en="Refer &amp; Earn" data-es="Recomienda y gana">Refer &amp; Earn</span></a>
+      <a href="billing.html" class="sb-link"><span data-en="Billing" data-es="Facturación">Billing</span></a>
+      <div class="sb-section"><span data-en="Coming soon" data-es="Próximamente">Coming soon</span></div>
+      <span class="sb-link sb-soon" aria-disabled="true"><span data-en="Leads" data-es="Contactos">Leads</span> <span class="sb-soon-badge"><span data-en="Coming soon" data-es="Próximamente">Coming soon</span></span></span>
+      <span class="sb-link sb-soon" aria-disabled="true"><span data-en="Appointments" data-es="Citas">Appointments</span> <span class="sb-soon-badge"><span data-en="Coming soon" data-es="Próximamente">Coming soon</span></span></span>
+      <span class="sb-link sb-soon" aria-disabled="true"><span data-en="Messages" data-es="Mensajes">Messages</span> <span class="sb-soon-badge"><span data-en="Coming soon" data-es="Próximamente">Coming soon</span></span></span>
+      <div class="sb-section"><span data-en="Account" data-es="Cuenta">Account</span></div>
+      <a href="login.html" class="sb-link" onclick="sessionStorage.clear();return true;" style="margin-top:8px;color:var(--ink-muted);">
+        <svg viewBox="0 0 15 15" fill="none"><path d="M9 2H3a1 1 0 00-1 1v9a1 1 0 001 1h6M11 10l3-2.5L11 5M6 7.5h8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-en="Sign out" data-es="Cerrar sesión">Sign out</span>
+      </a>
+    </aside>
+
+    <main class="main">
+      <div class="dash-header">
+        <div>
+          <div class="dash-greeting" id="dash-greeting"><span data-en="Loading..." data-es="Cargando...">Loading...</span></div>
+          <div class="dash-sub" id="dash-sub"><span data-en="Fetching your business data..." data-es="Cargando los datos de tu negocio...">Fetching your business data...</span></div>
+        </div>
+        <div class="hdr-btns">
+          <button type="button" class="btn-sm btn-soon" disabled aria-disabled="true"><span data-en="Export report · Coming soon" data-es="Exportar informe · Próximamente">Export report · Coming soon</span></button>
+          <button class="btn-sm-primary" onclick="window.location='billing.html'"><span data-en="Upgrade to Featured →" data-es="Mejorar a Destacado →">Upgrade to Featured →</span></button>
+        </div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-lbl" data-en="Profile Views" data-es="Vistas del perfil">Profile Views</div>
+          <div class="kpi-num" id="kpi-views" style="color:var(--coral);">—</div>
+          <div class="kpi-trend kpi-nt" id="kpi-views-trend"><span data-en="Profile analytics coming soon" data-es="Estadísticas del perfil próximamente">Profile analytics coming soon</span></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl" data-en="New Leads" data-es="Nuevos contactos">New Leads</div>
+          <div class="kpi-num" id="kpi-leads" style="color:var(--blue);">—</div>
+          <div class="kpi-trend kpi-up" id="kpi-leads-trend"><span data-en="Loading..." data-es="Cargando...">Loading...</span></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl" data-en="Marketplace Sales" data-es="Ventas del mercado">Marketplace Sales</div>
+          <div class="kpi-num" id="kpi-sales" style="color:var(--teal);">—</div>
+          <div class="kpi-trend kpi-nt" id="kpi-sales-trend"><span data-en="Marketplace sales tracking coming soon" data-es="Seguimiento de ventas próximamente">Marketplace sales tracking coming soon</span></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl" data-en="Average Rating" data-es="Calificación promedio">Average Rating</div>
+          <div class="kpi-num" id="kpi-rating" style="color:var(--coral);">—</div>
+          <div class="kpi-trend kpi-nt" id="kpi-rating-trend"><span data-en="From published reviews" data-es="De las reseñas publicadas">From published reviews</span></div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dc-head">
+            <div class="dc-title" data-en="Your Next Best Actions" data-es="Tus próximas mejores acciones">Your Next Best Actions</div>
+          </div>
+          <div class="mll-next-actions" id="next-actions"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-head"><span class="dc-title" data-en="Recent Activity" data-es="Actividad reciente">Recent Activity</span></div>
+          <div class="act-list" id="act-list">
+            <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;"><span data-en="Loading activity..." data-es="Cargando actividad...">Loading activity...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="v2-promote" style="margin: 4px 0 20px;">
+        <div>
+          <h3 data-en="Get more leads &amp; visibility" data-es="Consigue más contactos y visibilidad">Get more leads &amp; visibility</h3>
+          <p data-en="Featured placement helps customers find you first." data-es="La posición destacada ayuda a que te encuentren primero.">Featured placement helps customers find you first.</p>
+        </div>
+        <a href="billing.html" data-en="Promote My Business" data-es="Promocionar mi negocio">Promote My Business</a>
+      </div>
+
+      <div class="profile-bar">
+        <div class="pb-left">
+          <div>
+            <div class="pb-title"><span data-en="Profile completion" data-es="Progreso del perfil">Profile completion</span></div>
+            <div class="pb-sub"><span data-en="Complete your profile to attract more customers" data-es="Completa tu perfil para atraer a más clientes">Complete your profile to attract more customers</span></div>
+          </div>
+          <div class="pb-bar-wrap"><div class="pb-bar" id="pb-bar" style="width:0%"></div></div>
+          <div class="pb-pct" id="pb-pct">0%</div>
+        </div>
+        <div class="pb-steps" id="pb-steps"></div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dc-head"><span class="dc-title"><span data-en="Marketplace products" data-es="Productos del mercado">Marketplace products</span></span><a href="marketplace.html" class="dc-link"><span data-en="+ Add product" data-es="+ Agregar producto">+ Add product</span></a></div>
+          <div class="prod-list" id="prod-list">
+            <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;"><span data-en="Loading..." data-es="Cargando...">Loading...</span></div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-head"><span class="dc-title"><span data-en="Recent leads" data-es="Contactos recientes">Recent leads</span></span><span class="dc-link" style="cursor:default;opacity:0.7;"><span data-en="Coming soon" data-es="Próximamente">Coming soon</span></span></div>
+          <div class="lead-list" id="lead-list">
+            <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;"><span data-en="Loading..." data-es="Cargando...">Loading...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dc-head"><span class="dc-title"><span data-en="Jobs board" data-es="Bolsa de empleo">Jobs board</span></span><a href="jobs.html" class="dc-link"><span data-en="+ Post job" data-es="+ Publicar empleo">+ Post job</span></a></div>
+          <div class="job-list-dash" id="job-list-dash">
+            <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;"><span data-en="Loading..." data-es="Cargando...">Loading...</span></div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-head"><span class="dc-title"><span data-en="La Voz Latino resources" data-es="Recursos de La Voz Latino">La Voz Latino resources</span></span><a href="voz.html" class="dc-link"><span data-en="Explore all →" data-es="Explorar todo →">Explore all →</span></a></div>
+          <div class="res-list" id="res-list">
+            <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;"><span data-en="Loading..." data-es="Cargando...">Loading...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card" style="margin-bottom:16px;">
+        <div class="dc-head"><span class="dc-title"><span data-en="Affiliate promotions" data-es="Promociones de afiliados">Affiliate promotions</span></span><span class="dc-link" onclick="window.location='affiliates.html'"><span data-en="Browse programs →" data-es="Ver programas →">Browse programs →</span></span></div>
+        <div class="aff-list" id="aff-list">
+          <div style="font-size:13px;color:var(--ink-muted);padding:8px 0;"><span data-en="Loading..." data-es="Cargando...">Loading...</span></div>
+        </div>
+      </div>
+
+      <div class="dash-card" id="refer-earn" style="margin-bottom:4px;background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);border-color:#bbf7d0;">
+        <div class="dc-head">
+          <span class="dc-title" style="color:#065f46;"><span data-en="🎁 Refer &amp; Earn" data-es="🎁 Recomienda y gana">🎁 Refer &amp; Earn</span></span>
+          <span style="font-size:11px;background:#10b981;color:#fff;padding:2px 9px;border-radius:10px;font-weight:500;"><span data-en="Free month per referral" data-es="Un mes gratis por recomendación">Free month per referral</span></span>
+        </div>
+        <p style="font-size:13px;color:#065f46;margin:0 0 14px;line-height:1.5;"><span data-en="Invite a fellow Latino business owner. When they upgrade to a paid plan, you get" data-es="Invita a otro dueño de negocio latino. Si elige un plan de pago, recibes">Invite a fellow Latino business owner. When they upgrade to a paid plan, you get</span> <strong><span data-en="1 free month" data-es="1 mes gratis">1 free month</span></strong> <span data-en="added to your account." data-es="en tu cuenta.">added to your account.</span></p>
+        <div style="background:#fff;border:1px solid #a7f3d0;border-radius:8px;padding:12px 14px;margin-bottom:12px;">
+          <div style="font-size:11px;color:#6b7280;margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;"><span data-en="Your referral link" data-es="Tu enlace de recomendación">Your referral link</span></div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div id="ref-link-display" style="font-size:12px;font-family:monospace;color:#065f46;flex:1;word-break:break-all;"><span data-en="Loading..." data-es="Cargando...">Loading...</span></div>
+            <button onclick="copyReferralLink()" style="flex-shrink:0;background:#10b981;color:#fff;border:none;border-radius:6px;padding:7px 13px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);" id="copy-ref-btn"><span data-en="Copy" data-es="Copiar">Copy</span></button>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;">
+          <div style="flex:1;background:#fff;border:1px solid #a7f3d0;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#10b981;" id="ref-credits">0</div>
+            <div style="font-size:11px;color:#6b7280;margin-top:2px;"><span data-en="Credits earned" data-es="Créditos obtenidos">Credits earned</span></div>
+          </div>
+          <div style="flex:1;background:#fff;border:1px solid #a7f3d0;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#059669;" id="ref-code-display">—</div>
+            <div style="font-size:11px;color:#6b7280;margin-top:2px;"><span data-en="Your code" data-es="Tu código">Your code</span></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+const API = window.MLL_CONFIG.API_URL;
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 10));
+
+// Mobile sidebar toggle
+function toggleDashSidebar() {
+  const sidebar  = document.querySelector('.sidebar');
+  const overlay  = document.getElementById('mob-overlay');
+  const btn      = document.getElementById('mob-menu-btn');
+  const isOpen   = sidebar.classList.contains('mob-open');
+  sidebar.classList.toggle('mob-open', !isOpen);
+  overlay.classList.toggle('active', !isOpen);
+}
+
+// Close sidebar when a link is clicked on mobile
+document.querySelectorAll('.sidebar .sb-link').forEach(link => {
+  link.addEventListener('click', () => {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mob-overlay');
+    if (sidebar.classList.contains('mob-open')) {
+      sidebar.classList.remove('mob-open');
+      overlay.classList.remove('active');
+    }
+  });
+});
+
+const token = sessionStorage.getItem('mll_token');
+
+function setReferralCopyEnabled(enabled) {
+  const btn = document.getElementById('copy-ref-btn');
+  if (!btn) return;
+  btn.disabled = !enabled;
+  btn.style.opacity = enabled ? '1' : '0.5';
+  btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+}
+
+function renderReferralCard(biz, options) {
+  const linkEl = document.getElementById('ref-link-display');
+  const codeEl = document.getElementById('ref-code-display');
+  const credEl = document.getElementById('ref-credits');
+  if (!linkEl || !codeEl || !credEl) return;
+
+  if (options && options.error) {
+    linkEl.textContent = 'Could not load referral details';
+    codeEl.textContent = '—';
+    credEl.textContent = '—';
+    setReferralCopyEnabled(false);
+    return;
+  }
+
+  const code = biz && biz.referral_code ? String(biz.referral_code).trim() : '';
+  credEl.textContent = (biz && biz.referral_credits != null) ? String(biz.referral_credits) : '0';
+
+  if (!code) {
+    linkEl.textContent = 'Referral code unavailable';
+    codeEl.textContent = '—';
+    setReferralCopyEnabled(false);
+    return;
+  }
+
+  linkEl.textContent = `https://mylatinolist.io/pages/enroll.html?ref=${encodeURIComponent(code)}`;
+  codeEl.textContent = code;
+  setReferralCopyEnabled(true);
+}
+
+// If no token redirect to login
+if (!token) {
+  renderReferralCard(null);
+  window.location.href = 'login.html';
+}
+
+function greet(lang) {
+  const h = new Date().getHours();
+  const es = lang === 'es';
+  if (h < 12) return es ? 'Buenos días' : 'Hello';
+  if (h < 17) return es ? 'Buenas tardes' : 'Hello';
+  return es ? 'Buenas noches' : 'Hello';
+}
+
+function escapeDashText(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+  });
+}
+
+function timeAgo(d) {
+  if (!d) return '';
+  const s = Math.floor((Date.now() - new Date(d)) / 1000);
+  if (s < 3600)   return Math.floor(s/60) + ' min ago';
+  if (s < 86400)  return Math.floor(s/3600) + 'h ago';
+  if (s < 604800) return Math.floor(s/86400) + ' days ago';
+  return Math.floor(s/604800) + ' weeks ago';
+}
+
+async function apiFetch(path) {
+  try {
+    const res = await fetch(`${API}${path}`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    });
+    if (res.status === 401) { sessionStorage.clear(); window.location.href = 'login.html'; return null; }
+    return await res.json();
+  } catch { return null; }
+}
+
+async function loadDashboard() {
+  // 1. Load user + business profile
+  const me = await apiFetch('/api/auth/me');
+  if (!me || !me.profile) {
+    renderReferralCard(null, { error: true });
+    return;
+  }
+
+  const profile  = me.profile;
+  const resolved = window.MLL_CURRENT_BUSINESS.resolveAssignedBusiness(me);
+  const biz      = resolved.business;
+  window.MLL_CURRENT_BUSINESS.syncAssignedBusinessId(resolved.assignedId);
+  window.__mll_biz = biz;
+  renderReferralCard(biz);
+  const fname    = profile.first_name || me.user?.user_metadata?.first_name || 'there';
+  const bizName  = biz?.name  || 'Your business';
+  const bizCity  = biz?.city  || '';
+  const bizState = biz?.state || '';
+  const bizPlan  = biz?.plan  || 'free';
+  const bizEmoji = biz?.emoji || '🏢';
+  const completion = biz?.profile_completion || 0;
+
+  // ── Expiry wall — block entire dashboard if listing expired ──────────
+  if (biz?.status === 'expired' && bizPlan !== 'admin') {
+    document.querySelector('.main').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 20px;">
+        <div style="font-size:56px;margin-bottom:20px;">⏰</div>
+        <h2 style="font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--ink);margin:0 0 12px;">Your listing has expired</h2>
+        <p style="font-size:15px;color:var(--ink-soft);max-width:480px;line-height:1.6;margin:0 0 8px;">Your free 90-day listing for <strong>${bizName}</strong> has expired and is no longer visible to customers.</p>
+        <p style="font-size:15px;color:var(--ink-soft);max-width:480px;line-height:1.6;margin:0 0 28px;">Upgrade to keep your business in the directory and get access to all platform features.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <a href="billing.html?plan=pro" style="background:#D85A30;color:#fff;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;">Upgrade to Pro — $39/mo</a>
+          <a href="billing.html?plan=featured" style="background:#1A56DB;color:#fff;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;">Upgrade to Featured — $89/mo</a>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // Update nav
+  document.getElementById('dash-user-name').textContent = bizName;
+  document.getElementById('dash-user-initials').textContent =
+    fname.charAt(0).toUpperCase() + (profile.last_name?.charAt(0) || '').toUpperCase();
+
+  // Update sidebar
+  document.getElementById('sb-biz-avatar').textContent = bizEmoji;
+  document.getElementById('sb-biz-name').textContent   = bizName;
+  const planBadge = document.getElementById('sb-biz-plan');
+  if (bizPlan === 'admin') {
+    planBadge.textContent = 'Admin';
+    planBadge.style.background = '#EDE9FE';
+    planBadge.style.color = '#5B21B6';
+  } else {
+    planBadge.textContent = bizPlan.charAt(0).toUpperCase() + bizPlan.slice(1) + ' plan';
+  }
+
+  const isAdmin = resolved.isAdmin;
+  window.MLL_CURRENT_BUSINESS.injectAdminSidebarLinks(document.querySelector('.sidebar'), isAdmin);
+  window.MLL_CURRENT_BUSINESS.injectMarketingPilotLink(
+    document.querySelector('.sidebar'),
+    window.MLL_CURRENT_BUSINESS.isMarketingPilotEnabled(me)
+  );
+
+  if (!biz) {
+    document.getElementById('dash-greeting').textContent = `Welcome back, ${fname}! 👋`;
+    document.getElementById('dash-sub').textContent = 'No business assigned to this account';
+    return;
+  }
+
+  // ── Enroll / checkout return banners (plan from API only) ──
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('enrolled') === '1' || urlParams.get('upgraded') === '1') {
+    const banner = document.createElement('div');
+    const wantedUpgrade = urlParams.get('upgraded') === '1';
+    const paid = ['basic', 'pro', 'featured', 'agency'].includes(String(bizPlan || '').toLowerCase());
+    if (wantedUpgrade && paid) {
+      banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;font-weight:500;';
+      banner.textContent = 'Welcome! Your account and subscription are now active.';
+    } else if (wantedUpgrade && !paid) {
+      banner.style = 'background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;';
+      banner.textContent = 'Confirming your subscription... Your payment is being confirmed.';
+      // Bounded recheck — never treat upgraded=1 as success
+      (async function pollDashBilling() {
+        for (let i = 0; i < 5; i++) {
+          try {
+            const res = await fetch(`${API}/api/billing/status?confirming=1&reconcile=1`, {
+              headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const data = await res.json();
+            const p = String(data.plan || 'free').toLowerCase();
+            if (['basic', 'pro', 'featured', 'agency'].includes(p)) {
+              banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;font-weight:500;';
+              banner.textContent = 'Welcome! Your account and subscription are now active.';
+              const planBadge = document.getElementById('sb-biz-plan');
+              if (planBadge) planBadge.textContent = p.charAt(0).toUpperCase() + p.slice(1) + ' plan';
+              return;
+            }
+          } catch (e) {}
+          await new Promise(r => setTimeout(r, 2000));
+        }
+        banner.textContent = 'Your payment is being confirmed. Refresh in a moment to check your plan.';
+      })();
+    } else {
+      banner.style = 'background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:14px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;font-weight:500;';
+      banner.textContent = 'Welcome to MyLatinoList! Your business is now live.';
+    }
+    document.querySelector('.main').prepend(banner);
+    window.history.replaceState({}, '', 'dashboard.html');
+  }
+
+  // ── Plan gating — lock modules for free users ──────────
+  if (bizPlan === 'free' && !isAdmin) {
+    document.querySelectorAll('.sidebar .sb-link').forEach(link => {
+      const href = link.getAttribute('href') || '';
+      if (['analytics.html','marketplace.html','jobs.html','affiliates.html'].some(m => href.includes(m))) {
+        link.style.opacity = '0.4';
+        link.style.pointerEvents = 'none';
+        link.title = 'Upgrade to Pro to unlock';
+        const lock = document.createElement('span');
+        lock.textContent = '🔒'; lock.style.marginLeft = 'auto'; lock.style.fontSize = '11px';
+        link.appendChild(lock);
+      }
+    });
+    const upgradeBanner = document.createElement('div');
+    upgradeBanner.style = 'background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px 20px;border-radius:8px;margin-bottom:16px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:12px;';
+    upgradeBanner.innerHTML = '<span>🚀 Upgrade to Pro to unlock analytics, marketplace, jobs board and more.</span><a href="billing.html" style="background:#D85A30;color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;white-space:nowrap;">Upgrade now →</a>';
+    document.querySelector('.main').prepend(upgradeBanner);
+  }
+
+  // ── Expiry warning banner — show when expires_at within 30 days ─────
+  if (biz?.expires_at && bizPlan !== 'admin') {
+    const daysLeft = Math.ceil((new Date(biz.expires_at) - Date.now()) / (1000 * 60 * 60 * 24));
+    if (daysLeft > 0 && daysLeft <= 30) {
+      const expiryBanner = document.createElement('div');
+      expiryBanner.style = 'background:#FDE8DF;border:1px solid #D85A30;color:#9a3412;padding:14px 20px;border-radius:8px;margin-bottom:16px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:12px;';
+      expiryBanner.innerHTML = `<span>⚠️ Your free listing expires in <strong>${daysLeft} day${daysLeft === 1 ? '' : 's'}</strong> — Upgrade to Pro to stay listed.</span><a href="billing.html" style="background:#D85A30;color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;white-space:nowrap;">Upgrade now →</a>`;
+      document.querySelector('.main').prepend(expiryBanner);
+    }
+  }
+
+  // ── Update header upgrade button based on plan ─────────
+  const upgBtn = document.querySelector('.btn-sm-primary');
+  if (upgBtn) {
+    if (bizPlan === 'free') { upgBtn.textContent = '⚡ Upgrade to Pro →'; upgBtn.onclick = () => window.location.href = 'billing.html'; }
+    else if (bizPlan === 'pro') { upgBtn.textContent = '⭐ Upgrade to Featured →'; upgBtn.onclick = () => window.location.href = 'billing.html'; }
+    else { upgBtn.style.display = 'none'; }
+  }
+
+  // Update header
+  const lang = (function () { try { return localStorage.getItem('mll_lang') || 'en'; } catch (e) { return 'en'; } })();
+  document.getElementById('dash-greeting').textContent = `Welcome back, ${fname}! 👋`;
+  document.getElementById('dash-sub').textContent =
+    `${bizName} · ${bizCity}${bizState ? ', '+bizState : ''} · ${isAdmin ? 'Admin' : bizPlan.charAt(0).toUpperCase()+bizPlan.slice(1)+' plan'} · Listing live`;
+
+  // Update profile completion bar
+  document.getElementById('pb-bar').style.width = completion + '%';
+  document.getElementById('pb-pct').textContent = completion + '%';
+
+  // Profile completion steps
+  const steps = [
+    { id:'pbs-basic',    done: !!(biz?.name && biz?.phone),        label:'Basic info' },
+    { id:'pbs-category', done: !!biz?.category,                    label:'Category' },
+    { id:'pbs-phone',    done: !!biz?.phone,                       label:'Phone verified' },
+    { id:'pbs-photos',   done: !!(biz?.logo_url),                  label:'Add photos' },
+    { id:'pbs-hours',    done: !!(biz?.hours),                     label:'Set hours' },
+    { id:'pbs-social',   done: !!(biz?.social_links),              label:'Social links' },
+  ];
+  const stepsEl = document.getElementById('pb-steps');
+  stepsEl.innerHTML = steps.map(s =>
+    `<span class="pb-step ${s.done?'done':'todo'}">${s.label}</span>`
+  ).join('');
+
+  // 2. Load leads count + recent rows from the real leads API
+  const leadsData = await apiFetch(`/api/leads?business_id=${biz?.id}`);
+  const leadsCount = leadsData?.total || 0;
+  const leads = Array.isArray(leadsData?.leads) ? leadsData.leads : [];
+  document.getElementById('kpi-leads').textContent = leadsCount;
+  document.getElementById('kpi-leads-trend').textContent = leadsCount > 0 ? `${leadsCount} total` : 'No leads yet';
+
+  const leadList = document.getElementById('lead-list');
+  if (leadList) {
+    if (leads.length) {
+      leadList.innerHTML = leads.slice(0, 3).map(function (l) {
+        const name = escapeDashText(l.name || 'A visitor');
+        const action = l.action === 'call' ? 'Phone call'
+          : l.action === 'email' ? 'Email inquiry'
+          : l.action === 'directions' ? 'Directions'
+          : l.action === 'website' ? 'Website click'
+          : 'Inquiry';
+        const initial = name.charAt(0).toUpperCase();
+        return `<div class="lead-row">
+          <div class="lead-av" style="background:var(--coral-light);color:var(--coral-dark);">${initial}</div>
+          <div><div class="lead-nm">${name}</div><div class="lead-ac">${action}</div></div>
+          <div class="lead-tm">${timeAgo(l.created_at)}</div>
+        </div>`;
+      }).join('');
+    } else {
+      leadList.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">No leads yet.</div>`;
+    }
+  }
+
+  // 3. Load products — listings only; sales_count is not a real order source
+  const prodData = await apiFetch('/api/marketplace?page=1');
+  const myProducts = prodData?.products?.filter(p => p.business_id === biz?.id) || [];
+  document.getElementById('kpi-sales').textContent = '—';
+  const salesTrend = document.getElementById('kpi-sales-trend');
+  if (salesTrend) salesTrend.textContent = 'Marketplace sales tracking coming soon';
+
+  const prodList = document.getElementById('prod-list');
+  if (myProducts.length) {
+    prodList.innerHTML = myProducts.slice(0,3).map(p => `
+      <div class="prod-row">
+        <div class="prod-ic">${p.emoji || '📦'}</div>
+        <div><div class="prod-nm">${escapeDashText(p.name)}</div><div class="prod-sold">Listed in marketplace</div></div>
+        <div class="prod-price">$${Number(p.price).toFixed(2)}</div>
+      </div>`).join('');
+  } else {
+    prodList.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">No products yet. <a href="marketplace.html" style="color:var(--coral);">Add your first product →</a></div>`;
+  }
+
+  // 4. Load jobs
+  const jobsData = await apiFetch('/api/jobs?page=1');
+  const myJobs = jobsData?.jobs?.filter(j => j.business_id === biz?.id) || [];
+  const jobList = document.getElementById('job-list-dash');
+  if (myJobs.length) {
+    jobList.innerHTML = myJobs.slice(0,3).map(j => `
+      <div class="jd-row">
+        <div class="jd-title">${j.title}</div>
+        <div class="jd-apps">${j.applications_count || 0} applicants</div>
+        <span class="jd-badge" style="background:#E1F5EE;color:#085041">${j.status}</span>
+      </div>`).join('');
+  } else {
+    jobList.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">No jobs posted yet. <a href="jobs.html" style="color:var(--coral);">Post your first job →</a></div>`;
+  }
+
+  // 5. Load affiliates
+  const affData = await apiFetch('/api/affiliates');
+  const affList = document.getElementById('aff-list');
+  if (affData?.affiliates?.length) {
+    affList.innerHTML = affData.affiliates.slice(0,3).map(a => `
+      <div class="af-row">
+        <div class="af-ic" style="background:${a.bg_color}">${a.emoji}</div>
+        <div><div class="af-nm">${a.name}</div><div class="af-earn">${a.commission_text}</div></div>
+        <a href="affiliates.html" class="af-status" style="background:${a.badge_bg};color:${a.badge_color};text-decoration:none;">View →</a>
+      </div>`).join('');
+  }
+
+  // 6. Load resources from the existing production API (same as voz.html)
+  const resList = document.getElementById('res-list');
+  if (resList) {
+    const resData = await apiFetch('/api/resources');
+    if (!resData) {
+      resList.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">Could not load resources. <a href="voz.html" style="color:var(--coral);">Try La Voz Latino →</a></div>`;
+    } else if (!resData.resources || !resData.resources.length) {
+      resList.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">No resources available. <a href="voz.html" style="color:var(--coral);">Open La Voz Latino →</a></div>`;
+    } else {
+      resList.innerHTML = resData.resources.slice(0,3).map(r => `
+      <a class="res-row" href="voz.html" style="text-decoration:none;">
+        <div class="res-ic" style="background:${r.bg_color || '#EEF0FE'}">${r.icon || '📄'}</div>
+        <span class="res-lbl">${r.title}</span>
+        <span class="res-tag" style="background:${r.tag_bg || '#EEF0FE'};color:${r.tag_color || '#3C3489'}">${r.tag || r.category || ''}</span>
+      </a>`).join('');
+    }
+  }
+
+  document.getElementById('kpi-views').textContent    = '—';
+  document.getElementById('kpi-views-trend').textContent = 'Profile analytics coming soon';
+  const ratingEl = document.getElementById('kpi-rating');
+  const ratingTrend = document.getElementById('kpi-rating-trend');
+  if (ratingEl) ratingEl.textContent = biz?.rating ? Number(biz.rating).toFixed(1) : '—';
+  if (ratingTrend) ratingTrend.textContent = `${biz?.review_count || 0} reviews`;
+
+  const nextEl = document.getElementById('next-actions');
+  if (nextEl) {
+    const items = [
+      { done: completion >= 90, href: 'listing.html', label: 'Complete business profile', es: 'Completa el perfil del negocio' },
+      { done: !!biz?.logo_url, href: 'listing.html', label: 'Add photos', es: 'Agregar fotos' },
+      { done: (biz?.review_count || 0) > 0, href: 'listing.html', label: 'Respond to reviews', es: 'Responder reseñas' },
+      { done: myProducts.length > 0, href: 'marketplace.html', label: 'Add marketplace product', es: 'Agregar producto' },
+      { done: myJobs.length > 0, href: 'jobs.html', label: 'Post a job', es: 'Publicar un empleo' },
+      { done: bizPlan !== 'free', href: 'billing.html', label: 'Promote your business', es: 'Promociona tu negocio' },
+    ];
+    nextEl.innerHTML = items.map(function (item) {
+      const text = lang === 'es' ? item.es : item.label;
+      return '<a class="mll-next-item' + (item.done ? ' done' : '') + '" href="' + item.href + '"><span class="dot"></span><span>' + text + '</span><span class="go">' + (item.done ? '✓' : '→') + '</span></a>';
+    }).join('');
+  }
+
+  // 7. Load activity feed from reviews + leads
+  loadActivity(biz?.id);
+}
+
+async function loadActivity(bizId) {
+  if (!bizId) return;
+  const actList = document.getElementById('act-list');
+  if (!actList) return;
+
+  try {
+    // Fetch recent reviews for this business
+    const [reviewsRes, leadsRes] = await Promise.all([
+      fetch(`${API}/api/reviews?business_id=${bizId}`),
+      apiFetch(`/api/leads?business_id=${bizId}`)
+    ]);
+
+    const reviewsData = await reviewsRes.json();
+    const reviews = reviewsData?.reviews || [];
+    const leads   = leadsRes?.leads || [];
+
+    // Merge and sort by date
+    const activities = [
+      ...reviews.map(r => ({
+        type: 'review',
+        text: `${r.rating}★ review from ${r.reviewer_name}`,
+        time: r.created_at,
+        color: 'var(--teal)',
+      })),
+      ...leads.map(l => ({
+        type: 'lead',
+        text: `${l.action === 'call' ? 'Phone call' : l.action === 'email' ? 'Email inquiry' : l.action === 'directions' ? 'Direction click' : 'Website click'} from ${l.name || 'a visitor'}`,
+        time: l.created_at,
+        color: 'var(--blue)',
+      })),
+    ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 6);
+
+    if (!activities.length) {
+      actList.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">No activity yet — your feed will populate as customers interact with your listing.</div>`;
+      return;
+    }
+
+    actList.innerHTML = activities.map(a => `
+      <div class="act-row">
+        <div class="act-dot" style="background:${a.color}"></div>
+        <div>
+          <div class="act-text">${a.text}</div>
+          <div class="act-time">${timeAgo(a.time)}</div>
+        </div>
+      </div>`).join('');
+
+  } catch {
+    actList.innerHTML = `<div style="font-size:13px;color:var(--ink-muted);padding:8px 0;">Could not load activity.</div>`;
+  }
+}
+
+loadDashboard().catch(() => renderReferralCard(null, { error: true }));
+
+function copyReferralLink() {
+  const biz = window.__mll_biz;
+  const code = biz && biz.referral_code ? String(biz.referral_code).trim() : '';
+  if (!code) return;
+  const link = `https://mylatinolist.io/pages/enroll.html?ref=${encodeURIComponent(code)}`;
+  navigator.clipboard.writeText(link).then(() => {
+    const btn = document.getElementById('copy-ref-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  }).catch(() => { prompt('Copy this link:', link); });
+}
+</script>
+  <script src="/js/nav.js"></script>
+<script src="/js/language-flags.js" defer></script></body>
+</html>

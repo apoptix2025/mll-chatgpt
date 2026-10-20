@@ -1,0 +1,8 @@
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(self)
+  X-Dev-Environment: mylatinolist-dev-v0.1.0
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src https://media.mylatinolist.io; connect-src https://mll-api-staging.sparkling-hill-934f.workers.dev; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; form-action 'none'; base-uri 'self'
+  X-Robots-Tag: noindex, nofollow

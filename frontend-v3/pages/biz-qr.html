@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script data-mll-v3-safety>try {
+(function () {
+'use strict';
+var host=window.location.hostname;
+var approved=host==='mylatinolist-staging.pages.dev'||/^(?:staging|v3-preview|mll-v2-dev|[a-f0-9]{8})\.mylatinolist-staging\.pages\.dev$/.test(host);
+approved=approved||((host==='localhost'||host==='127.0.0.1')&&window.location.port==='8083');
+if(!approved){window.stop();throw new Error('V3 visual-only preview: unapproved host');}
+var api='https://mll-api-staging.sparkling-hill-934f.workers.dev';
+window.MLL_STAGING=Object.freeze({visualOnly:true,api:api,origin:window.location.origin});
+var policy="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src https://media.mylatinolist.io; connect-src "+api+"; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'self'";
+document.write('<meta http-equiv="Content-Security-Policy" content="'+policy+'">');
+var message='Visual-only staging: submissions and account/payment changes are disabled. / Prueba visual: los envíos y cambios de cuenta/pagos están desactivados.';
+function blocked(){if(window.console)console.info(message);}
+var nativeFetch=window.fetch.bind(window);
+window.fetch=function(input,init){
+ init=init||{};var method=String(init.method||(input&&input.method)||'GET').toUpperCase();var url;
+ try{url=new URL(typeof input==='string'||input instanceof URL?input:input.url,window.location.href);}catch(e){return deny();}
+ var path=/^\/api\/(?:businesses(?:\/[^/]+)?|jobs|marketplace|affiliates|resources|stats|ai\/status)\/?$/.test(url.pathname);
+ if(url.origin!==api||!path||(method!=='GET'&&method!=='HEAD')||init.body!=null)return deny();
+ var headers=new Headers(init.headers||(input&&input.headers)||{});headers.delete('Authorization');headers.delete('Cookie');
+ return nativeFetch(input,Object.assign({},init,{headers:headers,redirect:'error',credentials:'omit'}));
+};
+function deny(){blocked();return Promise.resolve(new Response('{"error":"Visual-only staging: this action is disabled"}',{status:403,headers:{'Content-Type':'application/json'}}));}
+window.XMLHttpRequest=function(){throw new Error(message);};
+window.WebSocket=window.EventSource=function(){throw new Error(message);};
+if(navigator.sendBeacon)navigator.sendBeacon=function(){blocked();return false;};
+if(window.HTMLFormElement){HTMLFormElement.prototype.submit=blocked;HTMLFormElement.prototype.requestSubmit=blocked;}
+document.addEventListener('submit',function(e){e.preventDefault();e.stopImmediatePropagation();blocked();},true);
+document.addEventListener('click',function(e){
+ var link=e.target.closest&&e.target.closest('a[href]');if(!link)return;var url;
+ try{url=new URL(link.href,window.location.href);}catch(err){return;}
+ if(/^(?:mylatinolist\.io|www\.mylatinolist\.io)$/.test(url.hostname)||/(?:^|\.)stripe\.com$/.test(url.hostname)||/^(?:mailto|tel):$/.test(url.protocol)){e.preventDefault();e.stopImmediatePropagation();blocked();}
+},true);
+document.addEventListener('DOMContentLoaded',function(){
+ var banner=document.createElement('div');banner.id='mll-staging-notice';banner.setAttribute('role','note');banner.textContent=message;
+ banner.style.cssText='position:relative;z-index:10000;padding:12px;background:#eaf3ff;color:#123e73;text-align:center;font:14px sans-serif';
+ document.body.insertBefore(banner,document.body.firstChild);
+});
+})();
+
+} catch (error) { window.stop(); throw error; }</script>
+
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your QR Code — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .qr-page{max-width:600px;margin:0 auto;padding:48px 16px 80px;}
+    .qr-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);padding:36px;text-align:center;margin-bottom:16px;}
+    .qr-biz-name{font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:4px;}
+    .qr-biz-cat{font-size:13px;color:var(--ink-muted);margin-bottom:24px;}
+    .qr-wrap{display:inline-block;padding:16px;background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);margin-bottom:20px;}
+    #qr-canvas{display:block;}
+    .qr-url{font-size:12px;font-family:monospace;color:var(--ink-muted);background:var(--surface-2);padding:8px 14px;border-radius:var(--radius-sm);margin-bottom:20px;word-break:break-all;}
+    .qr-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .qr-btn-dl{font-size:14px;font-weight:500;padding:12px;background:var(--coral);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;}
+    .qr-btn-dl:hover{background:var(--coral-dark);}
+    .qr-btn-kit{font-size:14px;font-weight:500;padding:12px;background:#fff;color:var(--ink);border:1px solid var(--border-mid);border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;text-decoration:none;display:block;}
+    .qr-btn-kit:hover{background:var(--surface-2);}
+    .use-cases{background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;}
+    .uc-title{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:16px;}
+    .uc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .uc-item{background:var(--surface-2);border-radius:var(--radius-md);padding:14px;text-align:center;}
+    .uc-icon{font-size:28px;margin-bottom:8px;}
+    .uc-label{font-size:12px;font-weight:500;color:var(--ink);}
+    .uc-desc{font-size:11px;color:var(--ink-muted);margin-top:3px;line-height:1.4;}
+    .tracking-note{background:var(--teal-light);border-radius:var(--radius-md);padding:14px 16px;margin-top:16px;font-size:12px;color:var(--teal-dark);line-height:1.5;}
+  </style>
+  <!-- Google tag (gtag.js) -->
+
+
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+<link rel="stylesheet" href="/css/v3-brand.css">
+<link rel="stylesheet" href="/css/location-language.css">
+</head>
+<body>
+  <nav class="nav scrolled">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><img class="mll-official-logo" src="/assets/mll-v3-official-logo.png" width="221" height="48" alt="My Latino List — Connect • Support • Grow"></a>
+      <div class="nav-actions" style="margin-left:auto;">
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">🇺🇸 EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">🇪🇸 ES</button>
+        </div>
+        <a href="login.html" class="btn-ghost">Sign in</a>
+        <a href="enroll.html" class="btn-cta">List your business</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="qr-page">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div class="section-label">QR code</div>
+      <h1 style="font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:6px;">Your business QR code</h1>
+      <p style="font-size:14px;color:var(--ink-soft);font-weight:300;">Print it, share it, put it on your door — every scan brings customers to your listing.</p>
+    </div>
+
+    <div class="qr-card">
+      <div class="qr-biz-name" id="qr-biz-name">Loading...</div>
+      <div class="qr-biz-cat" id="qr-biz-cat"></div>
+      <div class="qr-wrap">
+        <canvas id="qr-canvas" width="200" height="200"></canvas>
+      </div>
+      <div class="qr-url" id="qr-url-display"></div>
+      <div class="qr-btns">
+        <button class="qr-btn-dl" onclick="downloadQR()">⬇ Download PNG</button>
+        <a href="#" class="qr-btn-kit" id="kit-link">🎨 Get marketing kit</a>
+      </div>
+      <div class="tracking-note">📊 Every QR scan is tracked in your dashboard — you'll see how many customers found you this way.</div>
+    </div>
+
+    <div class="use-cases">
+      <div class="uc-title">Where to use your QR code</div>
+      <div class="uc-grid">
+        <div class="uc-item"><div class="uc-icon">🚪</div><div class="uc-label">Window &amp; door</div><div class="uc-desc">Sticker on your storefront for walk-by customers</div></div>
+        <div class="uc-item"><div class="uc-icon">🪪</div><div class="uc-label">Business cards</div><div class="uc-desc">Print on cards so customers can find you online</div></div>
+        <div class="uc-item"><div class="uc-icon">📋</div><div class="uc-label">Menus &amp; receipts</div><div class="uc-desc">Add to menus, invoices, or packaging</div></div>
+        <div class="uc-item"><div class="uc-icon">📱</div><div class="uc-label">Social media</div><div class="uc-desc">Share as image in your Instagram or Facebook bio</div></div>
+        <div class="uc-item"><div class="uc-icon">✉️</div><div class="uc-label">Flyers &amp; mailers</div><div class="uc-desc">Add to any printed marketing material</div></div>
+        <div class="uc-item"><div class="uc-icon">💬</div><div class="uc-label">WhatsApp</div><div class="uc-desc">Share the QR image directly in group chats</div></div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const API  = window.MLL_CONFIG.API_URL;
+const slug = new URLSearchParams(window.location.search).get('id') || '';
+let bizName = '';
+
+async function loadAndRenderQR() {
+  if (!slug) return;
+  try {
+    const res  = await fetch(`${API}/api/businesses/${slug}`);
+    const data = await res.json();
+    const b    = data.business;
+    if (!b) return;
+    bizName = b.name;
+    document.getElementById('qr-biz-name').textContent = b.name;
+    document.getElementById('qr-biz-cat').textContent  = `${b.category} · ${b.city}, ${b.state}`;
+
+    const qrUrl = window.location.origin + '/pages/business-detail.html?slug=' + encodeURIComponent(b.slug) + '&src=qr';
+    document.getElementById('qr-url-display').textContent = qrUrl;
+    document.getElementById('kit-link').href = `biz-kit.html?id=${b.slug}`;
+
+    // Generate QR code on canvas
+    const canvas = document.getElementById('qr-canvas');
+    const ctx    = canvas.getContext('2d');
+
+    // Use QRCode lib to get modules, draw manually for clean result
+    const qr = new QRCode(document.createElement('div'), {
+      text: qrUrl,
+      width: 200,
+      height: 200,
+      colorDark: '#1a1714',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H,
+    });
+
+    // Give QR lib a moment to render, then snapshot
+    setTimeout(() => {
+      const img = qr._el.querySelector('img') || qr._el.querySelector('canvas');
+      if (img) {
+        const tmp = new Image();
+        tmp.onload = () => ctx.drawImage(tmp, 0, 0, 200, 200);
+        tmp.src = img.src || img.toDataURL();
+      }
+    }, 100);
+
+  } catch(err) {
+    document.getElementById('qr-biz-name').textContent = 'Could not load QR code';
+  }
+}
+
+function downloadQR() {
+  const canvas = document.getElementById('qr-canvas');
+  // Add white padding + business name below
+  const out  = document.createElement('canvas');
+  out.width  = 260;
+  out.height = 300;
+  const ctx  = out.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, 260, 300);
+  ctx.drawImage(canvas, 30, 20, 200, 200);
+  ctx.fillStyle = '#1a1714';
+  ctx.font = 'bold 13px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(bizName, 130, 242);
+  ctx.fillStyle = '#6b6760';
+  ctx.font = '11px sans-serif';
+  ctx.fillText('mylatinolist.io', 130, 260);
+  const link = document.createElement('a');
+  link.download = `${slug}-qrcode.png`;
+  link.href = out.toDataURL('image/png');
+  link.click();
+}
+
+loadAndRenderQR();
+</script>
+  <script src="/js/nav.js"></script>
+<script src="/js/language-flags.js" defer></script></body>
+</html>

@@ -1,0 +1,35 @@
+/* Customer AI Marketing Pack — report cards aligned with MCC professional layout */
+.mg-pack-disclosure { font-size: 12px; color: var(--ink-muted); margin: 0 0 14px; }
+.mg-pack-cta { border: 0; cursor: pointer; font-family: var(--font-body); }
+.mg-pack-cta:disabled { opacity: 0.55; cursor: default; }
+.mg-pack-lock { margin: 8px 0 14px; }
+.mg-pack-lock p { font-size: 14px; color: var(--ink-soft); margin: 0 0 10px; }
+.mg-pack-meta { font-size: 12px; color: var(--ink-muted); margin: 8px 0 14px; }
+.mcc-pack-section { margin: 22px 0 8px; }
+.mcc-pack-h { font-size: 15px; font-weight: 600; color: var(--ink); margin: 0 0 12px; }
+.mcc-pack-count { color: var(--ink-muted); font-weight: 500; }
+.mcc-report-card { background: #fff; border: 1px solid var(--border-line, var(--border)); border-radius: 16px; padding: 16px 18px; margin-bottom: 10px; box-shadow: 0 6px 18px rgba(16,33,58,0.04); min-width: 0; }
+.mcc-report-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+.mcc-report-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--navy-700, #1d4f91); }
+.mcc-report-body { font-size: 14px; color: var(--ink-soft); margin: 0; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+.mcc-field { margin: 0 0 12px; }
+.mcc-field:last-child { margin-bottom: 0; }
+.mcc-field-lbl { display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--navy-700, #1d4f91); margin-bottom: 4px; }
+.mcc-field-body { font-size: 14px; color: var(--ink-soft); margin: 0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+.mcc-copy-row { display: flex; gap: 8px; flex-shrink: 0; }
+.mcc-copy, .mcc-chip { font-family: var(--font-body); font-size: 12px; font-weight: 600; border-radius: 8px; border: 1px solid var(--border-mid, var(--border)); background: #fff; color: var(--navy-900, var(--ink)); cursor: pointer; }
+.mcc-copy { min-width: 76px; height: 32px; padding: 0 12px; }
+.mcc-copy:hover, .mcc-chip:hover { border-color: var(--navy-700, #1d4f91); color: var(--navy-700, #1d4f91); }
+.mcc-copy:focus-visible, .mcc-chip:focus-visible { outline: 2px solid var(--navy-700, #1d4f91); outline-offset: 2px; }
+.mcc-copy.is-copied, .mcc-chip.is-copied { border-color: var(--navy-700, #1d4f91); background: #eef4fb; }
+.mcc-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.mcc-chip { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; padding: 8px 12px; min-height: 36px; }
+.mcc-chip-text { overflow-wrap: anywhere; }
+.mcc-chip .mcc-copy-label { min-width: 48px; text-align: right; color: var(--navy-700, #1d4f91); }
+.mcc-empty { font-size: 13px; color: var(--ink-muted); padding: 12px 0; }
+@media (max-width: 640px) {
+  .mcc-report-card { padding: 14px; }
+  .mcc-copy { min-width: 72px; height: 36px; }
+  .mcc-chip { width: 100%; justify-content: space-between; }
+  .mcc-report-top { flex-wrap: wrap; }
+}

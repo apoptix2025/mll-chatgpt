@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script data-mll-v3-safety>try {
+(function () {
+'use strict';
+var host=window.location.hostname;
+var approved=host==='mylatinolist-staging.pages.dev'||/^(?:staging|v3-preview|mll-v2-dev|[a-f0-9]{8})\.mylatinolist-staging\.pages\.dev$/.test(host);
+approved=approved||((host==='localhost'||host==='127.0.0.1')&&window.location.port==='8083');
+if(!approved){window.stop();throw new Error('V3 visual-only preview: unapproved host');}
+var api='https://mll-api-staging.sparkling-hill-934f.workers.dev';
+window.MLL_STAGING=Object.freeze({visualOnly:true,api:api,origin:window.location.origin});
+var policy="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src https://media.mylatinolist.io; connect-src "+api+"; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'self'";
+document.write('<meta http-equiv="Content-Security-Policy" content="'+policy+'">');
+var message='Visual-only staging: submissions and account/payment changes are disabled. / Prueba visual: los envíos y cambios de cuenta/pagos están desactivados.';
+function blocked(){if(window.console)console.info(message);}
+var nativeFetch=window.fetch.bind(window);
+window.fetch=function(input,init){
+ init=init||{};var method=String(init.method||(input&&input.method)||'GET').toUpperCase();var url;
+ try{url=new URL(typeof input==='string'||input instanceof URL?input:input.url,window.location.href);}catch(e){return deny();}
+ var path=/^\/api\/(?:businesses(?:\/[^/]+)?|jobs|marketplace|affiliates|resources|stats|ai\/status)\/?$/.test(url.pathname);
+ if(url.origin!==api||!path||(method!=='GET'&&method!=='HEAD')||init.body!=null)return deny();
+ var headers=new Headers(init.headers||(input&&input.headers)||{});headers.delete('Authorization');headers.delete('Cookie');
+ return nativeFetch(input,Object.assign({},init,{headers:headers,redirect:'error',credentials:'omit'}));
+};
+function deny(){blocked();return Promise.resolve(new Response('{"error":"Visual-only staging: this action is disabled"}',{status:403,headers:{'Content-Type':'application/json'}}));}
+window.XMLHttpRequest=function(){throw new Error(message);};
+window.WebSocket=window.EventSource=function(){throw new Error(message);};
+if(navigator.sendBeacon)navigator.sendBeacon=function(){blocked();return false;};
+if(window.HTMLFormElement){HTMLFormElement.prototype.submit=blocked;HTMLFormElement.prototype.requestSubmit=blocked;}
+document.addEventListener('submit',function(e){e.preventDefault();e.stopImmediatePropagation();blocked();},true);
+document.addEventListener('click',function(e){
+ var link=e.target.closest&&e.target.closest('a[href]');if(!link)return;var url;
+ try{url=new URL(link.href,window.location.href);}catch(err){return;}
+ if(/^(?:mylatinolist\.io|www\.mylatinolist\.io)$/.test(url.hostname)||/(?:^|\.)stripe\.com$/.test(url.hostname)||/^(?:mailto|tel):$/.test(url.protocol)){e.preventDefault();e.stopImmediatePropagation();blocked();}
+},true);
+document.addEventListener('DOMContentLoaded',function(){
+ var banner=document.createElement('div');banner.id='mll-staging-notice';banner.setAttribute('role','note');banner.textContent=message;
+ banner.style.cssText='position:relative;z-index:10000;padding:12px;background:#eaf3ff;color:#123e73;text-align:center;font:14px sans-serif';
+ document.body.insertBefore(banner,document.body.firstChild);
+});
+})();
+
+} catch (error) { window.stop(); throw error; }</script>
+
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketing &amp; AI Growth — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/marketing-pack.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .dash-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - var(--nav-h));}
+    .sidebar{background:#fff;border-right:1px solid var(--border);padding:24px 0;}
+    .sb-biz{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+    .sb-avatar{width:44px;height:44px;border-radius:var(--radius-md);background:var(--coral-light);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:8px;}
+    .sb-name{font-size:14px;font-weight:500;color:var(--ink);}
+    .sb-plan{font-size:11px;color:var(--coral);font-weight:500;background:var(--coral-light);padding:2px 8px;border-radius:10px;display:inline-block;margin-top:3px;}
+    .sb-section{font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink-muted);padding:10px 20px 4px;}
+    .sb-link{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;color:var(--ink-soft);cursor:pointer;transition:all 0.15s;border-right:2px solid transparent;text-decoration:none;}
+    .sb-link:hover{color:var(--ink);background:var(--surface-2);}
+    .sb-link.active{color:var(--coral-dark);background:var(--coral-light);border-right-color:var(--coral);font-weight:500;}
+    html,body{overflow-x:hidden;}
+    .main{padding:32px;max-width:860px;min-width:0;}
+    .page-h{font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+    .page-sub{font-size:14px;color:var(--ink-soft);margin-bottom:24px;line-height:1.5;}
+    .page-powered{font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--coral);margin:0 0 8px;}
+    .mg-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;min-width:0;overflow-wrap:anywhere;}
+    .mg-card h2{font-size:15px;margin:0 0 12px;}
+    .mg-row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border);}
+    .mg-row:last-child{border-bottom:0;}
+    .mg-denied{max-width:520px;margin:80px auto;text-align:center;}
+    .mg-opp{padding:10px 0;border-bottom:1px solid var(--border);}
+    .mg-opp:last-child{border-bottom:0;}
+    .mg-empty{font-size:13px;color:var(--ink-muted);}
+    .mg-status{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:var(--teal-light,#d1fae5);color:var(--teal-dark,#065f46);padding:3px 8px;border-radius:999px;}
+    .mg-status.is-ended{background:var(--surface-3);color:var(--ink-muted);}
+    .mg-score{font-family:var(--font-display);font-size:36px;font-weight:800;line-height:1;margin:0 0 8px;}
+    .mg-cat{margin-bottom:12px;}
+    .mg-cat-top{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:6px;}
+    .mg-bar{height:8px;background:var(--surface-3,#eef2f7);border-radius:99px;overflow:hidden;}
+    .mg-bar>span{display:block;height:8px;background:var(--coral);border-radius:99px;}
+    .mg-reasons{margin:6px 0 0;padding-left:16px;color:var(--ink-muted);font-size:12px;}
+    .mg-cta{display:inline-block;margin-top:12px;background:var(--coral);color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;max-width:100%;box-sizing:border-box;}
+    .mg-tl{display:flex;flex-direction:column;gap:12px;margin-top:8px;}
+    .mg-tl-item{border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--surface-2,#f8fafc);}
+    .mg-tl-item.is-completed{background:#fff;border-color:#bbf7d0;}
+    .mg-tl-item.is-available,.mg-tl-item.is-in_progress{background:#fff;border-color:var(--coral);box-shadow:0 0 0 1px rgba(8,102,255,0.08);}
+    .mg-tl-item.is-upcoming{opacity:0.92;}
+    .mg-tl-item.is-skipped,.mg-tl-item.is-unavailable{opacity:0.75;}
+    .mg-tl-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px;}
+    .mg-tl-day{font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-muted);}
+    .mg-tl-title{font-size:14px;font-weight:600;color:var(--ink);margin:2px 0 4px;}
+    .mg-tl-blurb{font-size:12px;color:var(--ink-soft);line-height:1.45;margin:0;}
+    .mg-tl-badge{flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--surface-3);color:var(--ink-muted);}
+    .mg-tl-badge.is-completed{background:#d1fae5;color:#065f46;}
+    .mg-tl-badge.is-available,.mg-tl-badge.is-in_progress{background:var(--coral-light);color:var(--coral-dark);}
+    .mg-tl-meta{font-size:11px;color:var(--ink-muted);margin-top:6px;}
+    .mg-tl-result{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--ink-soft);}
+    .mg-tl-result .mg-row{padding:5px 0;font-size:12px;}
+    .mg-listing-progress{margin-top:16px;padding-top:12px;border-top:1px solid var(--border);}
+    .mg-listing-progress h3{font-size:13px;margin:0 0 8px;color:var(--ink);}
+    @media (max-width: 767px){.dash-layout{grid-template-columns:1fr}.sidebar{display:none;position:fixed;top:var(--nav-h);left:0;bottom:0;z-index:200;width:220px;overflow:auto}.sidebar.mob-open{display:block}.main{padding:20px 16px 80px}.mg-score{font-size:28px}.mg-row{flex-wrap:wrap}.mg-tl-top{flex-wrap:wrap}}
+  </style>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/current-business.js"></script>
+  <script src="/js/date-only.js"></script>
+  <script src="/js/marketing-pack.js"></script>
+<link rel="stylesheet" href="/css/v3-brand.css">
+<link rel="stylesheet" href="/css/location-language.css">
+</head>
+<body>
+  <nav class="nav scrolled" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><img class="mll-official-logo" src="/assets/mll-v3-official-logo.png" width="221" height="48" alt="My Latino List — Connect • Support • Grow"></a>
+      <button class="mob-menu-btn" onclick="toggleDashSidebar()" style="background:none;border:none;cursor:pointer;padding:8px;flex-direction:column;gap:5px;align-items:center;">
+        <span style="width:22px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+        <span style="width:22px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+        <span style="width:22px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+      </button>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="switchLang('en')">🇺🇸 EN</button>
+          <span>|</span>
+          <button class="lang-btn" data-lang="es" onclick="switchLang('es')">🇪🇸 ES</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="mob-overlay" id="mob-overlay" onclick="toggleDashSidebar()"></div>
+  <div class="mob-back-bar">
+    <button class="mob-back-btn" onclick="history.back()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </button>
+    <span style="font-size:13px;font-weight:500;color:var(--ink);">Marketing &amp; AI Growth</span>
+    <button class="mob-menu-btn" onclick="toggleDashSidebar()" style="background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:4px;margin-left:auto;">
+      <span style="width:20px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+      <span style="width:20px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+      <span style="width:20px;height:1.5px;background:var(--ink);border-radius:2px;display:block;"></span>
+    </button>
+  </div>
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <div class="sb-biz">
+        <div class="sb-avatar" id="sb-biz-avatar">🏢</div>
+        <div class="sb-name" id="sb-biz-name">Loading...</div>
+        <div class="sb-plan" id="sb-biz-plan">Plan</div>
+      </div>
+      <div class="sb-section">Workspace</div>
+      <a href="dashboard.html" class="sb-link">Dashboard</a>
+      <a href="listing.html" class="sb-link">My Listing</a>
+      <a href="analytics.html" class="sb-link">Analytics</a>
+      <a href="marketplace.html" class="sb-link">Marketplace</a>
+      <a href="jobs.html" class="sb-link">Jobs</a>
+      <a href="voz.html" class="sb-link">La Voz Latino</a>
+      <a href="affiliates.html" class="sb-link">Affiliates</a>
+      <a href="dashboard.html#refer-earn" class="sb-link">Refer &amp; Earn</a>
+      <a href="billing.html" class="sb-link">Billing</a>
+      <div class="sb-section">Coming soon</div>
+      <span class="sb-link" aria-disabled="true">Leads</span>
+      <div class="sb-section">Account</div>
+      <a href="login.html" class="sb-link" onclick="sessionStorage.clear();return true;">Sign out</a>
+    </aside>
+    <main class="main">
+      <div id="mg-denied" class="mg-denied" style="display:none;">
+        <h1 class="page-h">Marketing &amp; AI Growth</h1>
+        <p class="page-sub" id="mg-denied-msg">This pilot is not enabled for this account.</p>
+        <a href="dashboard.html">Back to dashboard</a>
+      </div>
+      <div id="mg-app" style="display:none;">
+        <p class="page-powered">Powered by MLL + AP Optix</p>
+        <h1 class="page-h">Marketing &amp; AI Growth</h1>
+        <p class="page-sub" id="mg-sub">Pilot tools for your listing on My Latino List. Nothing auto-posts.</p>
+
+        <section class="mg-card" id="mg-trial-card">
+          <h2>30-Day Free Growth Trial</h2>
+          <div class="mg-row"><span>Status</span><strong id="mg-trial-status" class="mg-status">—</strong></div>
+          <div class="mg-row"><span>Trial starts</span><strong id="mg-trial-start">—</strong></div>
+          <div class="mg-row"><span>Trial ends</span><strong id="mg-trial-end">—</strong></div>
+          <div class="mg-row"><span>Days remaining</span><strong id="mg-trial-remaining">—</strong></div>
+        </section>
+
+        <section class="mg-card" id="mg-score-card">
+          <h2>Digital Footprint Score</h2>
+          <div class="mg-score" id="mg-score-total">—</div>
+          <p class="mg-empty" id="mg-score-note">Score is calculated from this listing only.</p>
+          <div id="mg-score-cats"></div>
+        </section>
+
+        <section class="mg-card" id="mg-opps-card">
+          <h2>Growth Opportunities</h2>
+          <div id="mg-opps"></div>
+        </section>
+
+        <section class="mg-card" id="mg-pack-card">
+          <h2>AI Marketing Pack</h2>
+          <p class="page-sub" id="mg-pack-sub">Create ready-to-use marketing content personalized for your business.</p>
+          <p class="mg-pack-disclosure">Powered by MLL + AP Optix AI. Nothing auto-posts.</p>
+          <div id="mg-pack-lock" class="mg-pack-lock" hidden>
+            <p id="mg-pack-lock-msg">Your free Growth Trial is complete.</p>
+            <a class="mg-cta" id="mg-pack-plans" href="billing.html">View Plans</a>
+          </div>
+          <button type="button" class="mg-cta mg-pack-cta" id="mg-pack-generate" hidden>Generate My Marketing Pack</button>
+          <p class="mg-empty" id="mg-pack-status"></p>
+          <div id="mg-pack-report"></div>
+        </section>
+
+        <section class="mg-card" id="mg-progress-card">
+          <h2 data-en="30-Day Growth Progress" data-es="Progreso de crecimiento de 30 días">30-Day Growth Progress</h2>
+          <p class="mg-empty" id="mg-timeline-msg" hidden></p>
+          <div class="mg-tl" id="mg-timeline"></div>
+          <div class="mg-listing-progress" id="mg-listing-progress">
+            <h3 data-en="Listing checklist" data-es="Lista de verificación del perfil">Listing checklist</h3>
+            <div id="mg-progress"></div>
+          </div>
+        </section>
+
+        <section class="mg-card" id="mg-upgrade-card">
+          <h2 id="mg-upgrade-title">Keep Growing After Your Free Trial</h2>
+          <p class="page-sub" id="mg-upgrade-copy" style="margin-bottom:0;">Review your plan when you are ready.</p>
+          <a class="mg-cta" id="mg-upgrade-cta" href="billing.html">View Plans</a>
+        </section>
+      </div>
+    </main>
+  </div>
+<script>
+const token = sessionStorage.getItem('mll_token');
+if (!token) window.location.href = 'login.html';
+const API = window.MLL_CONFIG.API_URL;
+
+function toggleDashSidebar() {
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.getElementById('mob-overlay');
+  if (sidebar) sidebar.classList.toggle('mob-open');
+  if (overlay) overlay.classList.toggle('active');
+}
+
+function showDenied(msg) {
+  document.getElementById('mg-app').style.display = 'none';
+  document.getElementById('mg-denied').style.display = 'block';
+  document.getElementById('mg-denied-msg').textContent = msg || 'This pilot is not enabled for this account.';
+}
+
+function yn(v) { return v ? 'Ready' : 'Needs attention'; }
+
+function statusBadgeLabel(status) {
+  if (status === 'completed') return 'Completed';
+  if (status === 'available') return 'Available';
+  if (status === 'in_progress') return 'In progress';
+  if (status === 'upcoming') return 'Upcoming';
+  if (status === 'skipped') return 'Skipped';
+  if (status === 'unavailable') return 'Unavailable';
+  return 'Upcoming';
+}
+
+function renderMilestoneResult(code, result) {
+  if (!result || typeof result !== 'object') return '';
+  var rows = [];
+  function add(label, value) {
+    if (value == null || value === '') return;
+    rows.push('<div class="mg-row"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(String(value)) + '</strong></div>');
+  }
+  if (code === 'DAY_0_BASELINE') {
+    if (result.score && result.score.total != null) add('Starting score', result.score.total + ' / ' + (result.score.max || 100));
+    if (result.progress_items && result.progress_items.length) {
+      var done = result.progress_items.filter(function (i) { return i.done; }).length;
+      add('Profile completeness', done + ' / ' + result.progress_items.length);
+    }
+  } else if (code === 'DAY_1_ANALYSIS') {
+    add('Current score', result.current_score);
+    if (Array.isArray(result.top_actions) && result.top_actions.length) {
+      rows.push('<div class="mg-empty" style="margin-top:6px;">Top actions</div>');
+      result.top_actions.slice(0, 3).forEach(function (a) {
+        rows.push('<div class="mg-opp"><strong>' + escapeHtml(a.title || '') + '</strong><p class="mg-empty">' + escapeHtml(a.detail || '') + '</p></div>');
+      });
+    }
+  } else if (code === 'DAY_2_MARKETING_PACK') {
+    add('Packs generated', result.packs_generated);
+    add('Packs remaining', result.packs_remaining);
+    if (result.recommendation) rows.push('<p class="mg-empty">' + escapeHtml(String(result.recommendation)) + '</p>');
+  } else if (code === 'DAY_7_RECOMMENDATIONS' || code === 'DAY_21_RECOMMENDATIONS') {
+    if (Array.isArray(result.improvements_completed) && result.improvements_completed.length) {
+      add('Improvements completed', result.improvements_completed.join(', '));
+    }
+    if (Array.isArray(result.recommended_actions) && result.recommended_actions.length) {
+      rows.push('<div class="mg-empty" style="margin-top:6px;">Recommended actions</div>');
+      result.recommended_actions.slice(0, 3).forEach(function (a) {
+        rows.push('<div class="mg-opp"><strong>' + escapeHtml(a.title || '') + '</strong><p class="mg-empty">' + escapeHtml(a.detail || '') + '</p></div>');
+      });
+    }
+  } else if (code === 'DAY_14_MID_TRIAL_REPORT') {
+    add('Baseline score', result.baseline_score);
+    add('Current score', result.current_score);
+    add('Score change', result.score_change);
+    add('Packs generated', result.packs_generated);
+    add('Copy events', result.content_copy_events);
+    add('Days remaining', result.days_remaining);
+  } else if (code === 'DAY_25_UPGRADE_RECOMMENDATION') {
+    add('Current plan', result.current_plan);
+    if (result.recommended_next_step) rows.push('<p class="mg-empty">' + escapeHtml(String(result.recommended_next_step)) + '</p>');
+    if (result.view_plans) rows.push('<a class="mg-cta" href="billing.html">View Plans</a>');
+  } else if (code === 'DAY_28_ENDING_REMINDER') {
+    add('Trial ends', fmtDate(result.ends_at));
+    add('Days remaining', result.days_remaining);
+    if (result.view_plans) rows.push('<a class="mg-cta" href="billing.html">View Plans</a>');
+  } else if (code === 'DAY_30_FINAL_REPORT') {
+    add('Baseline score', result.baseline_score);
+    add('Final score', result.final_score);
+    add('Score change', result.score_change);
+    if (Array.isArray(result.listing_improvements) && result.listing_improvements.length) {
+      add('Improvements', result.listing_improvements.join(', '));
+    }
+    add('Packs generated', result.packs_generated);
+    add('Copy events', result.content_copy_events);
+    if (result.view_plans) rows.push('<a class="mg-cta" href="billing.html">View Plans</a>');
+  }
+  if (!rows.length) return '';
+  return '<div class="mg-tl-result">' + rows.join('') + '</div>';
+}
+
+function renderTimeline(automation) {
+  var root = document.getElementById('mg-timeline');
+  var msg = document.getElementById('mg-timeline-msg');
+  automation = automation || {};
+  var milestones = automation.milestones || [];
+  if (!milestones.length) {
+    msg.hidden = false;
+    msg.textContent = automation.message || 'Your marketing growth timeline will appear here as milestones are completed.';
+    root.innerHTML = '';
+    return;
+  }
+  if (automation.message) {
+    msg.hidden = false;
+    msg.textContent = automation.message;
+  } else {
+    msg.hidden = true;
+    msg.textContent = '';
+  }
+  root.innerHTML = milestones.map(function (m) {
+    var st = m.status || 'upcoming';
+    var meta = '';
+    if (m.executed_at) meta = 'Completed ' + fmtDate(m.executed_at);
+    else if (m.scheduled_for) meta = 'Scheduled ' + fmtDate(m.scheduled_for);
+    return '<article class="mg-tl-item is-' + escapeHtml(st) + '">' +
+      '<div class="mg-tl-top">' +
+        '<div><div class="mg-tl-day">Day ' + escapeHtml(String(m.day != null ? m.day : '')) + '</div>' +
+        '<div class="mg-tl-title">' + escapeHtml(m.label || m.code || '') + '</div>' +
+        '<p class="mg-tl-blurb">' + escapeHtml(m.blurb || '') + '</p></div>' +
+        '<span class="mg-tl-badge is-' + escapeHtml(st) + '">' + escapeHtml(statusBadgeLabel(st)) + '</span>' +
+      '</div>' +
+      (meta ? '<div class="mg-tl-meta">' + escapeHtml(meta) + '</div>' : '') +
+      (st === 'completed' || st === 'available' ? renderMilestoneResult(m.code, m.result) : '') +
+    '</article>';
+  }).join('');
+}
+
+function fmtDate(iso) {
+  if (window.MLL_DATE && typeof window.MLL_DATE.formatUtcDateOnly === 'function') {
+    return window.MLL_DATE.formatUtcDateOnly(iso);
+  }
+  if (!iso) return '—';
+  var m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return '—';
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[Number(m[2]) - 1] + ' ' + Number(m[3]) + ', ' + m[1];
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, function (ch) {
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+  });
+}
+
+function renderPackState(pack) {
+  var generate = document.getElementById('mg-pack-generate');
+  var lock = document.getElementById('mg-pack-lock');
+  var lockMsg = document.getElementById('mg-pack-lock-msg');
+  var status = document.getElementById('mg-pack-status');
+  var report = document.getElementById('mg-pack-report');
+  pack = pack || {};
+  var canGenerate = !!pack.can_generate;
+  generate.hidden = !canGenerate;
+  generate.disabled = !canGenerate;
+  if (canGenerate) {
+    lock.hidden = true;
+  } else {
+    lock.hidden = false;
+    lockMsg.textContent = pack.lock_message || (pack.lock_reason === 'trial_expired' ? 'Your free Growth Trial is complete.' : 'Generation is not available.');
+    document.getElementById('mg-pack-plans').hidden = pack.lock_reason === 'cooldown' || pack.lock_reason === 'storage_unavailable';
+  }
+  var meta = [];
+  if (pack.packs_generated) meta.push(pack.packs_generated + ' pack' + (pack.packs_generated === 1 ? '' : 's') + ' generated');
+  if (pack.remaining != null && canGenerate) meta.push(pack.remaining + ' remaining in this pilot');
+  status.textContent = meta.join(' · ');
+  if (window.MLL_MARKETING_PACK && pack.last_pack) {
+    report.innerHTML = window.MLL_MARKETING_PACK.render(pack.last_pack);
+  } else if (!pack.last_pack) {
+    report.innerHTML = '<div class="mcc-empty">No pack generated yet. Drafts only — nothing auto-posts.</div>';
+  }
+}
+
+function recordCopyEvent() {
+  fetch(API + '/api/marketing/pilot/pack/copy', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token },
+  }).catch(function () {});
+}
+
+async function generatePack() {
+  var btn = document.getElementById('mg-pack-generate');
+  var status = document.getElementById('mg-pack-status');
+  btn.disabled = true;
+  status.textContent = 'Generating your Marketing Pack…';
+  try {
+    var res = await fetch(API + '/api/marketing/pilot/pack', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    var data = await res.json().catch(function () { return {}; });
+    if (res.ok && data.pack) {
+      renderPackState(data.pack);
+      status.textContent = data.fallback ? 'Grounded fallback draft is ready. Review before publishing.' : 'Your Marketing Pack is ready. Review before publishing.';
+      return;
+    }
+    if (data.pack) renderPackState(data.pack);
+    status.textContent = data.error || 'Could not generate a Marketing Pack.';
+  } catch (err) {
+    status.textContent = 'Could not generate a Marketing Pack.';
+  } finally {
+    if (!btn.hidden) btn.disabled = false;
+  }
+}
+
+async function load() {
+  const meRes = await fetch(API + '/api/auth/me', { headers: { Authorization: 'Bearer ' + token } });
+  if (meRes.status === 401) { window.location.href = 'login.html'; return; }
+  if (!meRes.ok) { showDenied('Could not verify your account.'); return; }
+  const me = await meRes.json();
+  const resolved = window.MLL_CURRENT_BUSINESS.resolveAssignedBusiness(me);
+  const b = resolved.business;
+  window.MLL_CURRENT_BUSINESS.syncAssignedBusinessId(resolved.assignedId);
+  window.MLL_CURRENT_BUSINESS.injectAdminSidebarLinks(document.querySelector('.sidebar'), resolved.isAdmin);
+  window.MLL_CURRENT_BUSINESS.injectMarketingPilotLink(document.querySelector('.sidebar'), window.MLL_CURRENT_BUSINESS.isMarketingPilotEnabled(me));
+  document.getElementById('sb-biz-avatar').textContent = (b && b.emoji) || '🏢';
+  document.getElementById('sb-biz-name').textContent = (b && b.name) || 'Your business';
+  document.getElementById('sb-biz-plan').textContent = ((b && b.plan) || 'free') + ' plan';
+
+  const sumRes = await fetch(API + '/api/marketing/pilot/summary', { headers: { Authorization: 'Bearer ' + token } });
+  if (sumRes.status === 401) { window.location.href = 'login.html'; return; }
+  if (sumRes.status === 403) { showDenied('Marketing & AI Growth is not enabled for this account.'); return; }
+  if (!sumRes.ok) { showDenied('Could not load marketing data.'); return; }
+  const data = await sumRes.json();
+  document.getElementById('mg-denied').style.display = 'none';
+  document.getElementById('mg-app').style.display = 'block';
+  document.getElementById('mg-sub').textContent = 'Pilot tools for ' + (data.business && data.business.name ? data.business.name : 'your listing') + '. Nothing auto-posts.';
+
+  const trial = data.trial || {};
+  const trialStatus = document.getElementById('mg-trial-status');
+  let statusLabel = '—';
+  if (trial.status === 'active') statusLabel = 'Active';
+  else if (trial.status === 'expired' || trial.status === 'ended') statusLabel = 'Trial Complete';
+  else if (trial.status === 'cancelled') statusLabel = 'Cancelled';
+  else if (trial.status === 'converted') statusLabel = 'Converted';
+  else if (trial.status) statusLabel = String(trial.status);
+  trialStatus.textContent = statusLabel;
+  trialStatus.className = 'mg-status' + (trial.status === 'active' ? '' : ' is-ended');
+  const startedAt = trial.started_at || trial.starts_at;
+  document.getElementById('mg-trial-start').textContent = fmtDate(startedAt);
+  document.getElementById('mg-trial-end').textContent = fmtDate(trial.ends_at);
+  document.getElementById('mg-trial-remaining').textContent = trial.days_remaining != null ? String(trial.days_remaining) : '—';
+
+  const score = data.score || {};
+  document.getElementById('mg-score-total').textContent = (score.total != null ? score.total : '—') + ' / ' + (score.max || 100);
+  const cats = score.categories || [];
+  document.getElementById('mg-score-cats').innerHTML = cats.map(function (c) {
+    const pct = c.max ? Math.round((c.score / c.max) * 100) : 0;
+    const reasons = (c.reasons || []).map(function (r) { return '<li>' + escapeHtml(r) + '</li>'; }).join('');
+    return '<div class="mg-cat"><div class="mg-cat-top"><span>' + escapeHtml(c.label) + '</span><strong>' + escapeHtml(String(c.score)) + ' / ' + escapeHtml(String(c.max)) + '</strong></div><div class="mg-bar"><span style="width:' + pct + '%"></span></div><ul class="mg-reasons">' + reasons + '</ul></div>';
+  }).join('');
+
+  const listing = data.listing || {};
+  const opps = data.opportunities || listing.opportunities || [];
+  document.getElementById('mg-opps').innerHTML = opps.length
+    ? opps.map(function (o) {
+        return '<div class="mg-opp"><strong>' + escapeHtml(o.title || '') + '</strong><p class="mg-empty">' + escapeHtml(o.detail || '') + '</p></div>';
+      }).join('')
+    : '<p class="mg-empty">No gaps detected from your listing data.</p>';
+
+  const progress = data.progress || {};
+  const items = progress.items || [];
+  const progressRows = items.map(function (item) {
+    return '<div class="mg-row"><span>' + escapeHtml(item.label) + '</span><strong>' + yn(item.done) + '</strong></div>';
+  }).join('');
+  document.getElementById('mg-progress').innerHTML =
+    '<div class="mg-row"><span>Completed</span><strong>' + escapeHtml(String(progress.completed || 0)) + ' / ' + escapeHtml(String(progress.total || items.length || 0)) + '</strong></div>' +
+    '<div class="mg-row"><span>Days remaining in trial</span><strong>' + escapeHtml(String(progress.trial_days_remaining != null ? progress.trial_days_remaining : '—')) + '</strong></div>' +
+    '<div class="mg-row"><span>Leads for this listing</span><strong>' + escapeHtml(String(progress.listing_leads != null ? progress.listing_leads : 0)) + '</strong></div>' +
+    progressRows;
+
+  renderTimeline(data.automation);
+
+  const upgrade = data.upgrade || {};
+  document.getElementById('mg-upgrade-title').textContent = upgrade.headline || 'Keep Growing After Your Free Trial';
+  document.getElementById('mg-upgrade-copy').textContent = upgrade.detail || 'Review your plan when you are ready.';
+  document.getElementById('mg-upgrade-cta').textContent = upgrade.cta_label || 'View Plans';
+  if (trial.status === 'converted') {
+    document.getElementById('mg-upgrade-title').textContent = 'Your growth continues';
+    document.getElementById('mg-upgrade-copy').textContent = 'Your paid plan stays in place. Review billing anytime from your workspace.';
+  }
+
+  renderPackState(data.pack);
+  if (window.MLL_MARKETING_PACK) {
+    window.MLL_MARKETING_PACK.bindCopy(document.getElementById('mg-pack-report'), recordCopyEvent);
+  }
+  document.getElementById('mg-pack-generate').onclick = generatePack;
+}
+load();
+</script>
+  <script src="/js/nav.js"></script>
+<script src="/js/language-flags.js" defer></script></body>
+</html>

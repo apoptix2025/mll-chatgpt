@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script data-mll-v3-safety>try {
+(function () {
+'use strict';
+var host=window.location.hostname;
+var approved=host==='mylatinolist-staging.pages.dev'||/^(?:staging|v3-preview|mll-v2-dev|[a-f0-9]{8})\.mylatinolist-staging\.pages\.dev$/.test(host);
+approved=approved||((host==='localhost'||host==='127.0.0.1')&&window.location.port==='8083');
+if(!approved){window.stop();throw new Error('V3 visual-only preview: unapproved host');}
+var api='https://mll-api-staging.sparkling-hill-934f.workers.dev';
+window.MLL_STAGING=Object.freeze({visualOnly:true,api:api,origin:window.location.origin});
+var policy="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src https://media.mylatinolist.io; connect-src "+api+"; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'self'";
+document.write('<meta http-equiv="Content-Security-Policy" content="'+policy+'">');
+var message='Visual-only staging: submissions and account/payment changes are disabled. / Prueba visual: los envíos y cambios de cuenta/pagos están desactivados.';
+function blocked(){if(window.console)console.info(message);}
+var nativeFetch=window.fetch.bind(window);
+window.fetch=function(input,init){
+ init=init||{};var method=String(init.method||(input&&input.method)||'GET').toUpperCase();var url;
+ try{url=new URL(typeof input==='string'||input instanceof URL?input:input.url,window.location.href);}catch(e){return deny();}
+ var path=/^\/api\/(?:businesses(?:\/[^/]+)?|jobs|marketplace|affiliates|resources|stats|ai\/status)\/?$/.test(url.pathname);
+ if(url.origin!==api||!path||(method!=='GET'&&method!=='HEAD')||init.body!=null)return deny();
+ var headers=new Headers(init.headers||(input&&input.headers)||{});headers.delete('Authorization');headers.delete('Cookie');
+ return nativeFetch(input,Object.assign({},init,{headers:headers,redirect:'error',credentials:'omit'}));
+};
+function deny(){blocked();return Promise.resolve(new Response('{"error":"Visual-only staging: this action is disabled"}',{status:403,headers:{'Content-Type':'application/json'}}));}
+window.XMLHttpRequest=function(){throw new Error(message);};
+window.WebSocket=window.EventSource=function(){throw new Error(message);};
+if(navigator.sendBeacon)navigator.sendBeacon=function(){blocked();return false;};
+if(window.HTMLFormElement){HTMLFormElement.prototype.submit=blocked;HTMLFormElement.prototype.requestSubmit=blocked;}
+document.addEventListener('submit',function(e){e.preventDefault();e.stopImmediatePropagation();blocked();},true);
+document.addEventListener('click',function(e){
+ var link=e.target.closest&&e.target.closest('a[href]');if(!link)return;var url;
+ try{url=new URL(link.href,window.location.href);}catch(err){return;}
+ if(/^(?:mylatinolist\.io|www\.mylatinolist\.io)$/.test(url.hostname)||/(?:^|\.)stripe\.com$/.test(url.hostname)||/^(?:mailto|tel):$/.test(url.protocol)){e.preventDefault();e.stopImmediatePropagation();blocked();}
+},true);
+document.addEventListener('DOMContentLoaded',function(){
+ var banner=document.createElement('div');banner.id='mll-staging-notice';banner.setAttribute('role','note');banner.textContent=message;
+ banner.style.cssText='position:relative;z-index:10000;padding:12px;background:#eaf3ff;color:#123e73;text-align:center;font:14px sans-serif';
+ document.body.insertBefore(banner,document.body.firstChild);
+});
+})();
+
+} catch (error) { window.stop(); throw error; }</script>
+
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Affiliate Brands — MyLatinoList</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body{background:var(--surface-2);padding-top:var(--nav-h);}
+    .page-hero{padding:64px 0 48px;text-align:center;}
+    .aff-page-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding-bottom:32px;}
+    .skeleton{background:var(--surface-3);border-radius:var(--radius-md);animation:pulse 1.4s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    .skel-aff{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;display:flex;flex-direction:column;gap:10px;}
+    .join-btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1.5px solid var(--coral);color:var(--coral);background:transparent;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;white-space:nowrap;min-width:118px;text-align:center;}
+    .join-btn:hover{background:var(--coral);color:#fff;}
+    .join-btn:disabled{opacity:0.75;cursor:default;}
+    .join-btn.is-joined,.join-btn.is-joined:hover{border-color:var(--teal);color:var(--teal);background:transparent;cursor:default;}
+    .aff-page-grid .aff-footer{gap:8px;flex-wrap:wrap;}
+    .join-error{grid-column:1/-1;background:#FCEBEB;color:#791F1F;border-radius:var(--radius-md);padding:10px 14px;font-size:13px;margin-bottom:8px;display:none;}
+    .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink-muted);}
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+    .stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;text-align:center;}
+    .stat-card .n{font-family:var(--font-display);font-size:28px;font-weight:500;color:var(--coral);}
+    .stat-card .l{font-size:13px;color:var(--ink-muted);margin-top:4px;}
+    @media(max-width:1024px){.aff-page-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:768px){.aff-page-grid{grid-template-columns:1fr;}.stats-row{grid-template-columns:1fr;}}
+  </style>
+  <!-- Google tag (gtag.js) -->
+
+
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+<link rel="stylesheet" href="/css/v3-brand.css">
+<link rel="stylesheet" href="/css/location-language.css">
+</head>
+<body>
+  <nav class="nav scrolled has-mobile" id="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="logo"><img class="mll-official-logo" src="/assets/mll-v3-official-logo.png" width="221" height="48" alt="My Latino List — Connect • Support • Grow"></a>
+      <div class="nav-links">
+        <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+        <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+        <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+        <a href="voz.html">La Voz Latino</a>
+        <a href="affiliates.html" style="color:var(--coral);font-weight:500;" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+        <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">🇺🇸 EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">🇪🇸 ES</button>
+      </div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+        <a href="enroll.html" class="btn-cta" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+      </div>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="/#directory" data-en="Directory" data-es="Directorio">Directory</a>
+      <a href="marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>
+      <a href="jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>
+      <a href="voz.html">La Voz Latino</a>
+      <a href="affiliates.html" style="color:var(--coral);font-weight:500;" data-en="Affiliates" data-es="Afiliados">Affiliates</a>
+      <a href="/pages/partners.html" data-en="Partners" data-es="Socios">Partners</a>
+      <div style="height:1px;background:var(--border);margin:8px 12px;"></div>
+      <div class="lang-toggle" style="margin:4px 12px 8px;">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">🇺🇸 EN</button>
+        <span>|</span>
+        <button class="lang-btn" data-lang="es" onclick="switchLang('es')">🇪🇸 ES</button>
+      </div>
+      <a href="login.html" style="color:var(--coral);font-weight:500;" data-en="Sign in" data-es="Iniciar sesión">Sign in</a>
+      <a href="enroll.html" class="btn-cta" style="margin-top:8px;text-align:center;" data-en="List your business" data-es="Registra tu negocio">List your business</a>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="page-hero">
+      <div class="section-label" data-en="Affiliate program" data-es="Programa de afiliados">Affiliate program</div>
+      <h1 data-en="Big brands supporting Latino business" data-es="Grandes marcas que apoyan a los negocios latinos" style="font-family:var(--font-display);font-size:clamp(32px,5vw,52px);font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:12px;">Big brands supporting Latino business</h1>
+      <p data-en="Promote trusted brands. Earn commission on every referral." data-es="Promociona marcas confiables. Gana comisión por cada referido." style="font-size:16px;color:var(--ink-soft);max-width:480px;margin:0 auto 28px;font-weight:300;">Promote trusted brands. Earn commission on every referral.</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="n" id="stat-programs">—</div><div class="l" data-en="Affiliate programs" data-es="Programas de afiliados">Affiliate programs</div></div>
+      <div class="stat-card"><div class="n" aria-label="Not available">—</div><div class="l" data-en="Avg. commission per referral" data-es="Comisión promedio por referido">Avg. commission per referral</div></div>
+      <div class="stat-card"><div class="n" data-en="Free" data-es="Gratis">Free</div><div class="l" data-en="To join any program" data-es="Para unirte a cualquier programa">To join any program</div></div>
+    </div>
+
+    <div class="join-error" id="join-error" role="alert"></div>
+    <div class="aff-page-grid" id="aff-page-grid"></div>
+
+    <div id="partner" style="background:var(--coral);border-radius:var(--radius-xl);padding:48px;text-align:center;margin-bottom:80px;">
+      <h2 data-en="Are you a brand?" data-es="¿Tienes una marca?" style="font-family:var(--font-display);font-size:32px;font-weight:500;color:#fff;letter-spacing:-0.02em;margin-bottom:10px;">Are you a brand?</h2>
+      <p data-en="Reach thousands of Latino business owners and consumers. Join the affiliate program." data-es="Llega a miles de dueños de negocios latinos y consumidores. Únete al programa de afiliados." style="font-size:15px;color:rgba(255,255,255,0.75);margin-bottom:24px;font-weight:300;">Reach thousands of Latino business owners and consumers. Join the affiliate program.</p>
+      <a href="mailto:partners@mylatinolist.io" style="font-size:14px;font-weight:500;padding:12px 28px;background:#fff;color:var(--coral);border-radius:var(--radius-md);display:inline-block;" data-en="Join the affiliate program →" data-es="Únete al programa de afiliados →">Join the affiliate program →</a>
+    </div>
+  </div>
+<script>
+const API=window.MLL_CONFIG.API_URL;
+const LOGIN_RETURN='login.html?return=/pages/affiliates';
+const pendingJoins=new Set();
+
+function sessionToken(){
+  return sessionStorage.getItem('mll_token');
+}
+function escapeHtml(value){
+  return String(value==null?'':value).replace(/[&<>"']/g,function(ch){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]);
+  });
+}
+function showJoinError(message){
+  const el=document.getElementById('join-error');
+  if(!el) return;
+  el.textContent=message||'Could not join this program. Please try again.';
+  el.style.display='block';
+}
+function hideJoinError(){
+  const el=document.getElementById('join-error');
+  if(!el) return;
+  el.textContent='';
+  el.style.display='none';
+}
+function markJoined(btn){
+  if(!btn) return;
+  btn.classList.add('is-joined');
+  btn.disabled=true;
+  btn.textContent="You're enrolled";
+  btn.setAttribute('aria-disabled','true');
+}
+function markAvailable(btn){
+  if(!btn) return;
+  btn.classList.remove('is-joined');
+  btn.disabled=false;
+  btn.textContent='Join Program';
+  btn.removeAttribute('aria-disabled');
+}
+function skelAffs(){return Array(6).fill('<div class="skel-aff"><div class="skeleton" style="height:44px;width:44px;border-radius:8px;"></div><div class="skeleton" style="height:15px;width:60%;border-radius:4px;"></div><div class="skeleton" style="height:12px;width:90%;border-radius:4px;"></div><div class="skeleton" style="height:12px;width:70%;border-radius:4px;"></div></div>').join('');}
+
+async function loadEnrolledProgramIds(token){
+  if(!token) return new Set();
+  try{
+    const res=await fetch(`${API}/api/affiliates/enrollments`,{
+      headers:{Authorization:`Bearer ${token}`}
+    });
+    if(res.status===401) return new Set();
+    if(!res.ok) return new Set();
+    const data=await res.json();
+    const rows=Array.isArray(data.enrollments)?data.enrollments:[];
+    return new Set(rows.map(function(row){return row&&row.program_id;}).filter(Boolean));
+  }catch(_err){
+    return new Set();
+  }
+}
+
+async function loadAffiliates(){
+  const grid=document.getElementById('aff-page-grid');
+  grid.innerHTML=skelAffs();
+  hideJoinError();
+  try{
+    const token=sessionToken();
+    const [listRes, enrolled]=await Promise.all([
+      fetch(`${API}/api/affiliates`),
+      loadEnrolledProgramIds(token)
+    ]);
+    const data=await listRes.json();
+    const affiliates=data.affiliates||[];
+    document.getElementById('stat-programs').textContent=affiliates.length||'—';
+    if(!affiliates.length){
+      grid.innerHTML=`<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">🤝</div><p>No affiliate programs available yet.</p></div>`;
+      return;
+    }
+    grid.innerHTML=affiliates.map(function(a){
+      const joined=enrolled.has(a.id);
+      return `
+      <div class="aff-card">
+        <div class="aff-top">
+          <div class="aff-logo" style="background:${escapeHtml(a.bg_color||'#EBF2FF')}">${escapeHtml(a.emoji||'🤝')}</div>
+          <div>
+            <div class="aff-name">${escapeHtml(a.name)}</div>
+            <div class="aff-category">${escapeHtml(a.category||'')}</div>
+          </div>
+        </div>
+        <div class="aff-desc">${escapeHtml(a.description||'')}</div>
+        <div class="aff-footer">
+          <span class="aff-commission">${escapeHtml(a.commission_text||'')}</span>
+          <button type="button" class="join-btn${joined?' is-joined':''}" data-program-id="${escapeHtml(a.id)}" ${joined?'disabled aria-disabled="true"':''}>${joined?"You're enrolled":'Join Program'}</button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(err){
+    grid.innerHTML=`<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">⚠️</div><p>Could not load programs. Please try again.</p></div>`;
+  }
+}
+
+async function handleJoin(btn){
+  if(!btn||btn.disabled||btn.classList.contains('is-joined')) return;
+  const programId=btn.getAttribute('data-program-id');
+  if(!programId||pendingJoins.has(programId)) return;
+
+  const token=sessionToken();
+  if(!token){
+    window.location.href=LOGIN_RETURN;
+    return;
+  }
+
+  hideJoinError();
+  pendingJoins.add(programId);
+  btn.disabled=true;
+  btn.textContent='Joining...';
+
+  try{
+    const res=await fetch(`${API}/api/affiliates/join`,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        Authorization:`Bearer ${token}`
+      },
+      body:JSON.stringify({program_id:programId})
+    });
+    if(res.status===401){
+      window.location.href=LOGIN_RETURN;
+      return;
+    }
+    if(res.status===201||res.status===409){
+      markJoined(btn);
+      return;
+    }
+    let message='Could not join this program. Please try again.';
+    if(res.status===400) message='No business is assigned to this account.';
+    if(res.status===404) message='That affiliate program is not available.';
+    markAvailable(btn);
+    showJoinError(message);
+  }catch(_err){
+    markAvailable(btn);
+    showJoinError('Network error. Please try again.');
+  }finally{
+    pendingJoins.delete(programId);
+  }
+}
+
+document.getElementById('aff-page-grid').addEventListener('click',function(event){
+  const btn=event.target.closest('.join-btn');
+  if(!btn) return;
+  handleJoin(btn);
+});
+loadAffiliates();
+</script>
+  <script src="/js/nav.js"></script>
+<script src="/js/language-flags.js" defer></script></body></html>

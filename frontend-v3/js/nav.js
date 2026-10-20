@@ -1,0 +1,280 @@
+// ============================================================
+// MYLATINOLIST — NAV + LANGUAGE ENGINE (shared, loaded on every page)
+// Class/attribute-based — no per-page element IDs, so multiple
+// toggles (desktop nav, mobile menu, footer) coexist on one page.
+// ============================================================
+(function () {
+  // --- LANGUAGE ENGINE ---
+  // Persists the choice in localStorage('mll_lang') so it carries
+  // across navigation. Translates any element carrying data-en/data-es.
+  var currentLang = null;
+
+  // Apply translations to static data-en / data-en-ph elements + toggle state.
+  function applyLang(lang) {
+    document.documentElement.lang = lang;
+    try { localStorage.setItem('mll_lang', lang); } catch (e) {}
+    document.querySelectorAll('[data-en]').forEach(function (el) {
+      var txt = lang === 'es' ? el.getAttribute('data-es') : el.getAttribute('data-en');
+      if (txt != null) el.innerHTML = txt;
+    });
+    // Placeholders (data-en-ph / data-es-ph) — attribute, not innerHTML
+    document.querySelectorAll('[data-en-ph]').forEach(function (el) {
+      var ph = lang === 'es' ? el.getAttribute('data-es-ph') : el.getAttribute('data-en-ph');
+      if (ph != null) el.setAttribute('placeholder', ph);
+    });
+    // Active state on every toggle button (nav / mobile / footer).
+    // forEach over an empty set is a no-op, so this is inherently
+    // null-safe on pages that have no footer or no toggle.
+    document.querySelectorAll('.lang-btn').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  function switchLang(lang) {
+    applyLang(lang);
+    // Notify JS-rendered pages to re-render — only on an ACTUAL change, so the
+    // initial page load doesn't re-render before each page fetches its data.
+    // (Initial render is already localized because t() reads mll_lang.)
+    if (lang !== currentLang) {
+      currentLang = lang;
+      document.dispatchEvent(new CustomEvent('mll:langswitch', { detail: { lang: lang } }));
+    }
+  }
+  window.switchLang = switchLang;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Apply the persisted language on load (default English).
+    var saved = null;
+    try { saved = localStorage.getItem('mll_lang'); } catch (e) {}
+    var lang = saved || 'en';
+    currentLang = lang;          // set first so the initial apply does NOT dispatch
+    applyLang(lang);
+
+    syncMobileDrawerFromDesktop();
+    bindMobileDrawer(document.getElementById('hamburger'), document.getElementById('nav-mobile'), document.getElementById('nav-mobile-backdrop'), document.getElementById('nav-mobile-close'));
+    bindToolbarAi(document.getElementById('mll-ai-toolbar'));
+    document.querySelectorAll('.hamburger').forEach(function (h) {
+      if (h.id === 'hamburger') return;
+      h.addEventListener('click', function () {
+        var menu = document.querySelector('.nav-mobile');
+        if (menu) menu.classList.toggle('open');
+      });
+    });
+    document.querySelectorAll('.nav-mobile a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        var menu = a.closest('.nav-mobile');
+        if (menu) closeMobileDrawer(menu);
+      });
+    });
+
+    injectMarketingNav();
+    document.querySelectorAll('a.logo').forEach(function (anchor) { anchor.innerHTML = "<img class=\"mll-official-logo\" src=\"/assets/mll-v3-official-logo.png\" width=\"221\" height=\"48\" alt=\"My Latino List — Connect • Support • Grow\">"; });
+    injectMobileNav();
+    if (!window.MLL_STAGING?.visualOnly && !document.querySelector('script[data-mll-ai]')) {
+      var ai = document.createElement('script');
+      ai.src = '/js/mll-ai.js';
+      ai.setAttribute('data-mll-ai', '1');
+      document.body.appendChild(ai);
+    }
+    if (!window.MLL_STAGING?.visualOnly && !document.querySelector('script[data-mll-analytics]')) {
+      var analytics = document.createElement('script');
+      analytics.src = '/js/mll-analytics.js';
+      analytics.setAttribute('data-mll-analytics', '1');
+      document.body.appendChild(analytics);
+    }
+  });
+
+  function bindToolbarAi(btn) {
+    if (!btn) return;
+    function syncExpanded() {
+      btn.setAttribute('aria-expanded', document.body.classList.contains('mll-ai-open') ? 'true' : 'false');
+    }
+    btn.addEventListener('click', function () {
+      var launch = document.getElementById('mll-ai-launch');
+      if (launch) launch.click();
+    });
+    if (typeof MutationObserver === 'function') {
+      new MutationObserver(syncExpanded).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
+
+  function syncMobileDrawerFromDesktop() {
+    var src = document.querySelector('.v2-home .v2-links') || document.querySelector('nav.v2-topnav .v2-links');
+    var dest = document.getElementById('nav-mobile-primary');
+    if (!src || !dest) return;
+    var affiliates = dest.querySelector('a[href*="affiliates"]');
+    dest.innerHTML = '';
+    src.querySelectorAll('a').forEach(function (a) {
+      dest.appendChild(a.cloneNode(true));
+    });
+    if (affiliates) dest.appendChild(affiliates);
+  }
+
+  function inPages() {
+    return location.pathname.indexOf('/pages/') !== -1;
+  }
+  function pagesPrefix() { return inPages() ? '' : 'pages/'; }
+  function homeHref() { return inPages() ? '../index.html' : '/index.html'; }
+
+  function injectMarketingNav() {
+    var nav = document.querySelector('nav.nav.has-mobile');
+    if (!nav || nav.classList.contains('v2-topnav')) return;
+    var p = pagesPrefix();
+    var home = homeHref();
+    nav.className = 'v2-topnav has-mobile';
+    nav.innerHTML =
+      '<div class="v2-topnav-inner">' +
+        '<a href="' + home + '" class="logo"><img class="mll-official-logo" src="/assets/mll-v3-official-logo.png" width="221" height="48" alt="My Latino List — Connect • Support • Grow"></a>' +
+        '<div class="v2-links">' +
+          '<a href="' + home + '" data-en="Home" data-es="Inicio">Home</a>' +
+          '<a href="' + p + 'directory.html" data-en="Businesses" data-es="Negocios">Businesses</a>' +
+          '<a href="' + p + 'jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>' +
+          '<a href="' + p + 'marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>' +
+          '<a href="' + p + 'voz.html" data-en="La Voz Latino" data-es="La Voz Latino">La Voz Latino</a>' +
+          '<a href="/pages/partners" data-en="Partners" data-es="Socios">Partners</a>' +
+          '<a href="' + p + 'enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>' +
+        '</div>' +
+        '<div class="v2-top-actions">' +
+          '<a class="v2-icon-btn" href="' + p + 'directory.html" aria-label="Search"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></a>' +
+          '<div class="lang-toggle"><button class="lang-btn" data-lang="en" onclick="switchLang(\'en\')">🇺🇸 EN</button><span>|</span><button class="lang-btn" data-lang="es" onclick="switchLang(\'es\')">🇪🇸 ES</button></div>' +
+          '<a href="' + p + 'login.html" class="v2-btn-ghost" data-en="Sign In" data-es="Iniciar sesión">Sign In</a>' +
+          '<a href="' + p + 'enroll.html" class="v2-btn-primary" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>' +
+        '</div>' +
+        '<button class="v2-hamburger hamburger" aria-label="Menu"><span></span><span></span><span></span></button>' +
+        '<a href="' + p + 'enroll.html" class="mll-mobile-list-cta" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>' +
+      '</div>' +
+      '<div class="nav-mobile" id="nav-mobile">' +
+        '<a href="' + home + '" data-en="Home" data-es="Inicio">Home</a>' +
+        '<a href="' + p + 'directory.html" data-en="Businesses" data-es="Negocios">Businesses</a>' +
+        '<a href="' + p + 'jobs.html" data-en="Jobs" data-es="Empleos">Jobs</a>' +
+        '<a href="' + p + 'marketplace.html" data-en="Marketplace" data-es="Mercado">Marketplace</a>' +
+        '<a href="' + p + 'voz.html" data-en="La Voz Latino" data-es="La Voz Latino">La Voz Latino</a>' +
+        '<a href="/pages/partners" data-en="Partners" data-es="Socios">Partners</a>' +
+        '<a href="' + p + 'enroll.html" data-en="For Business" data-es="Para negocios">For Business</a>' +
+        '<a href="' + p + 'login.html" data-en="Sign In" data-es="Iniciar sesión">Sign In</a>' +
+        '<a href="' + p + 'enroll.html" class="v2-btn-primary" style="margin:8px 12px;text-align:center;" data-en="List Your Business" data-es="Registra tu negocio">List Your Business</a>' +
+      '</div>';
+    applyLang(currentLang || 'en');
+    nav.querySelectorAll('.hamburger').forEach(function (h) {
+      h.addEventListener('click', function () {
+        var menu = nav.querySelector('.nav-mobile');
+        if (menu) menu.classList.toggle('open');
+      });
+    });
+    nav.querySelectorAll('.nav-mobile a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        var menu = a.closest('.nav-mobile');
+        if (menu) menu.classList.remove('open');
+      });
+    });
+  }
+
+  function closeMobileDrawer(menu) {
+    if (!menu) return;
+    menu.classList.remove('open');
+    var btn = document.getElementById('hamburger');
+    if (btn) {
+      btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'Open menu');
+    }
+    document.body.classList.remove('mll-nav-open');
+    var back = document.getElementById('nav-mobile-backdrop');
+    if (back) {
+      back.hidden = true;
+      back.classList.remove('is-open');
+    }
+  }
+
+  function openMobileDrawer(menu) {
+    if (!menu) return;
+    menu.classList.add('open');
+    var btn = document.getElementById('hamburger');
+    if (btn) {
+      btn.setAttribute('aria-expanded', 'true');
+      btn.setAttribute('aria-label', 'Close menu');
+    }
+    document.body.classList.add('mll-nav-open');
+    var back = document.getElementById('nav-mobile-backdrop');
+    if (back) {
+      back.hidden = false;
+      back.classList.add('is-open');
+    }
+    var closeBtn = document.getElementById('nav-mobile-close');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function bindMobileDrawer(btn, menu, backdrop, closeBtn) {
+    if (!btn || !menu) return;
+    btn.addEventListener('click', function () {
+      if (menu.classList.contains('open')) closeMobileDrawer(menu);
+      else openMobileDrawer(menu);
+    });
+    if (closeBtn) closeBtn.addEventListener('click', function () { closeMobileDrawer(menu); });
+    if (backdrop) backdrop.addEventListener('click', function () { closeMobileDrawer(menu); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menu.classList.contains('open')) {
+        closeMobileDrawer(menu);
+        btn.focus();
+      }
+      if (e.key !== 'Tab' || !menu.classList.contains('open')) return;
+      var focusable = menu.querySelectorAll('a, button');
+      if (!focusable.length) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+  }
+
+  function injectMobileNav() {
+    if (document.querySelector('.mll-bottom-nav')) return;
+    document.body.classList.add('has-mll-bottom-nav');
+    var p = pagesPrefix();
+    var home = homeHref();
+    var path = location.pathname;
+    function active(name) {
+      if (name === 'home') return /index\.html\/?$/.test(path) || path.endsWith('/') && !inPages();
+      if (name === 'explore') return /\/pages\/(?:directory|business|businesses|business-detail)(?:\.html)?\/?$/.test(path);
+      if (name === 'saved') return /\/pages\/(?:directory|businesses)(?:\.html)?\/?$/.test(path) && location.hash === '#saved';
+      if (name === 'profile') return /\/pages\/(?:login|dashboard|billing|listing|analytics)(?:\.html)?\/?$/.test(path);
+      return false;
+    }
+    var token = null;
+    try { token = sessionStorage.getItem('mll_token'); } catch (e) {}
+    var profileHref = token ? p + 'dashboard.html' : p + 'login.html';
+
+    var nav = document.createElement('nav');
+    nav.className = 'mll-bottom-nav';
+    nav.setAttribute('aria-label', 'Mobile');
+    nav.innerHTML =
+      '<a class="' + (active('home') ? 'is-active' : '') + '" href="' + home + '"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 01-1 1h-5v-6H10v6H5a1 1 0 01-1-1v-9.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-en="Home" data-es="Inicio">Home</span></a>' +
+      '<a class="' + (active('explore') ? 'is-active' : '') + '" href="' + p + 'directory.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span data-en="Search" data-es="Buscar">Search</span></a>' +
+      '<button type="button" class="mll-add" id="mll-add-btn" aria-label="Add">+</button>' +
+      '<a href="' + p + 'directory.html#saved"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 4h10a1 1 0 011 1v16l-6-3.5L6 21V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-en="Saved" data-es="Guardados">Saved</span></a>' +
+      '<a class="' + (active('profile') ? 'is-active' : '') + '" href="' + profileHref + '"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.7"/><path d="M5 19c1.5-3 4-4.5 7-4.5s5.5 1.5 7 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span data-en="Profile" data-es="Perfil">Profile</span></a>';
+    document.body.appendChild(nav);
+
+    var backdrop = document.createElement('div');
+    backdrop.className = 'mll-sheet-backdrop';
+    backdrop.innerHTML =
+      '<div class="mll-sheet" role="dialog" aria-label="Create">' +
+        '<h3 data-en="Add to My Latino List" data-es="Agregar a My Latino List">Add to My Latino List</h3>' +
+        '<a href="' + p + 'enroll.html"><span>🏪</span><span data-en="List my business" data-es="Registrar mi negocio">List my business</span></a>' +
+        '<a href="' + p + 'marketplace.html"><span>🛍️</span><span data-en="Add product" data-es="Agregar producto">Add product</span></a>' +
+        '<a href="' + p + 'jobs.html"><span>💼</span><span data-en="Post job" data-es="Publicar empleo">Post job</span></a>' +
+      '</div>';
+    document.body.appendChild(backdrop);
+    document.getElementById('mll-add-btn').addEventListener('click', function () {
+      backdrop.classList.add('open');
+    });
+    backdrop.addEventListener('click', function (e) {
+      if (e.target === backdrop) backdrop.classList.remove('open');
+    });
+    applyLang(currentLang || 'en');
+  }
+})();
